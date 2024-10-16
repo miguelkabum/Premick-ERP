@@ -1,0 +1,114 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+
+
+#title{
+    font-size: 96px;
+    color: #16423C;
+
+    margin-bottom: 2rem;
+  }
+  
+
+  #main{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #F5F5F5;
+    gap: 80px;
+    font-family: "Inter", sans-serif;
+  }
+  #img img{
+    width: 420px;
+
+  }
+
+  #container, #img{
+  background-color: rgb(255, 255, 255);
+  width: 60%;
+  height: 630px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  gap: 25px;
+  
+  }
+
+  #container{
+    padding: 2rem;
+  }
+  
+  #loginParts{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  #formulario{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 520px;
+    gap: 47px;
+  }
+  .input{
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 1rem;  
+    padding: 0.5rem 1rem;
+  }
+  #inputBox{
+    width: 460px;
+    height: 60px;
+    border: none;
+    background-color: #E9EFEC;
+    border-radius: 15px;
+    padding: 12px;
+    font-size: 23px;
+  
+  }
+  
+  .textLabel{
+    align-self: start;
+    font-size: 23px;
+  }
+  
+  #link{
+    font-size: 18px;
+    text-decoration: none;
+    color: inherit;
+    color: #6A9C89;
+
+    text-align: center;
+    cursor: pointer;
+  }
+  
+  #bnt{
+    width: 295px;
+    height: 75px;
+    border-radius: 15px;
+    background-color: #16423C;
+    font-size: 23px;
+    color: white;
+    margin-top: 0.6rem;
+    margin-bottom: 0.4rem;
+  }
+  
+  .other{
+    margin-top: 0.4rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex-direction: column;
+  }

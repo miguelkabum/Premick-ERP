@@ -1,0 +1,97 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+nav{
+    /* position: absolute;
+    top: 0; */
+
+    background-color: #213635;
+    height: 4rem;
+
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: center;
+
+    
+}
+
+nav *{
+    list-style: none;
+    color: white;
+
+    cursor: pointer;
+}
+
+#division{
+    cursor: default !important;
+}
+
+.mainNav{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    left: 3rem;
+
+    gap: 2rem;
+}
+
+
+.userActions{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    position: absolute;
+    right: 3rem;
+
+    gap: 1rem;
+}
+
+.userActions > *{
+    border-radius: 4px;
+    padding: 4px;
+
+    transition: 0.35s ease-in-out;
+}
+
+#division{
+    width: 3rem;
+    height: 100%;
+}
+
+.mainNav > *, .userActions > *{
+    position: relative;
+}
+
+.mainNav > *::before{
+    content: "";
+    position: absolute;
+    bottom: -4px;
+    width: 0%;
+    height: 2px;
+    border-radius: 2px;
+    background-color: white;
+
+    transition: 0.4s ease-in-out;
+
+}
+
+#logo::before {
+    content: none;
+}
+.mainNav > *:hover::before{
+    width: 100% ;
+    
+}
+
+.userActions >*:hover:not(#division){
+    background-color: rgba(128, 128, 128, 0.700);
+}
+

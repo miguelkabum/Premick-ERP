@@ -1,0 +1,53 @@
+{
+  "clientes": [
+    {
+      "id": "c211",
+      "nome": "Ju Ju",
+      "fantasia": "dançar pelado",
+      "codigo": "666",
+      "tipoPessoa": "Pessoa Jurídica",
+      "rg": "7888999",
+      "cpfCnpj": "12345678911",
+      "cep": "29155854",
+      "numero": "210",
+      "endereco": "obed sei la oq",
+      "estado": "RJ",
+      "cidade": "Rio",
+      "bairro": "Janeiro",
+      "complemento": "Aqui",
+      "contato": "Eu",
+      "celular": "(11) 4541245454",
+      "telefone": "(37) 8784552121",
+      "email": "cliente@cliente.com"
+    }
+  ],
+  "usuarios": [
+    {
+      "id": "b8d6",
+      "nome": "aluno",
+      "email": "aluno@aluno.aluno",
+      "senha": "87654321"
+    }
+  ],
+  "produtos": [
+    {
+      "id": "b15c",
+      "nome": "Agua",
+      "codigo": "SKUCOD1",
+      "formato": "Simples",
+      "tipo": "Produto",
+      "ativado": true,
+      "precoVenda": "3,50",
+      "unidade": "UN",
+      "marca": "Coca Cola",
+      "producao": "Terceiros",
+      "pesoLiquido": "0,030",
+      "pesoBruto": "0,030",
+      "profundidade": "7,00",
+      "validade": "Indeterminada",
+      "volumes": "0",
+      "gtin": "7896019607636",
+      "gtinTributario": "SEM GTIN"
+    }
+  ]
+}
