@@ -19,6 +19,26 @@
       "celular": "(11) 4541245454",
       "telefone": "(37) 8784552121",
       "email": "cliente@cliente.com"
+    },
+    {
+      "id": "b16f",
+      "nome": "MIGUEL PEREIRA DE OLIVEIRA",
+      "fantasia": "",
+      "codigo": "599",
+      "tipoPessoa": "Pessoa Jurídica",
+      "rg": "",
+      "cpfCnpj": "",
+      "cep": "29176-599",
+      "numero": "60",
+      "endereco": "Rua Leonor Miguel Feu Rosa",
+      "estado": "SP",
+      "cidade": "Serra",
+      "bairro": "Palmeiras",
+      "complemento": "CASA",
+      "contato": "",
+      "celular": "",
+      "telefone": "27996560633",
+      "email": "miguelkabum@gmail.com"
     }
   ],
   "usuarios": [

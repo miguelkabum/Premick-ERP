@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   AppBar,
   Box,
@@ -11,8 +11,8 @@ import {
   Avatar,
   Button,
   Tooltip,
-} from '@mui/material';
-import { Link } from 'react-router-dom';
+} from "@mui/material";
+import { Link } from "react-router-dom";
 import {
   Menu as MenuIcon,
   Notifications as NotificationsIcon,
@@ -20,11 +20,10 @@ import {
   Help as HelpIcon,
   Logout as LogoutIcon,
   Person as UserIcon,
-} from '@mui/icons-material';
+} from "@mui/icons-material";
 
 // Importa o logo diretamente
-import logoExample from '/src/assets/icons/logoExample.png';
-
+import logoExample from "/src/assets/icons/logoExample.png";
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -50,12 +49,16 @@ const ResponsiveAppBar = () => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Link to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
-          <img src={logoExample} alt="logo" style={{ height: 40, marginRight: '1rem' }} />
+          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+            <img
+              src={logoExample}
+              alt="logo"
+              style={{ height: 40, marginRight: "1rem" }}
+            />
           </Link>
 
           {/* Menu para navegação */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
             <IconButton
               size="large"
               aria-label="account of current user"
@@ -70,60 +73,62 @@ const ResponsiveAppBar = () => {
               id="menu-appbar"
               anchorEl={anchorElNav}
               anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
+                vertical: "bottom",
+                horizontal: "left",
               }}
               keepMounted
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
+                vertical: "top",
+                horizontal: "left",
               }}
               open={Boolean(anchorElNav)}
               onClose={handleCloseNavMenu}
               sx={{
-                display: { xs: 'block', md: 'none' },
+                display: { xs: "block", md: "none" },
               }}
             >
-              {['Suprimentos', 'Vendas', 'Finanças', 'Serviços'].map((section) => (
-                <MenuItem key={section} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center">{section}</Typography>
-                </MenuItem>
-              ))}
+              {["Suprimentos", "Vendas", "Finanças", "Serviços"].map(
+                (section) => (
+                  <MenuItem key={section} onClick={handleCloseNavMenu}>
+                    <Typography textAlign="center">{section}</Typography>
+                  </MenuItem>
+                )
+              )}
             </Menu>
           </Box>
 
           {/* Links de navegação na tela grande */}
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
+          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
             <Button
-              sx={{ my: 2, color: 'white', display: 'block' }}
+              sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
               to="/suprimentos"
             >
               Suprimentos
             </Button>
             <Button
-              sx={{ my: 2, color: 'white', display: 'block' }}
+              sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
               to="/vendas"
             >
               Vendas
             </Button>
             <Button
-              sx={{ my: 2, color: 'white', display: 'block' }}
+              sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
               to="/financas"
             >
               Finanças
             </Button>
             <Button
-              sx={{ my: 2, color: 'white', display: 'block' }}
+              sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
               to="/servicos"
             >
               Serviços
             </Button>
             <Button
-              sx={{ my: 2, color: 'white', display: 'block' }}
+              sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
               to="/login"
             >
@@ -157,17 +162,17 @@ const ResponsiveAppBar = () => {
 
             {/* Menu de Configurações */}
             <Menu
-              sx={{ mt: '45px' }}
+              sx={{ mt: "45px" }}
               id="menu-appbar"
               anchorEl={anchorElUser}
               anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               keepMounted
               transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
+                vertical: "top",
+                horizontal: "right",
               }}
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}

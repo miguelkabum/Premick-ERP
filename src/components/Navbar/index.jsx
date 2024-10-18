@@ -6,6 +6,7 @@ import Login from '../../pages/Login'
 import Cadastro from '../../pages/Cadastro'
 
 import {BrowserRouter as Router, Routes, Route, NavLink } from 'react-router-dom'
+
 import {Link} from 'react-router-dom'
 
 const index = () => {
