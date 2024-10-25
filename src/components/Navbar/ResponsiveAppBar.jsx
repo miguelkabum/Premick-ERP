@@ -102,9 +102,9 @@ const ResponsiveAppBar = () => {
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
-              to="/suprimentos"
+              to="/clientes"
             >
-              Suprimentos
+              Clientes
             </Button>
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
@@ -123,14 +123,14 @@ const ResponsiveAppBar = () => {
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
-              to="/servicos"
+              to="/produtos"
             >
-              Serviços
+              Produtos
             </Button>
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
-              to="/login"
+              to="#"
             >
               Contabilidade
             </Button>

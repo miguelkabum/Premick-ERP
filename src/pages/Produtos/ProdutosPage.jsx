@@ -53,7 +53,7 @@ const ProdutosPage = () => {
 
   // Definição das colunas da tabela de produtos
   const columns = [
-    { field: 'descricao', headerName: 'Descrição', width: 200 },
+    { field: 'nome', headerName: 'Descrição', width: 200 },
     { field: 'codigo', headerName: 'Código', width: 150 },
     { field: 'unidade', headerName: 'Unidade', width: 100 },
     { field: 'preco', headerName: 'Preço', width: 100 },
@@ -86,7 +86,8 @@ const ProdutosPage = () => {
               <Delete fontSize="small" /> Excluir
             </MenuItem>
             <MenuItem onClick={() => {
-              navigate(`/produtos/estoque/${params.row.id}`);
+              // Navegar para a página de estoques, passando o produto selecionado
+              navigate(`/estoques/${params.row.id}`, { state: { produto: params.row } });
               handleCloseMenu();
             }}>
               <Inventory fontSize="small" /> Estoque

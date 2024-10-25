@@ -13,23 +13,33 @@ import FilterDrawer from "./components/Filtros/FilterDrawer.jsx";
 import ResponsiveAppBar from "./components/Navbar/ResponsiveAppBar.jsx";
 import RegistrationForm from "./pages/Cadastro/RegistrationForm.jsx";
 import LoginPage from "./pages/Login/LoginPage.jsx";
+import CadastroEstoque from "./pages/CadastroEstoques/CadastroEstoque.jsx";
+import EstoquesPage from "./pages/Estoques/EstoquesPage.jsx";
+import VendasPDV from "./pages/Vendas/VendasPDV.jsx";
+import RelatoriosPage from "./pages/Relatorios/RelatoriosPage.jsx";
+import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 const routesPage = () => {
-    return (
+  return (
     <Router>
-      {/* <Navbar /> */}
       {/* <Clientes /> */}
-      {/* <ResponsiveAppBar /> */}
+      <ResponsiveAppBar />
       {/* <FilterDrawer /> */}
-        {<ClientesPage />}
+      {/* {<ClientesPage />} */}
       {/* <RegistrationForm /> */}
       {/* <LoginPage /> */}
       {/* <CadastroCliente /> */}
       {/* <CadastroProduto /> */}
       {/* <ProdutosPage /> */}
-        <Routes>
+      {/* <Navbar /> */}
+      {/* <CadastroEstoque /> */}
+      {/* <EstoquesPage /> */}
+      {/* <VendasPDV /> */}
+      {/* <RelatoriosPage /> */}
+      {/* <DashboardPage /> */}
+      <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Cadastro" element={<Cadastro />} />
@@ -39,9 +49,16 @@ const routesPage = () => {
         <Route path="/produtos" element={<ProdutosPage />} />
         <Route path="/produtos/cadastro" element={<CadastroProduto />} />
         <Route path="/produtos/cadastro/:id" element={<CadastroProduto />} />
-        </Routes>
+        <Route path="/estoques" element={<EstoquesPage />} />
+        <Route path="/estoques/:id" element={<EstoquesPage />} />
+        <Route path="/estoques/cadastro" element={<CadastroEstoque />} />
+        <Route path="/estoques/cadastro/:id" element={<CadastroEstoque />} />
+        <Route path="/vendas" element={<VendasPDV />} />
+        <Route path="/relatorios" element={<RelatoriosPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Routes>
     </Router>
-    );
+  );
 };
 
 export default routesPage;
