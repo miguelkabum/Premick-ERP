@@ -1,0 +1,55 @@
+.container header {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.Container header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.addClient {
+  padding: 10px 40px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 56px;
+  transition: background-color 0.3s ease;
+  display: flex;
+  align-self: center;
+  align-items: center;
+}
+
+.pesquisarClient {
+  padding: 20px 20px;
+  background-color: #000;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.addClient:hover {
+  background-color: #333;
+}
+
+.container{
+  display: flex;
+  flex-direction: column;
+}
+.box{
+  display: grid;
+  grid-template-columns: 23% 75%;
+  gap: 8px
+}
+
+#options {
+  display: flex;
+  gap: 10%;
+}
