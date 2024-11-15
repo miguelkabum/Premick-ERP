@@ -107,7 +107,7 @@ const RelatorioVendas = () => {
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Detalhamento das Vendas</Typography>
         <DataGrid
-          rows={vendas}
+          getRowId={(row) => row.id_vendas}
           columns={columns}
           pageSize={5}
           rowsPerPageOptions={[5]}

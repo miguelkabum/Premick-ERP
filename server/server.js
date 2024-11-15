@@ -3,7 +3,7 @@ const usuariosRouter = require('./src/routes/usuarios'); // Importando o router 
 const clientesRouter = require('./src/routes/clientes');
 const categoriasRouter = require('./src/routes/categorias');
 const produtosRouter = require('./src/routes/produtos');
-
+const mysql = require('mysql2/promise'); // `mysql2` para suporte async/await
 const vendasRouter = require('./src/routes/vendas');
 const produtosVendidosRouter = require('./src/routes/produtosVendidos');
 const cancelamentosRouter = require('./src/routes/cancelamentos');
@@ -53,7 +53,7 @@ app.use((err, req, res, next) => {
   res.status(500).send('Algo deu errado!');
 });
 
-// Inicializando o servidor
+// Iniciar o servidor
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });

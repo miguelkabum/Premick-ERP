@@ -24,6 +24,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ImageIcon from "@mui/icons-material/Image";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
+import DiscountIcon from '@mui/icons-material/Discount';
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas
@@ -384,9 +385,18 @@ const VendasPDV = () => {
               variant="contained"
               color="primary"
               sx={{ mr: 1 }}
+              startIcon={<DiscountIcon  />}
               onClick={handleAplicarDesconto}
             >
               Desconto
+            </Button>
+            <Button
+              variant="contained"
+              color="error"
+              startIcon={<CancelIcon />}
+              onClick={handleFinalizarVenda}
+            >
+              Cancelar Venda
             </Button>
             <Button
               variant="contained"
@@ -515,6 +525,7 @@ const VendasPDV = () => {
             >
               <MenuItem value="Débito">Débito</MenuItem>
               <MenuItem value="Crédito">Crédito</MenuItem>
+              {/* <MenuItem value="Dinheiro">PIX</MenuItem> */}
               <MenuItem value="Dinheiro">Dinheiro</MenuItem>
             </Select>
           </FormControl>
