@@ -67,7 +67,6 @@ const ClientesPage = () => {
     { field: "id_cliente", headerName: "ID", width: 100 },
     { field: "nome_cliente", headerName: "Nome", width: 150 },
     { field: "CPF_cliente", headerName: "CPF", width: 150 },
-    { field: "CNPJ_cliente", headerName: "CNPJ", width: 150 },
     { field: "cidade", headerName: "Cidade", width: 150 },
     { field: "telefone_cliente", headerName: "Telefone", width: 150 },
     {
@@ -136,7 +135,7 @@ const ClientesPage = () => {
           >
             <TextField
               variant="outlined"
-              placeholder="Pesquisar por nome, CPF ou CNPJ..."
+              placeholder="Pesquisar por nome, CPF ..."
               InputProps={{
                 startAdornment: <Search />,
               }}

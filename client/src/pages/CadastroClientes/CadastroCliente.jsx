@@ -18,8 +18,7 @@ const CadastroCliente = () => {
     bairro: '',
     complemento: '',
     telefone_cliente: '',
-    CPF_cliente: '',
-    CNPJ_cliente: ''
+    CPF_cliente: ''
   });
 
   useEffect(() => {
@@ -172,16 +171,6 @@ const CadastroCliente = () => {
                 variant="outlined" 
                 name="CPF_cliente"
                 value={cliente.CPF_cliente}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="CNPJ" 
-                variant="outlined" 
-                name="CNPJ_cliente"
-                value={cliente.CNPJ_cliente}
                 onChange={handleChange}
               />
             </Grid>

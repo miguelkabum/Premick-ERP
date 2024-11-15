@@ -57,7 +57,7 @@ const ResponsiveAppBar = () => {
     <AppBar position="static">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
+          <Link to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>
             <img
               src={logoExample}
               alt="logo"
@@ -95,13 +95,21 @@ const ResponsiveAppBar = () => {
                 display: { xs: "block", md: "none" },
               }}
             >
-              {["Suprimentos", "Vendas", "Finanças", "Serviços"].map(
-                (section) => (
-                  <MenuItem key={section} onClick={handleCloseNavMenu}>
-                    <Typography textAlign="center">{section}</Typography>
-                  </MenuItem>
-                )
-              )}
+              <MenuItem onClick={() => { navigate("/clientes");}}>
+                <Typography textAlign="center">Clientes</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => { navigate("/produtos");}}>
+                <Typography textAlign="center">Produtos</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => { navigate("/estoques");}}>
+                <Typography textAlign="center">Estoque</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => { navigate("/vendas");}}>
+                <Typography textAlign="center">Vendas</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => { navigate("/relatorios");}}>
+                <Typography textAlign="center">Relatórios</Typography>
+              </MenuItem>
             </Menu>
           </Box>
 
@@ -117,20 +125,6 @@ const ResponsiveAppBar = () => {
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
-              to="/vendas"
-            >
-              Vendas
-            </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/financas"
-            >
-              Finanças
-            </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
               to="/produtos"
             >
               Produtos
@@ -138,9 +132,23 @@ const ResponsiveAppBar = () => {
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
               component={Link}
-              to="#"
+              to="/estoques"
             >
-              Contabilidade
+              Estoque
+            </Button>
+            <Button
+              sx={{ my: 2, color: "white", display: "block" }}
+              component={Link}
+              to="/vendas"
+            >
+              Vendas
+            </Button>
+            <Button
+              sx={{ my: 2, color: "white", display: "block" }}
+              component={Link}
+              to="/relatorios"
+            >
+              Relatórios
             </Button>
           </Box>
 

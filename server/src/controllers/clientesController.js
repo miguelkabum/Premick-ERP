@@ -15,8 +15,8 @@ exports.getClientes = (req, res) => {
 };
 
 exports.createCliente = (req, res) => {
-  const { nome_cliente, cep, numero, logradouro, uf, cidade, bairro, complemento, telefone_cliente, CPF_cliente, CNPJ_cliente } = req.body;
-  const cliente = { nome_cliente, cep, numero, logradouro, uf, cidade, bairro, complemento, telefone_cliente, CPF_cliente, CNPJ_cliente };
+  const { nome_cliente, cep, numero, logradouro, uf, cidade, bairro, complemento, telefone_cliente, CPF_cliente } = req.body;
+  const cliente = { nome_cliente, cep, numero, logradouro, uf, cidade, bairro, complemento, telefone_cliente, CPF_cliente };
   
   db.query('INSERT INTO clientes SET ?', cliente, (err, results) => {
     if (err) return res.status(500).send(err);
