@@ -1,22 +1,20 @@
-// const express = require('express');
-// const router = express.Router();
-// const usuariosController = require('../controllers/usuariosController');
+const express = require('express');
+const router = express.Router();
+const usuariosController = require('../controllers/usuariosController');
+const db = require('../models/db');
 
-// router.get('/', usuariosController.getUsuarios);
-// router.post('/', usuariosController.createUsuario);
-// router.put('/:id', usuariosController.updateUsuario);
-// router.delete('/:id', usuariosController.deleteUsuario);
+router.get('/', usuariosController.getUsuarios);
+router.post('/', usuariosController.createUsuario);
+router.put('/:id', usuariosController.updateUsuario);
+router.delete('/:id', usuariosController.deleteUsuario);
 
 // module.exports = router;
 // Em 'src/routes/usuarios.js' (ou o arquivo correspondente)
-const express = require('express');
-const bcrypt = require('bcryptjs');
-const db = require('../models/db');
-const router = express.Router();
+
 
 router.post('/login', (req, res) => {
   const { email, senha } = req.body;
-
+  console.log("oi")
   if (!email || !senha) {
     return res.status(400).json({ error: 'Email e senha são obrigatórios' });
   }

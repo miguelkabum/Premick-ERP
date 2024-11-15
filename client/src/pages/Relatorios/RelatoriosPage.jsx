@@ -14,7 +14,7 @@ import {
 import { DataGrid } from '@mui/x-data-grid';
 import { LineChart } from '@mui/x-charts/LineChart';
 
-const urlRelatorioVendas = "http://localhost:5000/vendas"; // API de relatórios de vendas
+const urlRelatorioVendas = "http://localhost:5000/vendas";
 
 const RelatorioVendas = () => {
   const [vendas, setVendas] = useState([]);
@@ -30,14 +30,15 @@ const RelatorioVendas = () => {
     try {
       const res = await fetch(`${urlRelatorioVendas}?periodo=${periodo}&produto=${filtroProduto}`);
       const data = await res.json();
-      setVendas(data);
-      
-      // Preparar dados para o gráfico
-      const vendasPorDia = data.map(venda => ({
-        data: venda.data,
-        total: venda.total
+      const formattedData = data.map((item) => ({
+        ...item,
+        id: item.id_venda, // Adiciona um campo `id` com o valor de `id_venda`
       }));
-      setGraficoData(vendasPorDia);
+      setVendas(formattedData);
+      setGraficoData(formattedData.map(venda => ({
+        
+        total: venda.valor_total, // Corrigido
+      })));
     } catch (error) {
       console.error('Erro ao gerar relatório:', error);
     }
@@ -45,16 +46,16 @@ const RelatorioVendas = () => {
 
   const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'data', headerName: 'Data', width: 150 },
-    { field: 'total', headerName: 'Total', width: 150 },
-    { field: 'tipoPagamento', headerName: 'Tipo de Pagamento', width: 150 },
-    { field: 'observacao', headerName: 'Observação', width: 200 },
+    { field: 'data_compra', headerName: 'Data', width: 150 },
+    { field: 'valor_total', headerName: 'Total', width: 150 },
+    { field: 'metodo_pagamento', headerName: 'Tipo de Pagamento', width: 150 },
+    { field: 'obs_vendas', headerName: 'Observação', width: 200 },
   ];
 
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" sx={{ mb: 2 }}>Relatório de Vendas</Typography>
-      
+
       <Paper sx={{ p: 2, mb: 4 }}>
         <Grid container spacing={2}>
           <Grid item xs={12} md={4}>
@@ -80,10 +81,10 @@ const RelatorioVendas = () => {
             />
           </Grid>
           <Grid item xs={12} md={2}>
-            <Button 
+            <Button
               fullWidth
-              variant="contained" 
-              color="primary" 
+              variant="contained"
+              color="primary"
               onClick={handleGerarRelatorio}
             >
               Gerar Relatório
@@ -91,7 +92,7 @@ const RelatorioVendas = () => {
           </Grid>
         </Grid>
       </Paper>
-      
+
       {/* Gráfico */}
       <Paper sx={{ p: 2, mb: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Gráfico de Vendas</Typography>
@@ -102,13 +103,14 @@ const RelatorioVendas = () => {
           height={300}
         />
       </Paper>
-      
+
       {/* Tabela de Relatórios */}
       <Paper sx={{ p: 2 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>Detalhamento das Vendas</Typography>
         <DataGrid
-          getRowId={(row) => row.id_vendas}
+          rows={vendas}
           columns={columns}
+          getRowId={(row) => row.id} // Corrigido
           pageSize={5}
           rowsPerPageOptions={[5]}
           autoHeight
