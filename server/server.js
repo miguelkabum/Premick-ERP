@@ -6,7 +6,6 @@ const produtosRouter = require('./src/routes/produtos');
 const mysql = require('mysql2/promise'); // `mysql2` para suporte async/await
 const vendasRouter = require('./src/routes/vendas');
 const produtosVendidosRouter = require('./src/routes/produtosVendidos');
-const cancelamentosRouter = require('./src/routes/cancelamentos');
 const entradaProdutoRouter = require('./src/routes/entradaProduto');
 const saidaProdutoRouter = require('./src/routes/saidaProduto');
 const estoqueRouter = require('./src/routes/estoque');
@@ -16,6 +15,9 @@ const produtosEstoqueRouter = require('./src/routes/produtosEstoque');
 
 const estoqueEntradaRouter = require('./src/routes/estoqueEntrada');
 const estoqueSaidaRouter = require('./src/routes/estoqueSaida');
+
+const vendasCanceladasRouter = require('./src/routes/vendasCanceladas');
+const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
 
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -33,7 +35,6 @@ app.use('/categorias', categoriasRouter);
 app.use('/produtos', produtosRouter);
 app.use('/vendas', vendasRouter);
 app.use('/produtosVendidos', produtosVendidosRouter);
-app.use('/cancelamentos', cancelamentosRouter);
 app.use('/entradaProduto', entradaProdutoRouter);
 app.use('/saidaProduto', saidaProdutoRouter);
 app.use('/estoque', estoqueRouter);
@@ -41,6 +42,9 @@ app.use('/alertasEstoque', alertasEstoqueRouter);
 app.use('/produtosEstoque', produtosEstoqueRouter);
 app.use('/estoqueEntrada', estoqueEntradaRouter);
 app.use('/estoqueSaida', estoqueSaidaRouter);
+
+app.use('/vendasCanceladas', vendasCanceladasRouter);
+app.use('/produtosCancelados', produtosCanceladosRouter);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {

@@ -28,6 +28,7 @@ import DiscountIcon from '@mui/icons-material/Discount';
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas
+const urlVendasCanceladas = "http://localhost:5000/vendasCanceladas"; // API de vendas canceladas
 
 const VendasPDV = () => {
   const [produtos, setProdutos] = useState([]);
@@ -180,6 +181,7 @@ const VendasPDV = () => {
       console.error("Erro ao buscar produto:", error);
     }
   };
+  
   const handleCancelarProduto = (id) => {
     console.log("Iniciando cancelamento do produto com ID:", id);
 
@@ -202,6 +204,7 @@ const VendasPDV = () => {
       return novosProdutos;
     });
   };
+  
   const handleAdicionarProduto = () => {
     if (!produtoDetalhado) return;
 
@@ -307,6 +310,55 @@ const VendasPDV = () => {
     }
   };
 
+  const handleCancelarVenda = async () => {
+    try {
+      const venda_cancelada = {
+        valor_total: valorTotal || 0, // Valor total da venda
+        metodo_pagamento: tipoPagamento || "Não Selecionado", // Tipo de pagamento
+        desconto: desconto || 0, // Desconto aplicado
+        obs_vendas_canceladas: observacao || "Venda Cancelada PDV", // Observação
+        id_cliente: 1 || null, // ID do cliente
+        id_usuario: 1 || null, // ID do usuário
+      };
+
+      console.log("Venda:", venda_cancelada);
+      console.log("Produtos na venda:", produtosVenda);
+
+      const res = await fetch(urlVendasCanceladas, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venda_cancelada: venda_cancelada,
+          produtos: produtosVenda,
+        }),
+      });
+
+      const data = await res.json(); // Captura a resposta da API
+
+      if (res.ok) {
+        // Se a resposta for bem-sucedida, feche o diálogo
+        console.log(data.message); // Mensagem de sucesso
+        openSnackbar(
+          "Venda cancelada com sucesso!",
+          "info")
+        setProdutosVenda([]);
+        setDesconto(0);
+        setObservacao("");
+        setValorTotal(0);
+        setOpenDialog(false); // Fecha o diálogo de finalização de venda
+
+        // Limpa o localStorage após a venda
+        localStorage.removeItem("produtosVenda");
+      } else {
+        console.error("Erro ao finalizar venda:", data.message);
+        alert("Erro ao finalizar venda");
+      }
+    } catch (error) {
+      console.error("Erro ao finalizar venda:", error);
+      alert("Erro ao finalizar venda");
+    }
+  };
+
   const columns = [
     { field: "nome_produto", headerName: "Descrição", width: 150 },
     {
@@ -394,7 +446,7 @@ const VendasPDV = () => {
               variant="contained"
               color="error"
               startIcon={<CancelIcon />}
-              onClick={handleFinalizarVenda}
+              onClick={handleCancelarVenda}
             >
               Cancelar Venda
             </Button>

@@ -1,5 +1,35 @@
 const db = require('../models/db');
 
+exports.login = (req, res) => {
+  const { email, senha } = req.body;
+  console.log("oi")
+  if (!email || !senha) {
+    return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+  }
+
+  db.query('SELECT * FROM usuarios WHERE email_usuario = ?', [email], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Erro no servidor' });
+    }
+
+    if (results.length === 0) {
+      return res.status(401).json({ error: 'Usuário não encontrado' });
+    }
+
+    const user = results[0];
+
+    res.json({
+      message: 'Login bem-sucedido',
+      user: {
+        id_usuario: user.id_usuario,
+        nome_usuario: user.nome_usuario,
+        email_usuario: user.email_usuario,
+      },
+    });
+  });
+};
+
 exports.getUsuarios = (req, res) => {
   const id = req.query.id; // Pega o id da query string
 
