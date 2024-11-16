@@ -19,7 +19,7 @@ export const login = createAsyncThunk(
       
       const data = await response.json();
       // Armazena o token no localStorage para persistência
-      localStorage.setItem("token", data.token);
+      sessionStorage.setItem("token", data.token);
       return data; // Exemplo: { user, token }
     } catch (error) {
       return rejectWithValue(error.message);

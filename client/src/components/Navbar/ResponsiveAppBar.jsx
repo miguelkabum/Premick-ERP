@@ -28,6 +28,7 @@ import { logout } from "../../hooks/authSlice";
 // Importa o logo diretamente
 import logoExample from "/src/assets/icons/logoExample.png";
 
+
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
@@ -49,8 +50,13 @@ const ResponsiveAppBar = () => {
     setAnchorElUser(null);
   };
   const handleLogout = () => {
-    dispatch(logout()); // Reseta o estado de autenticação
-    navigate("/login"); // Redireciona para a página de login
+    if (localStorage.produtosVenda.length > 2) {
+      alert("Finalize ou cancele a venda!")
+    } else {
+      localStorage.clear();
+      dispatch(logout()); // Reseta o estado de autenticação
+      navigate("/login"); // Redireciona para a página de login
+    }
   };
 
   return (
