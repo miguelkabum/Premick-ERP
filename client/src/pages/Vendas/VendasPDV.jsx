@@ -16,6 +16,7 @@ import {
   InputLabel,
   FormControl,
   InputAdornment,
+  Autocomplete,
   Snackbar,
   Alert,
 } from "@mui/material";
@@ -24,7 +25,7 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ImageIcon from "@mui/icons-material/Image";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
-import DiscountIcon from '@mui/icons-material/Discount';
+import DiscountIcon from "@mui/icons-material/Discount";
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas
@@ -34,10 +35,14 @@ const VendasPDV = () => {
   const [produtos, setProdutos] = useState([]);
   const [produtosVenda, setProdutosVenda] = useState(() => {
     // Carrega os produtos da venda do localStorage, se existir
-
     const savedProdutos = localStorage.getItem("produtosVenda");
     return savedProdutos ? JSON.parse(savedProdutos) : [];
   });
+
+  useEffect(() => {
+    // Sempre que produtosVenda mudar, atualiza o localStorage
+    localStorage.setItem("produtosVenda", JSON.stringify(produtosVenda));
+  }, [produtosVenda]); // A dependência é o estado de produtosVenda
   const [produtoDetalhado, setProdutoDetalhado] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
   const [precoUnidade, setPrecoUnidade] = useState(0);
@@ -50,6 +55,7 @@ const VendasPDV = () => {
   const [observacao, setObservacao] = useState("");
   const [descontoTemp, setDescontoTemp] = useState(0); // Estado temporário para armazenar o valor do desconto
   const [porcentagemTemp, setPorcentagemTemp] = useState(0); // Estado temporário para armazenar a porcentagem de desconto
+
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -61,6 +67,7 @@ const VendasPDV = () => {
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
+  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
   useEffect(() => {
     const total = produtosVenda.reduce((sum, item) => {
       // Só inclui no total os produtos que não foram cancelados
@@ -77,32 +84,32 @@ const VendasPDV = () => {
   const handleValorDescontoChange = (e) => {
     // Captura o valor inserido no campo, usando vírgula como separador decimal
     let value = e.target.value;
-  
+
     // Substitui a vírgula por ponto para facilitar a conversão para float
-    value = value.replace(',', '.');
-  
+    value = value.replace(",", ".");
+
     // Remove caracteres não numéricos, exceto ponto
-    value = value.replace(/[^0-9.]/g, '');
-  
+    value = value.replace(/[^0-9.]/g, "");
+
     // Verifica se há mais de uma casa decimal e limita a 2 casas decimais
-    if (value.indexOf('.') !== -1) {
-      const parts = value.split('.');
+    if (value.indexOf(".") !== -1) {
+      const parts = value.split(".");
       if (parts[1]?.length > 2) {
         value = `${parts[0]}.${parts[1].slice(0, 2)}`;
       }
     }
-  
+
     // Converte o valor para float, garantindo que não seja NaN
     const floatValue = parseFloat(value) || 0;
-  
+
     // Limita o valor a um mínimo de 0
     const limitedValue = Math.max(0, floatValue);
-  
+
     // Validação: desconto não pode ser maior que o total
     const totalSemDesconto = produtosVenda.reduce((sum, item) => {
       return sum + item.preco_venda * item.quantidade;
     }, 0);
-  
+
     if (limitedValue >= totalSemDesconto) {
       openSnackbar(
         "O desconto não pode ser maior que o total da venda.",
@@ -110,12 +117,11 @@ const VendasPDV = () => {
       );
       return;
     }
-  
+
     // Atualiza o estado com o valor do desconto e a porcentagem
     setDescontoTemp(limitedValue);
     setPorcentagemTemp(((limitedValue / totalSemDesconto) * 100).toFixed(2));
   };
-  
 
   // Atualizar o valor de desconto quando a porcentagem for alterada
   const handlePorcentagemDescontoChange = (e) => {
@@ -166,22 +172,17 @@ const VendasPDV = () => {
     setOpenDescontoDialog(true);
   };
 
-  const handlePesquisaProduto = async () => {
+  const handlePesquisaProduto = async (pesquisa) => {
     try {
-      const res = await fetch(`${urlProdutos}?id=${pesquisa}`);
+      const res = await fetch(`${urlProdutos}?codigo_barras=${pesquisa}`);
       const data = await res.json();
-      setProdutos(data);
-      if (data.length === 1) {
-        setProdutoDetalhado(data[0]);
-        setPrecoUnidade(data[0].preco);
-      } else {
-        setProdutoDetalhado(null);
-      }
+      setProdutos(data); // Atualiza a lista de produtos
+      console.log("Produtos retornados:", data);
     } catch (error) {
       console.error("Erro ao buscar produto:", error);
     }
   };
-  
+
   const handleCancelarProduto = (id) => {
     console.log("Iniciando cancelamento do produto com ID:", id);
 
@@ -204,59 +205,54 @@ const VendasPDV = () => {
       return novosProdutos;
     });
   };
-  
-  const handleAdicionarProduto = () => {
-    if (!produtoDetalhado) return;
 
-    // Verifica se o produto já existe na venda
+  const handleAdicionarProduto = () => {
+    console.log("Produto Detalhado:", produtoDetalhado);
+    console.log("Quantidade:", quantidade);
+    console.log("Produtos na Venda (antes):", produtosVenda);
+    if (!produtoDetalhado) {
+      openSnackbar("Nenhum produto selecionado.", "error");
+      return; // Se não houver produto detalhado, encerra a função
+    }
+
+    if (quantidade <= 0) {
+      openSnackbar("A quantidade deve ser maior que zero.", "error");
+      return; // Validação para impedir quantidade inválida
+    }
+
+    // Verifica se o produto já existe na lista
     const produtoExistente = produtosVenda.find(
       (prod) => prod.id_produto === produtoDetalhado.id_produto
     );
 
     if (produtoExistente) {
-      if (produtoExistente.status === "CANCELADO") {
-        // Se o produto estiver cancelado, altera o status para 'OK' e incrementa a quantidade
-        setProdutosVenda((prev) =>
-          prev.map((prod) =>
-            prod.id_produto === produtoDetalhado.id_produto
-              ? {
-                  ...prod,
-                  status: "OK",
-                  quantidade: produtoExistente.quantidade + quantidade,
-                }
-              : prod
-          )
-        );
-      } else {
-        // Se o produto não estiver cancelado, apenas incrementa a quantidade
-        setProdutosVenda((prev) =>
-          prev.map((prod) =>
-            prod.id_produto === produtoDetalhado.id_produto
-              ? { ...prod, quantidade: prod.quantidade + quantidade }
-              : prod
-          )
-        );
-      }
+      // Se já existe, incrementa a quantidade
+      setProdutosVenda((prev) =>
+        prev.map((prod) =>
+          prod.id_produto === produtoDetalhado.id_produto
+            ? { ...prod, quantidade: prod.quantidade + quantidade }
+            : prod
+        )
+      );
     } else {
-      // Se o produto não existir, adiciona ele com a quantidade e status 'OK'
+      // Adiciona o produto como novo item
       setProdutosVenda((prev) => [
         ...prev,
         { ...produtoDetalhado, quantidade, status: "OK" },
       ]);
     }
 
-    setQuantidade(1); // Reseta a quantidade para 1 após adicionar o produto
+    // Reseta quantidade e detalhes do produto
+    setQuantidade(1);
+    setPrecoUnidade(0);
+    openSnackbar("Produto adicionado com sucesso!", "success");
   };
 
   const handleFinalizarVenda = async () => {
-    if (valorTotal <= 0){
-      openSnackbar(
-        "Escolha um produto antes de finalizar.",
-        "error"
-      );
-    }else{
+    if (valorTotal <= 0) {
+      openSnackbar("Escolha um produto antes de finalizar.", "error");
+    } else {
       setOpenDialog(true);
-
     }
   };
 
@@ -289,9 +285,7 @@ const VendasPDV = () => {
       if (res.ok) {
         // Se a resposta for bem-sucedida, feche o diálogo
         console.log(data.message); // Mensagem de sucesso
-        openSnackbar(
-          "Venda realizada com sucesso!",
-          "success")
+        openSnackbar("Venda realizada com sucesso!", "success");
         setProdutosVenda([]);
         setDesconto(0);
         setObservacao("");
@@ -338,9 +332,7 @@ const VendasPDV = () => {
       if (res.ok) {
         // Se a resposta for bem-sucedida, feche o diálogo
         console.log(data.message); // Mensagem de sucesso
-        openSnackbar(
-          "Venda cancelada com sucesso!",
-          "info")
+        openSnackbar("Venda cancelada com sucesso!", "info");
         setProdutosVenda([]);
         setDesconto(0);
         setObservacao("");
@@ -437,7 +429,7 @@ const VendasPDV = () => {
               variant="contained"
               color="primary"
               sx={{ mr: 1 }}
-              startIcon={<DiscountIcon  />}
+              startIcon={<DiscountIcon />}
               onClick={handleAplicarDesconto}
             >
               Desconto
@@ -462,17 +454,66 @@ const VendasPDV = () => {
         </Box>
       </Paper>
       <Box sx={{ flex: 1 }}>
-        <Paper sx={{ p: 2 }}>
-          <Typography variant="h6">Pesquisar</Typography>
-          <TextField
+        <Paper sx={{ p: 3 }}>
+          {/* <Typography variant="h6"></Typography> */}
+          {/* <TextField
             fullWidth
             label="Pesquisar por código, descrição"
             variant="outlined"
             value={pesquisa}
-            onChange={(e) => setPesquisa(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handlePesquisaProduto()}
+            onClick={(e) =>handlePesquisaProduto()}
+            // onChange={(e) => setPesquisa(e.target.value)}
+            // onKeyPress={(e) => e.key === "Enter" && handlePesquisaProduto()}
             sx={{ mb: 2 }}
+          /> */}
+          <Autocomplete
+          onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
+            disablePortal
+            value={produtoSelecionado} // Usa o produto selecionado
+            onInputChange={(event, newInputValue) => {
+              setPesquisa(newInputValue); // Atualiza o valor da pesquisa
+              handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
+            }}
+            options={produtos} // Exibe os produtos filtrados
+            getOptionLabel={(option) =>
+              `${option.nome_produto || "Produto desconhecido"} - ${
+                option.codigo_interno || "Código não disponível"
+              }`
+            }
+            onChange={(event, newValue) => {
+              console.log("Produto selecionado:", newValue); // Verifique o valor de newValue
+              setProdutoSelecionado(newValue); // Atualiza o produto selecionado
+              setProdutoDetalhado(newValue); // Atualiza o produto detalhado
+              setPrecoUnidade(newValue.preco_venda); // Atualiza o preço da unidade
+              console.log(
+                "Produtos na venda antes de adicionar:",
+                produtosVenda
+              );
+              handleAdicionarProduto();
+              console.log("Produtos na venda após adicionar:", produtosVenda);
+            }}
+            sx={{ width: "auto", paddingBottom: "5px" }}
+            renderInput={(params) => (
+              <TextField {...params} label="Pesquisar" />
+            )}
+            renderOption={(props, option) => (
+              <li {...props} key={option.id_produto}>
+                {option.nome_produto} - {option.codigo_interno}
+              </li>
+            )}
           />
+
+          {/* {produtos.length > 1 && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6">Selecione um produto:</Typography>
+            </Box>
+          )} */}
+
+          {/* {produtos.length > 1 && (
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="h6">Selecione um produto:</Typography>
+            </Box>
+          )}
           <Box sx={{ mt: 2 }}>
             {produtos.length > 1 && (
               <Typography variant="h6">Selecione um produto:</Typography>
@@ -491,7 +532,7 @@ const VendasPDV = () => {
                 {produto.nome_produto} - {produto.codigo_interno}
               </Button>
             ))}
-          </Box>
+          </Box> */}
 
           <Box
             sx={{
@@ -509,16 +550,16 @@ const VendasPDV = () => {
           <TextField
             fullWidth
             label="Descrição"
-            value={produtoDetalhado ? produtoDetalhado.nome_produto : ""}
-            variant="outlined"
+            value={produtoSelecionado ? produtoSelecionado.nome_produto : ""}
+            variant="filled"
             InputProps={{ readOnly: true }}
             sx={{ mb: 2 }}
           />
           <TextField
             fullWidth
             label="Código"
-            value={produtoDetalhado ? produtoDetalhado.codigo_interno : ""}
-            variant="outlined"
+            value={produtoSelecionado ? produtoSelecionado.codigo_interno : ""}
+            variant="filled"
             InputProps={{ readOnly: true }}
             sx={{ mb: 2 }}
           />
@@ -535,11 +576,11 @@ const VendasPDV = () => {
             fullWidth
             label="Preço Unidade"
             type="number"
-            value={produtoDetalhado ? produtoDetalhado.preco_venda : ""}
+            value={produtoSelecionado ? produtoSelecionado.preco_venda : ""}
             onChange={(e) => setPrecoUnidade(Number(e.target.value))}
-            variant="outlined"
+            variant="filled"
             InputProps={{ readOnly: true }}
-            sx={{ mb: 2 }}
+            sx={{ mb: 2, cursor: "pointer" }}
           />
           <Typography
             variant="h4"
@@ -548,14 +589,14 @@ const VendasPDV = () => {
           >
             R$ {valorTotal.toFixed(2)}
           </Typography>
-          <Button
+          {/* <Button
             variant="contained"
             fullWidth
             sx={{ mt: 2 }}
-            onClick={handleAdicionarProduto}
+            onClick={() => handleAdicionarProduto()}
           >
             Adicionar Produto
-          </Button>
+          </Button> */}
         </Paper>
       </Box>
 
