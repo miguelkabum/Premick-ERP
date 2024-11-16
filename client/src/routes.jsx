@@ -4,9 +4,8 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 
 // Importação das páginas
-import Home from "./pages/Home/index.jsx";
 import LoginPage from "./pages/Login/LoginPage.jsx";
-import RegistrationForm from "./pages/Cadastro/RegistrationForm.jsx";
+import RegistrationForm from "./pages/CadastroUsuario/RegistrationForm.jsx";
 import ClientesPage from "./pages/Clientes/ClientesPage.jsx";
 import CadastroCliente from "./pages/CadastroClientes/CadastroCliente.jsx";
 import ProdutosPage from "./pages/Produtos/ProdutosPage.jsx";
@@ -30,7 +29,7 @@ const RoutesPage = () => {
       <ResponsiveAppBar /> {/* Navbar exibida em todas as rotas */}
       <Routes>
         {/* Rotas públicas */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegistrationForm />} />
 

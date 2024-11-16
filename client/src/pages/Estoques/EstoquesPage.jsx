@@ -11,8 +11,8 @@ const urlProdutos = "http://localhost:5000/produtos"; // URL de produtos
 const EstoquesPage = () => {
   const [estoques, setEstoques] = useState([]);
   const [produtos, setProdutos] = useState([]);  // Estado para armazenar os produtos
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [menuRowId, setMenuRowId] = useState(null);
+  // const [anchorEl, setAnchorEl] = useState(null);
+  // const [menuRowId, setMenuRowId] = useState(null);
   const [tipoFiltro, setTipoFiltro] = useState('');  // Filtro de tipo: 'Entrada' ou 'Saída'
   const [produtoSelecionado, setProdutoSelecionado] = useState(''); // Produto selecionado
   const navigate = useNavigate();
@@ -64,25 +64,25 @@ const EstoquesPage = () => {
     fetchEstoques();  // Recarrega os estoques sempre que o produto ou filtro mudar
   }, [produtoSelecionado, tipoFiltro]);
 
-  const handleOpenMenu = (event, id) => {
-    setAnchorEl(event.currentTarget);
-    setMenuRowId(id);
-  };
+  // const handleOpenMenu = (event, id) => {
+  //   setAnchorEl(event.currentTarget);
+  //   setMenuRowId(id);
+  // };
 
-  const handleCloseMenu = () => {
-    setAnchorEl(null);
-    setMenuRowId(null);
-  };
+  // const handleCloseMenu = () => {
+  //   setAnchorEl(null);
+  //   setMenuRowId(null);
+  // };
 
-  const handleDeleteEstoque = async (id, tipo) => {
-    const url = tipo === 'Entrada' ? `${urlEntrada}/${id}` : `${urlSaida}/${id}`;
-    try {
-      await fetch(url, { method: "DELETE" });
-      setEstoques(prev => prev.filter(estoque => estoque.id_entrada_produto !== id && estoque.id_saida_produto !== id));
-    } catch (error) {
-      console.error("Erro ao excluir estoque:", error);
-    }
-  };
+  // const handleDeleteEstoque = async (id, tipo) => {
+  //   const url = tipo === 'Entrada' ? `${urlEntrada}/${id}` : `${urlSaida}/${id}`;
+  //   try {
+  //     await fetch(url, { method: "DELETE" });
+  //     setEstoques(prev => prev.filter(estoque => estoque.id_entrada_produto !== id && estoque.id_saida_produto !== id));
+  //   } catch (error) {
+  //     console.error("Erro ao excluir estoque:", error);
+  //   }
+  // };
 
   const columns = [
     { field: 'nome_produto', headerName: 'Nome', width: 120 },
@@ -90,31 +90,7 @@ const EstoquesPage = () => {
     { field: 'quantidade', headerName: 'Quantidade', width: 120 },
     { field: 'valor_unitario', headerName: 'Valor Unitário', width: 120 },
     { field: 'data', headerName: 'Data', width: 180 },
-    {
-      field: 'actions',
-      headerName: 'Ações',
-      width: 120,
-      renderCell: (params) => (
-        <>
-          <IconButton
-            size="small"
-            color="primary"
-            onClick={(event) => handleOpenMenu(event, params.row.id)}
-          >
-            <MoreVert />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl) && menuRowId === params.row.id}
-            onClose={handleCloseMenu}
-          >
-            <MenuItem onClick={() => handleDeleteEstoque(params.row.id, params.row.tipo)}>
-              <Delete fontSize="small" /> Excluir
-            </MenuItem>
-          </Menu>
-        </>
-      ),
-    },
+    { field: 'obs_vendas', headerName: 'Observação', width: 200 }
   ];
 
   return (
