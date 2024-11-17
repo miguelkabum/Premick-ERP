@@ -91,6 +91,21 @@ function CadastroEstoque() {
               name="tipo"
               value={movimentacao.tipo}
               onChange={handleChange}
+              sx={{
+                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                borderRadius: 3, // Para arredondar os cantos
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#ffffff", // Cor da borda padrão
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no foco
+                  },
+                },
+              }}
             >
               <MenuItem value="Entrada">Entrada</MenuItem>
               <MenuItem value="Saída">Saída</MenuItem>
@@ -105,6 +120,21 @@ function CadastroEstoque() {
               name="quantidade"
               value={movimentacao.quantidade}
               onChange={handleChange}
+              sx={{
+                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                borderRadius: 3, // Para arredondar os cantos
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#ffffff", // Cor da borda padrão
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no foco
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={6}>
@@ -116,6 +146,21 @@ function CadastroEstoque() {
               name="valor_unitario"
               value={movimentacao.valor_unitario}
               onChange={handleChange}
+              sx={{
+                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                borderRadius: 3, // Para arredondar os cantos
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#ffffff", // Cor da borda padrão
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no foco
+                  },
+                },
+              }}
             />
           </Grid>
           {/* <Grid item xs={12}>
@@ -139,12 +184,28 @@ function CadastroEstoque() {
               name="observacao"
               value={movimentacao.observacao}
               onChange={handleChange}
+              sx={{
+                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                borderRadius: 3, // Para arredondar os cantos
+                "& .MuiOutlinedInput-root": {
+                  "& fieldset": {
+                    borderColor: "#ffffff", // Cor da borda padrão
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no hover
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#ffffff", // Cor da borda no foco
+                  },
+                },
+              }}
             />
           </Grid>
           <Grid item xs={6}>
             <Button
               fullWidth
-              variant="outlined"
+              variant="contained"
+              sx={{ backgroundColor: "white", color: "black" }} 
               onClick={() => navigate(`/estoques`, { state: { produto } })}
             >
               Cancelar
@@ -153,6 +214,7 @@ function CadastroEstoque() {
           <Grid item xs={6}>
             <Button
               fullWidth
+              sx={{ backgroundColor: "black", mr: 1 }}
               variant="contained"
               color="primary"
               onClick={handleSaveMovimentacao}

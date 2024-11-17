@@ -6,7 +6,8 @@ import {
   FormControlLabel,
   TextField,
   Typography,
-  Alert
+  Alert,
+  Container
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 
@@ -98,27 +99,38 @@ const RegistrationForm = () => {
   };
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="100vh"
-      bgcolor="#f5f5f5"
+    <Container
+    maxWidth="sm"
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      flexDirection: "column",
+      alignItems: "center",
+      minHeight: "100vh",
+    }}
     >
+        <Typography variant="h4" gutterBottom textAlign="center"
+        sx={{
+          marginBottom: "0",
+          fontSize: 60,
+          color: "#213635",
+          fontWeight: "bold",
+          mb: 5
+        }}>
+          Cadastro
+        </Typography>
       <Box
         component="form"
         onSubmit={handleSubmit}
         sx={{
-          width: 400,
+          width: "100%",
           padding: 4,
           backgroundColor: '#fff',
           borderRadius: 2,
           boxShadow: 3,
         }}
       >
-        <Typography variant="h4" gutterBottom textAlign="center">
-          Cadastro
-        </Typography>
+
         
         {alertaClass && <Alert severity="error" sx={{ mb: 2 }}>{alertaMensagem}</Alert>}
         
@@ -132,6 +144,22 @@ const RegistrationForm = () => {
           value={formData.nome_usuario}
           required
           placeholder="Digite o nome completo"
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
         />
         <TextField
           label="Seu melhor e-mail"
@@ -144,6 +172,22 @@ const RegistrationForm = () => {
           value={formData.email_usuario}
           required
           placeholder="Digite o seu e-mail"
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
         />
         <TextField
           label="Senha"
@@ -156,6 +200,22 @@ const RegistrationForm = () => {
           value={formData.senha_usuario}
           required
           placeholder="8 ou mais caracteres"
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
         />
         <TextField
           label="Confirme a senha"
@@ -168,6 +228,22 @@ const RegistrationForm = () => {
           value={formData.confirmSenha}
           required
           placeholder="Repita a senha"
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
         />
         <FormControlLabel
           control={
@@ -195,12 +271,12 @@ const RegistrationForm = () => {
           type="submit"
           variant="contained"
           fullWidth
-          sx={{ mt: 2, backgroundColor: '#000' }}
+          sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2}}
         >
           Avançar
         </Button>
       </Box>
-    </Box>
+    </Container>
   );
 };
 

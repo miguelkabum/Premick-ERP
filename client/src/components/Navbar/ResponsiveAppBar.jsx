@@ -60,8 +60,8 @@ const ResponsiveAppBar = () => {
   };
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
+    <AppBar position="static" sx={{ backgroundColor: "#213635"}}>
+      <Container maxWidth="xl" >
         <Toolbar disableGutters>
           <Link to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>
             <img

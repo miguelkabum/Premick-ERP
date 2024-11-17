@@ -59,26 +59,49 @@ const CadastroCliente = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" align="center" gutterBottom>
+      
+        <Typography sx={{
+                marginBottom: "0",
+                fontSize: 60,
+                color: "#213635",
+                fontWeight: "bold",
+                paddingBottom: "26px"
+              }} variant="h4" align="center" gutterBottom>
           {id ? 'Editar Cliente' : 'Cadastro de Clientes'}
         </Typography>
+      <Paper elevation={3} sx={{
+              p: 3,
+              width: "100%",
+              borderRadius: "12px",
+            }}>
         
         <Box component="form">
-          <Typography variant="h6" gutterBottom>
-            Dados Cadastrais
-          </Typography>
-          <Divider />
           
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
               <TextField 
                 fullWidth 
                 label="Nome" 
+                color='red'
                 variant="outlined" 
                 name="nome_cliente"
                 value={cliente.nome_cliente}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -89,6 +112,21 @@ const CadastroCliente = () => {
                 name="cep"
                 value={cliente.cep}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -99,6 +137,21 @@ const CadastroCliente = () => {
                 name="numero"
                 value={cliente.numero}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -109,6 +162,21 @@ const CadastroCliente = () => {
                 name="logradouro"
                 value={cliente.logradouro}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -118,6 +186,21 @@ const CadastroCliente = () => {
                 name="uf"
                 value={cliente.uf}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               >
                 <MenuItem value="SP">SP</MenuItem>
                 <MenuItem value="RJ">RJ</MenuItem>
@@ -132,6 +215,21 @@ const CadastroCliente = () => {
                 name="cidade"
                 value={cliente.cidade}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -142,6 +240,21 @@ const CadastroCliente = () => {
                 name="bairro"
                 value={cliente.bairro}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -152,6 +265,21 @@ const CadastroCliente = () => {
                 name="complemento"
                 value={cliente.complemento}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -162,6 +290,21 @@ const CadastroCliente = () => {
                 name="telefone_cliente"
                 value={cliente.telefone_cliente}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -172,18 +315,33 @@ const CadastroCliente = () => {
                 name="CPF_cliente"
                 value={cliente.CPF_cliente}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#D9D9D9", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#D1D1D1", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
           </Grid>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-            <Button variant="outlined" color="secondary" sx={{ mr: 2 }} onClick={() => navigate('/clientes')}>
+            <Button variant="contained" color="error" sx={{ mr: 2, backgroundColor: "white", color: "black" }} onClick={() => navigate('/clientes')}>
               Cancelar
             </Button>
             <Button 
               variant="contained" 
-              color="primary" 
               onClick={handleSaveCliente}
+              sx={{ backgroundColor: "black" }}
             >
               Salvar Cliente
             </Button>

@@ -66,10 +66,20 @@ const LoginPage = () => {
       sx={{
         display: "flex",
         justifyContent: "center",
+        flexDirection: "column",
         alignItems: "center",
         minHeight: "100vh",
       }}
     >
+        <Typography variant="h4" sx={{
+                marginBottom: "0",
+                fontSize: 60,
+                color: "#213635",
+                fontWeight: "bold",
+                mb: 5
+              }}>
+          Login
+        </Typography>
       <Box
         component="form"
         onSubmit={handleLogin}
@@ -81,18 +91,30 @@ const LoginPage = () => {
           width: "100%",
         }}
       >
-        <Typography variant="h4" sx={{ mb: 3, textAlign: "center" }}>
-          Login
-        </Typography>
 
         <TextField
           label="E-mail"
           variant="outlined"
           fullWidth
           autoComplete="email"
-          sx={{ mb: 2 }}
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
         />
 
         <TextField
@@ -101,9 +123,24 @@ const LoginPage = () => {
           type={showPassword ? "text" : "password"}
           fullWidth
           autoComplete="current-password"
-          sx={{ mb: 2 }}
           value={senha}
           onChange={(e) => setSenha(e.target.value)}
+          sx={{
+            mb: 2,
+            backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+            borderRadius: 3, // Para arredondar os cantos
+            "& .MuiOutlinedInput-root": {
+              "& fieldset": {
+                borderColor: "#ffffff", // Cor da borda padrão
+              },
+              "&:hover fieldset": {
+                borderColor: "#ffffff", // Cor da borda no hover
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#ffffff", // Cor da borda no foco
+              },
+            },
+          }}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -134,7 +171,7 @@ const LoginPage = () => {
           color="primary"
           fullWidth
           disabled={loading} // Desabilita o botão durante o carregamento
-          sx={{ mb: 2 }}
+          sx={{ mb: 2, background: "#213635", height: 45 }}
         >
           {loading ? "Entrando..." : "Entrar"} {/* Exibe mensagem de carregamento */}
         </Button>

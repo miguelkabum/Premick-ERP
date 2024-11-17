@@ -7,17 +7,10 @@ const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <Box sx={{ padding: 2 }}>
+    <Box sx={{ padding: 3, width: "100vw", display: "flex", justifyContent: "center"}}>
       {/* Cabeçalho com boas-vindas e informações */}
-      <Grid container spacing={2}>
-        <Grid item xs={3}>
+        {/* <Grid item xs={3}>
           <Paper sx={{ padding: 2 }}>
-            <Box display="flex" alignItems="center">
-              <AccountCircleIcon fontSize="large" />
-              <Typography variant="h6" sx={{ ml: 2 }}>
-                Bem-vindo, {user.nome_usuario}!
-              </Typography>
-            </Box>
             <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
               Restam 30 dias de teste grátis
             </Typography>
@@ -41,19 +34,26 @@ const Dashboard = () => {
               22%
             </Typography>
           </Paper>
-        </Grid>
+        </Grid> */}
 
         <Grid item xs={9}>
-          <Grid container spacing={2}>
+        <Box display="flex" alignItems="center" sx={{ paddingBottom: 3, gap: 2 }}>
+              <AccountCircleIcon fontSize="large" />
+              <Typography variant="h6" >
+                Bem-vindo, {user.nome_usuario}!
+              </Typography>
+            </Box>
+
+          <Grid container spacing={2}sx={{ maxWidth: 1200 }} >
             {/* Caixas de informação */}
             <Grid item xs={6}>
-              <Paper sx={{ padding: 2 }}>
+              <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
                 <Typography variant="h6">Feche com nossos parceiros para aproveitar todos os descontos.</Typography>
-                <Button fullWidth variant="contained" sx={{ mt: 2 }}>Conheça nossos parceiros</Button>
+                <Button fullWidth variant="contained" sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2}}>Conheça nossos parceiros</Button>
               </Paper>
             </Grid>
             <Grid item xs={6}>
-              <Paper sx={{ padding: 2 }}>
+              <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
                 <Typography variant="h6">Em breve um novo app será lançado.</Typography>
                 <Typography variant="body2">Praticidade na palma da mão.</Typography>
                 <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
@@ -120,7 +120,6 @@ const Dashboard = () => {
             </Grid>
           </Grid>
         </Grid>
-      </Grid>
     </Box>
   );
 };

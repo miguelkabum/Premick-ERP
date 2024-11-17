@@ -24,8 +24,8 @@ const CadastroProduto = () => {
   
   const [produto, setProduto] = useState({
     nome_produto: '',
-    unidade_medida: '',
-    preco_venda: 0.0,
+    unidade_medida: '0',
+    preco_venda: 0,
     codigo_barras: '',
     codigo_interno: '',
     estoque_minimo: 0,
@@ -78,17 +78,22 @@ const CadastroProduto = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" align="center" gutterBottom>
-          {id ? 'Editar Produto' : 'Cadastro de Produto'}
-        </Typography>
-        
-        <Box component="form">
-          <Typography variant="h6" gutterBottom>
-            Dados do Produto
+                <Typography  align="center" variant="h6" gutterBottom sx={{
+                marginBottom: "0",
+                fontSize: 60,
+                color: "#213635",
+                fontWeight: "bold",
+                paddingBottom: "26px"
+              }}>
+            {id ? 'Editar Produto' : 'Cadastro de Produto'}
           </Typography>
-          <Divider />
-          
+      <Paper elevation={3} sx={{
+              p: 3,
+              width: "100%",
+              borderRadius: "12px",
+            }}>
+    
+        <Box component="form">
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <TextField 
@@ -98,6 +103,21 @@ const CadastroProduto = () => {
                 name="nome_produto"
                 value={produto.nome_produto}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -108,6 +128,21 @@ const CadastroProduto = () => {
                 name="codigo_barras"
                 value={produto.codigo_barras}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -118,6 +153,21 @@ const CadastroProduto = () => {
                 name="codigo_interno"
                 value={produto.codigo_interno}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -128,6 +178,21 @@ const CadastroProduto = () => {
                 value={produto.id_categoria}
                 onChange={handleChange}
                 displayEmpty
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               >
                 <MenuItem value="" disabled>Categoria</MenuItem>
                 {categorias.map((cat) => (
@@ -145,6 +210,21 @@ const CadastroProduto = () => {
                 name="unidade_medida"
                 value={produto.unidade_medida}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -156,6 +236,21 @@ const CadastroProduto = () => {
                 name="preco_venda"
                 value={produto.preco_venda}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -167,6 +262,21 @@ const CadastroProduto = () => {
                 name="estoque_minimo"
                 value={produto.estoque_minimo}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12} sm={6}>
@@ -178,6 +288,21 @@ const CadastroProduto = () => {
                 name="estoque_maximo"
                 value={produto.estoque_maximo}
                 onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
+                  },
+                }}
               />
             </Grid>
             <Grid item xs={12}>
@@ -185,30 +310,32 @@ const CadastroProduto = () => {
                 control={<Switch 
                   checked={produto.status} 
                   onChange={handleChange} 
-                  name="status" 
+                  color="default"
+                  name="status"
                 />} 
                 label="Ativo" 
               />
             </Grid>
           </Grid>
           
-          <Box mt={3}>
+          <Container  sx={{ p: 2, display: "flex", justifyContent: "center"}}  >
             <Button 
               variant="contained" 
               color="primary" 
               onClick={handleSaveProduto}
+              sx={{ backgroundColor: "black", mr: 1 }}
             >
               Salvar
             </Button>
             <Button 
-              variant="outlined" 
               color="secondary" 
-              sx={{ ml: 2 }} 
+              variant="contained"
+              sx={{ backgroundColor: "white", color: "black" }} 
               onClick={() => navigate('/produtos')}
             >
               Cancelar
             </Button>
-          </Box>
+          </Container>
         </Box>
       </Paper>
     </Container>

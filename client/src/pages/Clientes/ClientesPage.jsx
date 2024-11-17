@@ -57,7 +57,9 @@ const ClientesPage = () => {
   const handleDeleteCliente = async (id) => {
     try {
       await fetch(`${url}/${id}`, { method: "DELETE" });
-      setClientes((prev) => prev.filter((cliente) => cliente.id_cliente !== id));
+      setClientes((prev) =>
+        prev.filter((cliente) => cliente.id_cliente !== id)
+      );
     } catch (error) {
       console.error("Erro ao excluir cliente:", error);
     }
@@ -76,8 +78,7 @@ const ClientesPage = () => {
       renderCell: (params) => (
         <>
           <IconButton
-            size="small"
-            color="primary"
+            size="large"
             onClick={(event) => handleOpenMenu(event, params.row.id_cliente)}
           >
             <MoreVert />
@@ -110,58 +111,98 @@ const ClientesPage = () => {
   ];
 
   return (
-      <Container sx={{ p: 2 }}>
-      <Paper elevation={1} sx={{ p: 2 }}>
+    <div
+      style={{
+        backgroundColor: "#F1F1F1",
+        height: "auto",
+        display: "flex",
+        justifyContent: "center",
+      }}
+    >
+      <Container sx={{ p: 1 }}>
         <Container sx={{ p: 2 }}>
-          <div className="header" style={{
-            display: "flex",
-            gap: "12px",
-            alignItems: "center",
-            marginBottom: "3px",
-          }}>
-            <Typography variant="h4" gutterBottom sx={{ marginBottom: "0" }}>
+          <div
+            className="header"
+            style={{
+              display: "flex",
+              gap: "12px",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "3px",
+            }}
+          >
+            <Typography
+              variant="h4"
+              gutterBottom
+              sx={{ marginBottom: "0", fontSize: 60, color:"#213635", fontWeight:"bold" }}
+            >
               Clientes
             </Typography>
-            <IconButton color="primary" onClick={fetchClientes}>
-              <Refresh />
-            </IconButton>
           </div>
-          <Box
-            display="flex"
+        </Container>
+        
+        <Paper elevation={1} sx={{ p: 2, borderRadius: "12px" }}>
+          <Container maxWidth="lg" sx={{ padding: 2 }}>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              marginBottom={2}
+              gap={3}
+            >
+              <TextField
+                variant="outlined"
+                placeholder="Pesquisar por nome, CPF ..."
+                InputProps={{
+                  startAdornment: <Search />,
+                }}
+                sx={{ width: "100%", maxWidth: "400px", height: "auto" }}
+              />
+
+              <Box display="flex"
             justifyContent="space-between"
             alignItems="center"
-            marginBottom={2}
-            gap={3}
-          >
-            <TextField
-              variant="outlined"
-              placeholder="Pesquisar por nome, CPF ..."
-              InputProps={{
-                startAdornment: <Search />,
-              }}
-              sx={{ width: "100%", maxWidth: "400px" }}
-            />
-
-            <Box>
-              <Button
-                variant="contained"
-                color="primary"
-                sx={{ height: "56px", width: "100%" }}
-                startIcon={<Add />}
-                onClick={() => navigate("/clientes/cadastro")}
-              >
-                Incluir cliente
-              </Button>
+            mb={2}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  sx={{ height: "56px", width: "100%", backgroundColor: "black"}}
+                  startIcon={<Add />}
+                  onClick={() => navigate("/clientes/cadastro")}
+                >
+                  Incluir cliente
+                </Button>
+              </Box>
             </Box>
-          </Box>
-        </Container>
-        <Container maxWidth="lg" sx={{ padding: 2 }}>
-          <Box sx={{ height: 400, width: "100%", backgroundColor: "white" }}>
-            <DataGrid rows={clientes} columns={columns} getRowId={(row) => row.id_cliente} pageSize={5} />
-          </Box>
-        </Container>
-      </Paper>
+          </Container>
+          <Container maxWidth="lg" sx={{ padding: 2 }}>
+            <Box
+              sx={{
+                height: "auto",
+                width: "100%",
+                backgroundColor: "#F2F2F2",
+                borderRadius: "12px",
+              }}
+            >
+              <DataGrid
+                rows={clientes}
+                columns={columns}
+                getRowId={(row) => row.id_cliente}
+                pageSize={5}
+                sx={{
+                  boxShadow: 0,
+                  border: 0,
+                  borderColor: "primary.light",
+                  "& .MuiDataGrid-cell:hover": {
+                    color: "primary.main",
+                  },
+                }}
+              />
+            </Box>
+          </Container>
+        </Paper>
       </Container>
+    </div>
   );
 };
 

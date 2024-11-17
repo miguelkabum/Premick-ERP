@@ -18,6 +18,7 @@ import {
   InputAdornment,
   Autocomplete,
   Snackbar,
+  Container,
   Alert,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
@@ -206,30 +207,31 @@ const VendasPDV = () => {
     });
   };
 
-  const handleAdicionarProduto = () => {
-    console.log("Produto Detalhado:", produtoDetalhado);
+  const handleAdicionarProduto = (produto, quantidade) => {
+    console.log("Produto Detalhado:", produto);
     console.log("Quantidade:", quantidade);
     console.log("Produtos na Venda (antes):", produtosVenda);
-    if (!produtoDetalhado) {
+  
+    if (!produto) {
       openSnackbar("Nenhum produto selecionado.", "error");
       return; // Se não houver produto detalhado, encerra a função
     }
-
+  
     if (quantidade <= 0) {
       openSnackbar("A quantidade deve ser maior que zero.", "error");
       return; // Validação para impedir quantidade inválida
     }
-
+  
     // Verifica se o produto já existe na lista
     const produtoExistente = produtosVenda.find(
-      (prod) => prod.id_produto === produtoDetalhado.id_produto
+      (prod) => prod.id_produto === produto.id_produto
     );
-
+  
     if (produtoExistente) {
       // Se já existe, incrementa a quantidade
       setProdutosVenda((prev) =>
         prev.map((prod) =>
-          prod.id_produto === produtoDetalhado.id_produto
+          prod.id_produto === produto.id_produto
             ? { ...prod, quantidade: prod.quantidade + quantidade }
             : prod
         )
@@ -238,15 +240,16 @@ const VendasPDV = () => {
       // Adiciona o produto como novo item
       setProdutosVenda((prev) => [
         ...prev,
-        { ...produtoDetalhado, quantidade, status: "OK" },
+        { ...produto, quantidade, status: "OK" },
       ]);
     }
-
+  
     // Reseta quantidade e detalhes do produto
     setQuantidade(1);
     setPrecoUnidade(0);
     openSnackbar("Produto adicionado com sucesso!", "success");
   };
+  
 
   const handleFinalizarVenda = async () => {
     if (valorTotal <= 0) {
@@ -352,11 +355,11 @@ const VendasPDV = () => {
   };
 
   const columns = [
-    { field: "nome_produto", headerName: "Descrição", width: 150 },
+    { field: "nome_produto", headerName: "Descrição", flex: 2 },
     {
       field: "status",
       headerName: "Status",
-      width: 120,
+      flex: 1,
       renderCell: (params) =>
         params.value === "OK" ? (
           <CheckCircleIcon color="success" />
@@ -364,14 +367,14 @@ const VendasPDV = () => {
           <CancelIcon color="error" />
         ),
     },
-    { field: "codigo_interno", headerName: "Código", width: 150 },
-    { field: "unidade_medida", headerName: "Unidade", width: 120 },
-    { field: "preco_venda", headerName: "Preço", width: 100 },
-    { field: "quantidade", headerName: "Quantidade", width: 100 },
+    { field: "codigo_interno", headerName: "Código", flex: 1.5 },
+    { field: "unidade_medida", headerName: "Unidade", flex: 1.5 },
+    { field: "preco_venda", headerName: "Preço", flex: 1 },
+    { field: "quantidade", headerName: "Quantidade", flex: 1 },
     {
       field: "actions",
       headerName: "Ações",
-      width: 150,
+      flex: 1.8,
       renderCell: (params) => (
         <Button
           color="error"
@@ -384,79 +387,126 @@ const VendasPDV = () => {
   ];
 
   return (
-    <Box sx={{ display: "flex", p: 2, gap: 2 }}>
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={closeSnackbar}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={closeSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-      <Paper sx={{ width: "70%" }}>
-        <Box sx={{ flex: 1, p: 2 }}>
-          <Typography variant="h4" sx={{ mb: 2 }}>
-            PDV 1
-          </Typography>
-          <DataGrid
-            rows={produtosVenda}
-            columns={columns}
-            disableSelectionOnClick
-            getRowId={(row) => row.id_produto}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            sx={{
-              backgroundColor: "#F1F1F1",
-              mb: 2,
-              width: "100%",
-              height: "580px",
-            }}
-          />
-          <Box
-            sx={{
+    <>
+        <Container sx={{ p: 2}}>
+          <div
+            className="header"
+            style={{
               display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
+              gap: "12px",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: "3px",
             }}
           >
-            <Button
-              variant="contained"
-              color="primary"
-              sx={{ mr: 1 }}
-              startIcon={<DiscountIcon />}
-              onClick={handleAplicarDesconto}
+            <Typography
+              variant="h4"
+              sx={{
+                marginBottom: "0",
+                fontSize: 60,
+                color: "#213635",
+                fontWeight: "bold",
+              }}
             >
-              Desconto
-            </Button>
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<CancelIcon />}
-              onClick={handleCancelarVenda}
-            >
-              Cancelar Venda
-            </Button>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<ShoppingCartCheckoutIcon />}
-              onClick={handleFinalizarVenda}
-            >
-              Finalizar Venda
-            </Button>
-          </Box>
-        </Box>
-      </Paper>
-      <Box sx={{ flex: 1 }}>
-        <Paper sx={{ p: 3 }}>
-          {/* <Typography variant="h6"></Typography> */}
-          {/* <TextField
+              PDV 1
+            </Typography>
+          </div>
+        </Container>
+        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center", alignItems:"center", width: "100vw"}}>
+          <Paper
+            elevation={1}
+            sx={{
+              p: 1,
+              width: "100%",
+              height: "700px",
+              minWidth: 350, // Define largura mínima para evitar problemas em telas menores
+              maxWidth: 1200,
+              borderRadius: "12px",
+            }}
+          >
+            <Container maxWidth="lg" sx={{ padding: 2, justifyContent: "space-around" , height: "100%"}}>
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "90%",
+                  backgroundColor: "#F2F2F2",
+                  borderRadius: "12px",
+                }}
+              >
+                <DataGrid
+                  rows={produtosVenda}
+                  columns={columns}
+                  disableSelectionOnClick
+                  getRowId={(row) => row.id_produto}
+                  pageSize={5}
+                  rowsPerPageOptions={[5]}
+                  sx={{
+                    boxShadow: 0,
+                    width: "100%",
+                    height: "100%",
+                    border: 0,
+                    borderColor: "primary.light",
+                    "& .MuiDataGrid-cell:hover": {
+                      color: "primary.main",
+                    },
+                  }}
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "end",
+                  height: "10%"
+                }}
+              >
+                <div className="fistButtom">
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    sx={{ mr: 1 }}
+                    startIcon={<DiscountIcon />}
+                    onClick={handleAplicarDesconto}
+                  >
+                    Desconto
+                  </Button>
+                  <Button
+                    variant="contained"
+                    color="error"
+                    sx={{ mr: 1 }}
+                    startIcon={<CancelIcon />}
+                    onClick={handleCancelarVenda}
+                  >
+                    Cancelar Venda
+                  </Button>
+                </div>
+                <Button
+                  variant="contained"
+                  color="success"
+                  startIcon={<ShoppingCartCheckoutIcon />}
+                  onClick={handleFinalizarVenda}
+                >
+                  Finalizar Venda
+                </Button>
+              </Box>
+            </Container>
+          </Paper>
+
+          <Paper
+            elevation={1}
+            sx={{
+              p: 2,
+              borderRadius: "12px",
+              height: "700px",
+              width: "400px",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              gap: 1.5,
+            }}
+          >
+            {/* <Typography variant="h6"></Typography> */}
+            {/* <TextField
             fullWidth
             label="Pesquisar por código, descrição"
             variant="outlined"
@@ -466,50 +516,46 @@ const VendasPDV = () => {
             // onKeyPress={(e) => e.key === "Enter" && handlePesquisaProduto()}
             sx={{ mb: 2 }}
           /> */}
-          <Autocomplete
-          onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
-            disablePortal
-            value={produtoSelecionado} // Usa o produto selecionado
-            onInputChange={(event, newInputValue) => {
-              setPesquisa(newInputValue); // Atualiza o valor da pesquisa
-              handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
-            }}
-            options={produtos} // Exibe os produtos filtrados
-            getOptionLabel={(option) =>
-              `${option.nome_produto || "Produto desconhecido"} - ${
-                option.codigo_interno || "Código não disponível"
-              }`
-            }
-            onChange={(event, newValue) => {
-              console.log("Produto selecionado:", newValue); // Verifique o valor de newValue
-              setProdutoSelecionado(newValue); // Atualiza o produto selecionado
-              setProdutoDetalhado(newValue); // Atualiza o produto detalhado
-              setPrecoUnidade(newValue.preco_venda); // Atualiza o preço da unidade
-              console.log(
-                "Produtos na venda antes de adicionar:",
-                produtosVenda
-              );
-              handleAdicionarProduto();
-              console.log("Produtos na venda após adicionar:", produtosVenda);
-            }}
-            sx={{ width: "auto", paddingBottom: "5px" }}
-            renderInput={(params) => (
-              <TextField {...params} label="Pesquisar" />
-            )}
-            renderOption={(props, option) => (
-              <li {...props} key={option.id_produto}>
-                {option.nome_produto} - {option.codigo_interno}
-              </li>
-            )}
-          />
+            <Autocomplete
+              onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
+              disablePortal
+              value={produtoSelecionado} // Usa o produto selecionado
+              onInputChange={(event, newInputValue) => {
+                setPesquisa(newInputValue); // Atualiza o valor da pesquisa
+                handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
+              }}
+              options={produtos} // Exibe os produtos filtrados
+              getOptionLabel={(option) =>
+                `${option.nome_produto || "Produto desconhecido"} - ${
+                  option.codigo_interno || "Código não disponível"
+                }`
+              }
+              onChange={(event, newValue) => {
+                if (newValue) {
+                  setProdutoSelecionado(newValue);
+                  setProdutoDetalhado(newValue);
+                  setPrecoUnidade(newValue.preco_venda);
+                  handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
+                }
+              }}
+              sx={{ width: "auto", paddingBottom: "5px" }}
+              renderInput={(params) => (
+                <TextField {...params} label="Pesquisar" />
+              )}
+              renderOption={(props, option) => (
+                <li {...props} key={option.id_produto}>
+                  {option.nome_produto} - {option.codigo_interno}
+                </li>
+              )}
+            />
 
-          {/* {produtos.length > 1 && (
+            {/* {produtos.length > 1 && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="h6">Selecione um produto:</Typography>
             </Box>
           )} */}
 
-          {/* {produtos.length > 1 && (
+            {/* {produtos.length > 1 && (
             <Box sx={{ mt: 2 }}>
               <Typography variant="h6">Selecione um produto:</Typography>
             </Box>
@@ -534,62 +580,64 @@ const VendasPDV = () => {
             ))}
           </Box> */}
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-              height: 150,
-              border: "1px solid lightgrey",
-              mb: 2,
-            }}
-          >
-            <ImageIcon sx={{ fontSize: 80, color: "lightgrey" }} />
-          </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                height: 150,
+                border: "1px solid lightgrey",
+                mb: 2,
+              }}
+            >
+              <ImageIcon sx={{ fontSize: 80, color: "lightgrey" }} />
+            </Box>
 
-          <TextField
-            fullWidth
-            label="Descrição"
-            value={produtoSelecionado ? produtoSelecionado.nome_produto : ""}
-            variant="filled"
-            InputProps={{ readOnly: true }}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Código"
-            value={produtoSelecionado ? produtoSelecionado.codigo_interno : ""}
-            variant="filled"
-            InputProps={{ readOnly: true }}
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Quantidade"
-            type="number"
-            value={quantidade}
-            onChange={(e) => setQuantidade(Number(e.target.value))}
-            variant="outlined"
-            sx={{ mb: 2 }}
-          />
-          <TextField
-            fullWidth
-            label="Preço Unidade"
-            type="number"
-            value={produtoSelecionado ? produtoSelecionado.preco_venda : ""}
-            onChange={(e) => setPrecoUnidade(Number(e.target.value))}
-            variant="filled"
-            InputProps={{ readOnly: true }}
-            sx={{ mb: 2, cursor: "pointer" }}
-          />
-          <Typography
-            variant="h4"
-            align="center"
-            sx={{ backgroundColor: "#f1f1f1", p: 2, borderRadius: 2 }}
-          >
-            R$ {valorTotal.toFixed(2)}
-          </Typography>
-          {/* <Button
+            <TextField
+              fullWidth
+              label="Descrição"
+              value={produtoSelecionado ? produtoSelecionado.nome_produto : ""}
+              variant="filled"
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Código"
+              value={
+                produtoSelecionado ? produtoSelecionado.codigo_interno : ""
+              }
+              variant="filled"
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Quantidade"
+              type="number"
+              value={quantidade}
+              onChange={(e) => setQuantidade(Number(e.target.value))}
+              variant="outlined"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Preço Unidade"
+              type="number"
+              value={produtoSelecionado ? produtoSelecionado.preco_venda : ""}
+              onChange={(e) => setPrecoUnidade(Number(e.target.value))}
+              variant="filled"
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2, cursor: "pointer" }}
+            />
+            <Typography
+              variant="h4"
+              align="center"
+              sx={{ backgroundColor: "#f1f1f1", p: 2, borderRadius: 2 }}
+            >
+              R$ {valorTotal.toFixed(2)}
+            </Typography>
+            {/* <Button
             variant="contained"
             fullWidth
             sx={{ mt: 2 }}
@@ -597,9 +645,8 @@ const VendasPDV = () => {
           >
             Adicionar Produto
           </Button> */}
-        </Paper>
-      </Box>
-
+          </Paper>
+        </Box>
       {/* Dialog de Finalização de Venda */}
       <Dialog
         open={openDialog}
@@ -698,7 +745,22 @@ const VendasPDV = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 
