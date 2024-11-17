@@ -40,6 +40,26 @@ const EstoquesPage = () => {
     }
   };
 
+  // Função para formatar a data e hora com ajuste de +3 horas
+const formatDate = (date) => {
+  if (!date) return ''; // Verifica se a data existe
+
+  const adjustedDate = new Date(date);
+  adjustedDate.setHours(adjustedDate.getHours() + 3); // Adiciona 3 horas
+
+  const formattedDate = adjustedDate.toLocaleString('pt-BR', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false // Para usar o formato 24h
+  });
+
+  return formattedDate.replace(',', ''); // Remove a vírgula entre data e hora
+};
+
   // Função para buscar estoques de acordo com o produto e tipo
   const fetchEstoques = async () => {
     if (!produtoSelecionado); // Não fazer nada se não houver produto selecionado
@@ -52,8 +72,8 @@ const EstoquesPage = () => {
       const entradaData = await resEntrada.json();
       const saidaData = await resSaida.json();
       const combinedData = [
-        ...entradaData.map((e) => ({ ...e, tipo: "Entrada" })),
-        ...saidaData.map((s) => ({ ...s, tipo: "Saída" })),
+        ...entradaData.map(e => ({ ...e, tipo: 'Entrada', data: formatDate(e.data_entrada), observacao: e.obs_entrada_produto })),
+        ...saidaData.map(s => ({ ...s, tipo: 'Saída', data: formatDate(s.data_saida), observacao: s.obs_saida_produto })),
       ];
 
       // Aplica o filtro de tipo (se houver)
@@ -100,8 +120,8 @@ const EstoquesPage = () => {
     { field: "tipo", headerName: "Tipo", width: 120 },
     { field: "quantidade", headerName: "Quantidade", width: 120 },
     { field: "valor_unitario", headerName: "Valor Unitário", width: 120 },
-    { field: "data", headerName: "Data", width: 180 },
-    { field: "obs_vendas", headerName: "Observação", width: 200 },
+    { field: 'data', headerName: 'Data', width: 180 },
+    { field: 'observacao', headerName: 'Observação', width: 200 },
   ];
 
   return (

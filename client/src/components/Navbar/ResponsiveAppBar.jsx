@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   AppBar,
   Box,
@@ -11,6 +11,8 @@ import {
   Avatar,
   Button,
   Tooltip,
+  Alert,
+  Snackbar,
 } from "@mui/material";
 import { Link } from "react-router-dom";
 import {
@@ -37,7 +39,17 @@ const ResponsiveAppBar = () => {
   const handleOpenNavMenu = (event) => {
     setAnchorElNav(event.currentTarget);
   };
-
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const openSnackbar = (message, severity = "success") => {
+    setSnackbar({ open: true, message, severity });
+  };
+  const closeSnackbar = () => {
+    setSnackbar({ ...snackbar, open: false });
+  };
   const handleOpenUserMenu = (event) => {
     setAnchorElUser(event.currentTarget);
   };
@@ -51,7 +63,7 @@ const ResponsiveAppBar = () => {
   };
   const handleLogout = () => {
     if (localStorage.produtosVenda.length > 2) {
-      alert("Finalize ou cancele a venda!")
+      openSnackbar("Finalize ou cancele a venda antes de sair!.", "error")
     } else {
       localStorage.clear();
       dispatch(logout()); // Reseta o estado de autenticação
@@ -108,7 +120,7 @@ const ResponsiveAppBar = () => {
                 <Typography textAlign="center">Produtos</Typography>
               </MenuItem>
               <MenuItem onClick={() => { navigate("/estoques");}}>
-                <Typography textAlign="center">Estoque</Typography>
+                <Typography textAlign="center">Estoques</Typography>
               </MenuItem>
               <MenuItem onClick={() => { navigate("/vendas");}}>
                 <Typography textAlign="center">Vendas</Typography>
@@ -140,7 +152,7 @@ const ResponsiveAppBar = () => {
               component={Link}
               to="/estoques"
             >
-              Estoque
+              Estoques
             </Button>
             <Button
               sx={{ my: 2, color: "white", display: "block" }}
@@ -209,6 +221,20 @@ const ResponsiveAppBar = () => {
           </Box>
         </Toolbar>
       </Container>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={closeSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={closeSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </AppBar>
   );
 };

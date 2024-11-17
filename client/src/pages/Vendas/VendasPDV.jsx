@@ -24,7 +24,6 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import ImageIcon from "@mui/icons-material/Image";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import DiscountIcon from "@mui/icons-material/Discount";
 
@@ -56,6 +55,8 @@ const VendasPDV = () => {
   const [observacao, setObservacao] = useState("");
   const [descontoTemp, setDescontoTemp] = useState(0); // Estado temporário para armazenar o valor do desconto
   const [porcentagemTemp, setPorcentagemTemp] = useState(0); // Estado temporário para armazenar a porcentagem de desconto
+  const [openDialogCancelamento, setOpenDialogCancelamento] = useState(false);
+  const [observacaoCancelamento, setObservacaoCancelamento] = useState("");
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -68,7 +69,7 @@ const VendasPDV = () => {
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
-  const [produtoSelecionado, setProdutoSelecionado] = useState(null);
+  const [produtoSelecionado, setProdutoSelecionado] = useState("");
   useEffect(() => {
     const total = produtosVenda.reduce((sum, item) => {
       // Só inclui no total os produtos que não foram cancelados
@@ -157,17 +158,20 @@ const VendasPDV = () => {
     const totalSemDesconto = produtosVenda.reduce((sum, item) => {
       return sum + item.preco_venda * item.quantidade;
     }, 0);
-
-    if (descontoTemp >= totalSemDesconto) {
+  
+    const descontoValidado = parseFloat(descontoTemp) || 0;
+  
+    if (descontoValidado >= totalSemDesconto) {
       openSnackbar(
         "O desconto não pode ser maior que o total da venda.",
         "error"
       );
     } else {
-      setDesconto(descontoTemp);
+      setDesconto(descontoValidado);
       setOpenDescontoDialog(false);
     }
   };
+  
 
   const handleAplicarDesconto = () => {
     setOpenDescontoDialog(true);
@@ -211,28 +215,32 @@ const VendasPDV = () => {
     console.log("Produto Detalhado:", produto);
     console.log("Quantidade:", quantidade);
     console.log("Produtos na Venda (antes):", produtosVenda);
-  
+
     if (!produto) {
       openSnackbar("Nenhum produto selecionado.", "error");
       return; // Se não houver produto detalhado, encerra a função
     }
-  
+
     if (quantidade <= 0) {
       openSnackbar("A quantidade deve ser maior que zero.", "error");
       return; // Validação para impedir quantidade inválida
     }
-  
+
     // Verifica se o produto já existe na lista
     const produtoExistente = produtosVenda.find(
       (prod) => prod.id_produto === produto.id_produto
     );
-  
+
     if (produtoExistente) {
-      // Se já existe, incrementa a quantidade
+      // Se já existe, incrementa a quantidade e redefine o status para "OK"
       setProdutosVenda((prev) =>
         prev.map((prod) =>
           prod.id_produto === produto.id_produto
-            ? { ...prod, quantidade: prod.quantidade + quantidade }
+            ? {
+                ...prod,
+                quantidade: prod.quantidade + quantidade,
+                status: "OK", // Atualiza o status para "OK"
+              }
             : prod
         )
       );
@@ -243,13 +251,12 @@ const VendasPDV = () => {
         { ...produto, quantidade, status: "OK" },
       ]);
     }
-  
+
     // Reseta quantidade e detalhes do produto
     setQuantidade(1);
     setPrecoUnidade(0);
     openSnackbar("Produto adicionado com sucesso!", "success");
   };
-  
 
   const handleFinalizarVenda = async () => {
     if (valorTotal <= 0) {
@@ -299,60 +306,59 @@ const VendasPDV = () => {
         localStorage.removeItem("produtosVenda");
       } else {
         console.error("Erro ao finalizar venda:", data.message);
-        alert("Erro ao finalizar venda");
+        openSnackbar("Error ao finalizar venda.", "error");
       }
     } catch (error) {
       console.error("Erro ao finalizar venda:", error);
-      alert("Erro ao finalizar venda");
+      openSnackbar("Error ao finalizar venda.", "error");
     }
   };
 
-  const handleCancelarVenda = async () => {
+  const handleConfirmarCancelamento = async () => {
     try {
-      const venda_cancelada = {
-        valor_total: valorTotal || 0, // Valor total da venda
-        metodo_pagamento: tipoPagamento || "Não Selecionado", // Tipo de pagamento
-        desconto: desconto || 0, // Desconto aplicado
-        obs_vendas_canceladas: observacao || "Venda Cancelada PDV", // Observação
-        id_cliente: 1 || null, // ID do cliente
-        id_usuario: 1 || null, // ID do usuário
-      };
-
-      console.log("Venda:", venda_cancelada);
-      console.log("Produtos na venda:", produtosVenda);
-
-      const res = await fetch(urlVendasCanceladas, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          venda_cancelada: venda_cancelada,
-          produtos: produtosVenda,
-        }),
-      });
-
-      const data = await res.json(); // Captura a resposta da API
-
-      if (res.ok) {
-        // Se a resposta for bem-sucedida, feche o diálogo
-        console.log(data.message); // Mensagem de sucesso
-        openSnackbar("Venda cancelada com sucesso!", "info");
-        setProdutosVenda([]);
-        setDesconto(0);
-        setObservacao("");
-        setValorTotal(0);
-        setOpenDialog(false); // Fecha o diálogo de finalização de venda
-
-        // Limpa o localStorage após a venda
-        localStorage.removeItem("produtosVenda");
-      } else {
-        console.error("Erro ao finalizar venda:", data.message);
-        alert("Erro ao finalizar venda");
-      }
-    } catch (error) {
-      console.error("Erro ao finalizar venda:", error);
-      alert("Erro ao finalizar venda");
+      if (Number(valorTotal) === 0) {
+        openSnackbar("Não é possível cancelar uma venda com valor total igual a zero.", "warning");
+        return;
     }
-  };
+        const venda_cancelada = {
+            valor_total: Number(valorTotal || 0).toFixed(2), // Certifica que é um número com 2 casas decimais
+            metodo_pagamento: tipoPagamento || "Não Selecionado", // Tipo de pagamento
+            desconto: Number(desconto || 0).toFixed(4), // Certifica que é um número com 2 casas decimais
+            obs_vendas_canceladas: observacao || "Venda Cancelada PDV", // Observação
+            id_cliente: 1 || null, // ID do cliente
+            id_usuario: 1 || null, // ID do usuário
+        };
+
+        const res = await fetch(urlVendasCanceladas, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                venda_cancelada: venda_cancelada,
+                produtos: produtosVenda,
+            }),
+        });
+
+        const data = await res.json(); // Captura a resposta da API
+
+        if (res.ok) {
+            console.log(data.message); // Mensagem de sucesso
+            openSnackbar("Venda cancelada com sucesso!", "info");
+            setProdutosVenda([]);
+            setDesconto(0);
+            setObservacaoCancelamento("");
+            setValorTotal(0);
+            setOpenDialogCancelamento(false); // Fecha o diálogo de finalização de venda
+            localStorage.removeItem("produtosVenda"); // Limpa o localStorage após a venda
+        } else {
+            console.error("Erro ao finalizar venda:", data.message);
+            openSnackbar("Erro ao cancelar venda.", "error");
+        }
+    } catch (error) {
+        console.error("Erro ao finalizar venda:", error);
+        openSnackbar("Erro ao finalizar venda.", "error");
+    }
+};
+
 
   const columns = [
     { field: "nome_produto", headerName: "Descrição", flex: 2 },
@@ -388,31 +394,24 @@ const VendasPDV = () => {
 
   return (
     <>
-        <Container sx={{ p: 2}}>
-          <div
-            className="header"
-            style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: "3px",
-            }}
-          >
-            <Typography
-              variant="h4"
-              sx={{
-                marginBottom: "0",
-                fontSize: 60,
-                color: "#213635",
-                fontWeight: "bold",
-              }}
-            >
-              PDV 1
-            </Typography>
-          </div>
-        </Container>
-        <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center", alignItems:"center", width: "100vw"}}>
+      <div
+        className="tudo"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          height: "calc(100vh - 65px)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            flexWrap: "wrap",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100vw",
+          }}
+        >
           <Paper
             elevation={1}
             sx={{
@@ -424,11 +423,62 @@ const VendasPDV = () => {
               borderRadius: "12px",
             }}
           >
-            <Container maxWidth="lg" sx={{ padding: 2, justifyContent: "space-around" , height: "100%"}}>
+            <Container
+              maxWidth="lg"
+              sx={{
+                padding: 2,
+                justifyContent: "space-around",
+                height: "100%",
+              }}
+            >
+              <Box sx={{ display: "flex", gap: 2 }}>
+                <Autocomplete
+                  // onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
+                  disablePortal
+                  value={produtoSelecionado} // Usa o produto selecionado
+                  onInputChange={(event, newInputValue) => {
+                    setPesquisa(newInputValue); // Atualiza o valor da pesquisa
+                    handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
+                  }}
+                  options={produtos} // Exibe os produtos filtrados
+                  getOptionLabel={(option) =>
+                    `${option.nome_produto || "Pesquisar"}  ${
+                      option.codigo_interno || ""
+                    }`
+                  }
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      setProdutoSelecionado(newValue);
+                      setProdutoDetalhado(newValue);
+                      setPrecoUnidade(newValue.preco_venda);
+                      handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
+                    }
+                  }}
+                  sx={{ flex: 5, mb: 2 }}
+                  renderInput={(params) => (
+                    <TextField {...params} label="Pesquisar" />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.id_produto}>
+                      {option.nome_produto} - {option.codigo_interno}
+                    </li>
+                  )}
+                />
+                <TextField
+                  fullWidth
+                  label="Quantidade"
+                  type="number"
+                  value={quantidade}
+                  onChange={(e) => setQuantidade(Number(e.target.value))}
+                  variant="outlined"
+                  sx={{ flex: 1 }}
+                />
+              </Box>
+
               <Box
                 sx={{
                   width: "100%",
-                  height: "90%",
+                  height: "80%",
                   backgroundColor: "#F2F2F2",
                   borderRadius: "12px",
                 }}
@@ -457,7 +507,7 @@ const VendasPDV = () => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "end",
-                  height: "10%"
+                  height: "10%",
                 }}
               >
                 <div className="fistButtom">
@@ -473,9 +523,8 @@ const VendasPDV = () => {
                   <Button
                     variant="contained"
                     color="error"
-                    sx={{ mr: 1 }}
                     startIcon={<CancelIcon />}
-                    onClick={handleCancelarVenda}
+                    onClick={() => setOpenDialogCancelamento(true)}
                   >
                     Cancelar Venda
                   </Button>
@@ -501,7 +550,7 @@ const VendasPDV = () => {
               width: "400px",
               display: "flex",
               flexDirection: "column",
-              justifyContent: "center",
+              justifyContent: "end",
               gap: 1.5,
             }}
           >
@@ -516,38 +565,6 @@ const VendasPDV = () => {
             // onKeyPress={(e) => e.key === "Enter" && handlePesquisaProduto()}
             sx={{ mb: 2 }}
           /> */}
-            <Autocomplete
-              onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
-              disablePortal
-              value={produtoSelecionado} // Usa o produto selecionado
-              onInputChange={(event, newInputValue) => {
-                setPesquisa(newInputValue); // Atualiza o valor da pesquisa
-                handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
-              }}
-              options={produtos} // Exibe os produtos filtrados
-              getOptionLabel={(option) =>
-                `${option.nome_produto || "Produto desconhecido"} - ${
-                  option.codigo_interno || "Código não disponível"
-                }`
-              }
-              onChange={(event, newValue) => {
-                if (newValue) {
-                  setProdutoSelecionado(newValue);
-                  setProdutoDetalhado(newValue);
-                  setPrecoUnidade(newValue.preco_venda);
-                  handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
-                }
-              }}
-              sx={{ width: "auto", paddingBottom: "5px" }}
-              renderInput={(params) => (
-                <TextField {...params} label="Pesquisar" />
-              )}
-              renderOption={(props, option) => (
-                <li {...props} key={option.id_produto}>
-                  {option.nome_produto} - {option.codigo_interno}
-                </li>
-              )}
-            />
 
             {/* {produtos.length > 1 && (
             <Box sx={{ mt: 2 }}>
@@ -579,20 +596,29 @@ const VendasPDV = () => {
               </Button>
             ))}
           </Box> */}
-
-            <Box
-              sx={{
+            <div
+              className="header"
+              style={{
                 display: "flex",
-                justifyContent: "center",
+                gap: "12px",
                 alignItems: "center",
-                height: 150,
-                border: "1px solid lightgrey",
-                mb: 2,
+                justifyContent: "center",
+                marginBottom: "3px",
+                height: "100%",
               }}
             >
-              <ImageIcon sx={{ fontSize: 80, color: "lightgrey" }} />
-            </Box>
-
+              <Typography
+                variant="h4"
+                sx={{
+                  marginBottom: "0",
+                  fontSize: 90,
+                  color: "#213635",
+                  fontWeight: "bold",
+                }}
+              >
+                PDV 1
+              </Typography>
+            </div>
             <TextField
               fullWidth
               label="Descrição"
@@ -613,13 +639,17 @@ const VendasPDV = () => {
             />
             <TextField
               fullWidth
-              label="Quantidade"
-              type="number"
-              value={quantidade}
-              onChange={(e) => setQuantidade(Number(e.target.value))}
-              variant="outlined"
-              sx={{ mb: 2 }}
+              label="Unidade"
+              type="text"
+              value={
+                produtoSelecionado ? produtoSelecionado.unidade_medida : ""
+              }
+              onChange={(e) => setPrecoUnidade(Number(e.target.value))}
+              variant="filled"
+              InputProps={{ readOnly: true }}
+              sx={{ mb: 2, cursor: "pointer" }}
             />
+
             <TextField
               fullWidth
               label="Preço Unidade"
@@ -630,6 +660,7 @@ const VendasPDV = () => {
               InputProps={{ readOnly: true }}
               sx={{ mb: 2, cursor: "pointer" }}
             />
+
             <Typography
               variant="h4"
               align="center"
@@ -647,6 +678,7 @@ const VendasPDV = () => {
           </Button> */}
           </Paper>
         </Box>
+      </div>
       {/* Dialog de Finalização de Venda */}
       <Dialog
         open={openDialog}
@@ -693,6 +725,60 @@ const VendasPDV = () => {
           </Button>
           <Button onClick={handleIncluirVenda} color="primary">
             Incluir
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={openDialogCancelamento}
+        onClose={() => setOpenDialogCancelamento(false)}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>Cancelar Venda</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            Você tem certeza que deseja cancelar esta venda? Esta ação não pode
+            ser desfeita.
+          </Typography>
+          <TextField
+            fullWidth
+            label="Observação (opcional)"
+            value={observacaoCancelamento}
+            onChange={(e) => setObservacaoCancelamento(e.target.value)}
+            margin="normal"
+            multiline
+            rows={3}
+          />
+          <TextField
+            fullWidth
+            label="Valor Total"
+            type="number"
+            value={valorTotal.toFixed(2)}
+            InputProps={{ readOnly: true }}
+            margin="normal"
+          />
+          <TextField
+            fullWidth
+            label="Desconto Aplicado"
+            type="number"
+            value={desconto.toFixed(2)}
+            InputProps={{ readOnly: true }}
+            margin="normal"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setOpenDialogCancelamento(false)}
+            color="secondary"
+          >
+            Voltar
+          </Button>
+          <Button
+            onClick={handleConfirmarCancelamento}
+            color="error"
+            variant="contained"
+          >
+            Confirmar Cancelamento
           </Button>
         </DialogActions>
       </Dialog>
