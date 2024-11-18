@@ -26,23 +26,19 @@ import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import DiscountIcon from "@mui/icons-material/Discount";
+import { useBlocker } from "../../hooks/useBlocker"; // Assumindo que o hook está nesse caminho
+import {
+  useNavigate,
+} from "react-router-dom";
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas
 const urlVendasCanceladas = "http://localhost:5000/vendasCanceladas"; // API de vendas canceladas
 
 const VendasPDV = () => {
+  const [vendaEmAberto, setVendaEmAberto] = useState(false);
+  const navigate = useNavigate();
   const [produtos, setProdutos] = useState([]);
-  const [produtosVenda, setProdutosVenda] = useState(() => {
-    // Carrega os produtos da venda do localStorage, se existir
-    const savedProdutos = localStorage.getItem("produtosVenda");
-    return savedProdutos ? JSON.parse(savedProdutos) : [];
-  });
-
-  useEffect(() => {
-    // Sempre que produtosVenda mudar, atualiza o localStorage
-    localStorage.setItem("produtosVenda", JSON.stringify(produtosVenda));
-  }, [produtosVenda]); // A dependência é o estado de produtosVenda
   const [produtoDetalhado, setProdutoDetalhado] = useState(null);
   const [quantidade, setQuantidade] = useState(1);
   const [precoUnidade, setPrecoUnidade] = useState(0);
@@ -57,19 +53,59 @@ const VendasPDV = () => {
   const [porcentagemTemp, setPorcentagemTemp] = useState(0); // Estado temporário para armazenar a porcentagem de desconto
   const [openDialogCancelamento, setOpenDialogCancelamento] = useState(false);
   const [observacaoCancelamento, setObservacaoCancelamento] = useState("");
-
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
+  const [produtoSelecionado, setProdutoSelecionado] = useState("");
+  const [produtosVenda, setProdutosVenda] = useState(() => {
+    // Carrega os produtos da venda do localStorage, se existir
+    const savedProdutos = localStorage.getItem("produtosVenda");
+    return savedProdutos ? JSON.parse(savedProdutos) : [];
   });
+
+const temVendaEmAndamento = () => produtosVenda.length > 0;
+useBlocker(
+  ({ retry }) => {
+    if (window.confirm("Há uma venda em andamento. Deseja sair e cancelar esta venda?")) {
+      localStorage.removeItem("produtosVeda"); // Limpa a venda se o usuário confirmar
+      retry(); // Permite a navegação
+    }
+  },
+  temVendaEmAndamento() // Bloqueia se há produtos na venda
+);
+
+useEffect(() => {
+  const handleBeforeUnload = (e) => {
+    if (temVendaEmAndamento()) {
+      e.preventDefault();
+      e.returnValue = ""; // Necessário para mostrar o alerta no navegador
+    }
+  };
+
+  window.addEventListener("beforeunload", handleBeforeUnload);
+
+  return () => {
+    window.removeEventListener("beforeunload", handleBeforeUnload);
+  };
+}, [produtosVenda]);
+
+const [snackbar, setSnackbar] = useState({
+  open: false,
+  message: "",
+  severity: "success",
+});
+
+useEffect(() => {
+  const produtosVenda =
+    JSON.parse(localStorage.getItem("produtosVenda")) || [];
+  setVendaEmAberto(produtosVenda.length > 0);
+}, []);
+
   const openSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
+
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
-  const [produtoSelecionado, setProdutoSelecionado] = useState("");
+
   useEffect(() => {
     const total = produtosVenda.reduce((sum, item) => {
       // Só inclui no total os produtos que não foram cancelados
@@ -83,16 +119,45 @@ const VendasPDV = () => {
     localStorage.setItem("produtosVenda", JSON.stringify(produtosVenda));
   }, [produtosVenda, desconto]);
 
+  useEffect(() => {
+    // Sempre que produtosVenda mudar, atualiza o localStorage
+    localStorage.setItem("produtosVenda", JSON.stringify(produtosVenda));
+  }, [produtosVenda]); // A dependência é o estado de produtosVenda
+
+  useEffect(() => {
+    const produtosVenda =
+      JSON.parse(localStorage.getItem("produtosVenda")) || [];
+    setVendaEmAberto(produtosVenda.length > 0);
+  }, []);
+
+  // Bloqueia a navegação
+  useEffect(() => {
+    // Previne a navegação ao sair da página
+    const handleBeforeUnload = (event) => {
+      if (vendaEmAberto) {
+        const confirmationMessage =
+          "Você tem uma venda em aberto. Deseja mesmo sair? Todas as alterações podem ser perdidas.";
+        event.returnValue = confirmationMessage; // Padrão para navegadores modernos
+        return confirmationMessage; // Para alguns navegadores mais antigos
+      }
+    };
+
+    // Registra o evento antes de sair
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    // Cleanup (desregistra o evento)
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [vendaEmAberto]);
+
   const handleValorDescontoChange = (e) => {
     // Captura o valor inserido no campo, usando vírgula como separador decimal
     let value = e.target.value;
-
     // Substitui a vírgula por ponto para facilitar a conversão para float
     value = value.replace(",", ".");
-
     // Remove caracteres não numéricos, exceto ponto
     value = value.replace(/[^0-9.]/g, "");
-
     // Verifica se há mais de uma casa decimal e limita a 2 casas decimais
     if (value.indexOf(".") !== -1) {
       const parts = value.split(".");
@@ -100,18 +165,14 @@ const VendasPDV = () => {
         value = `${parts[0]}.${parts[1].slice(0, 2)}`;
       }
     }
-
     // Converte o valor para float, garantindo que não seja NaN
     const floatValue = parseFloat(value) || 0;
-
     // Limita o valor a um mínimo de 0
     const limitedValue = Math.max(0, floatValue);
-
     // Validação: desconto não pode ser maior que o total
     const totalSemDesconto = produtosVenda.reduce((sum, item) => {
       return sum + item.preco_venda * item.quantidade;
     }, 0);
-
     if (limitedValue >= totalSemDesconto) {
       openSnackbar(
         "O desconto não pode ser maior que o total da venda.",
@@ -119,27 +180,21 @@ const VendasPDV = () => {
       );
       return;
     }
-
     // Atualiza o estado com o valor do desconto e a porcentagem
     setDescontoTemp(limitedValue);
     setPorcentagemTemp(((limitedValue / totalSemDesconto) * 100).toFixed(2));
   };
 
-  // Atualizar o valor de desconto quando a porcentagem for alterada
   const handlePorcentagemDescontoChange = (e) => {
     const value = parseFloat(e.target.value) || 0;
-
     // Limita a entrada a dois dígitos
     const limitedValue = Math.min(99, Math.max(0, value));
     setPorcentagemTemp(limitedValue);
-
     // Calcula o valor de desconto com base na porcentagem
     const totalSemDesconto = produtosVenda.reduce((sum, item) => {
       return sum + item.preco_venda * item.quantidade;
     }, 0);
-
     const descontoCalculado = (limitedValue / 100) * totalSemDesconto;
-
     if (descontoCalculado > totalSemDesconto) {
       if (descontoTemp > totalSemDesconto) {
         openSnackbar(
@@ -150,7 +205,6 @@ const VendasPDV = () => {
       }
       return;
     }
-
     setDescontoTemp(descontoCalculado.toFixed(2));
   };
 
@@ -158,9 +212,9 @@ const VendasPDV = () => {
     const totalSemDesconto = produtosVenda.reduce((sum, item) => {
       return sum + item.preco_venda * item.quantidade;
     }, 0);
-  
+
     const descontoValidado = parseFloat(descontoTemp) || 0;
-  
+
     if (descontoValidado >= totalSemDesconto) {
       openSnackbar(
         "O desconto não pode ser maior que o total da venda.",
@@ -171,7 +225,6 @@ const VendasPDV = () => {
       setOpenDescontoDialog(false);
     }
   };
-  
 
   const handleAplicarDesconto = () => {
     setOpenDescontoDialog(true);
@@ -300,6 +353,7 @@ const VendasPDV = () => {
         setDesconto(0);
         setObservacao("");
         setValorTotal(0);
+        localStorage.removeItem("produtosVenda");
         setOpenDialog(false); // Fecha o diálogo de finalização de venda
 
         // Limpa o localStorage após a venda
@@ -317,80 +371,82 @@ const VendasPDV = () => {
   const handleConfirmarCancelamento = async () => {
     try {
       if (Number(valorTotal) === 0) {
-        openSnackbar("Não é possível cancelar uma venda com valor total igual a zero.", "warning");
+        openSnackbar(
+          "Não é possível cancelar uma venda com valor total igual a zero.",
+          "warning"
+        );
         return;
-    }
-        const venda_cancelada = {
-            valor_total: Number(valorTotal || 0).toFixed(2), // Certifica que é um número com 2 casas decimais
-            metodo_pagamento: tipoPagamento || "Não Selecionado", // Tipo de pagamento
-            desconto: Number(desconto || 0).toFixed(4), // Certifica que é um número com 2 casas decimais
-            obs_vendas_canceladas: observacao || "Venda Cancelada PDV", // Observação
-            id_cliente: 1 || null, // ID do cliente
-            id_usuario: 1 || null, // ID do usuário
-        };
+      }
+      const venda_cancelada = {
+        valor_total: Number(valorTotal || 0).toFixed(2), // Certifica que é um número com 2 casas decimais
+        metodo_pagamento: tipoPagamento || "Não Selecionado", // Tipo de pagamento
+        desconto: Number(desconto || 0).toFixed(4), // Certifica que é um número com 2 casas decimais
+        obs_vendas_canceladas: observacao || "Venda Cancelada PDV", // Observação
+        id_cliente: 1 || null, // ID do cliente
+        id_usuario: 1 || null, // ID do usuário
+      };
 
-        const res = await fetch(urlVendasCanceladas, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                venda_cancelada: venda_cancelada,
-                produtos: produtosVenda,
-            }),
-        });
+      const res = await fetch(urlVendasCanceladas, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          venda_cancelada: venda_cancelada,
+          produtos: produtosVenda,
+        }),
+      });
 
-        const data = await res.json(); // Captura a resposta da API
+      const data = await res.json(); // Captura a resposta da API
 
-        if (res.ok) {
-            console.log(data.message); // Mensagem de sucesso
-            openSnackbar("Venda cancelada com sucesso!", "info");
-            setProdutosVenda([]);
-            setDesconto(0);
-            setObservacaoCancelamento("");
-            setValorTotal(0);
-            setOpenDialogCancelamento(false); // Fecha o diálogo de finalização de venda
-            localStorage.removeItem("produtosVenda"); // Limpa o localStorage após a venda
-        } else {
-            console.error("Erro ao finalizar venda:", data.message);
-            openSnackbar("Erro ao cancelar venda.", "error");
-        }
+      if (res.ok) {
+        console.log(data.message); // Mensagem de sucesso
+        openSnackbar("Venda cancelada com sucesso!", "info");
+        setProdutosVenda([]);
+        setDesconto(0);
+        setObservacaoCancelamento("");
+        setValorTotal(0);
+        setOpenDialogCancelamento(false); // Fecha o diálogo de finalização de venda
+        localStorage.removeItem("produtosVenda"); // Limpa o localStorage após a venda
+      } else {
+        console.error("Erro ao finalizar venda:", data.message);
+        openSnackbar("Erro ao cancelar venda.", "error");
+      }
     } catch (error) {
-        console.error("Erro ao finalizar venda:", error);
-        openSnackbar("Erro ao finalizar venda.", "error");
+      console.error("Erro ao finalizar venda:", error);
+      openSnackbar("Erro ao finalizar venda.", "error");
     }
-};
+  };
 
-
-  const columns = [
-    { field: "nome_produto", headerName: "Descrição", flex: 2 },
-    {
-      field: "status",
-      headerName: "Status",
-      flex: 1,
-      renderCell: (params) =>
-        params.value === "OK" ? (
-          <CheckCircleIcon color="success" />
-        ) : (
-          <CancelIcon color="error" />
-        ),
-    },
-    { field: "codigo_interno", headerName: "Código", flex: 1.5 },
-    { field: "unidade_medida", headerName: "Unidade", flex: 1.5 },
-    { field: "preco_venda", headerName: "Preço", flex: 1 },
-    { field: "quantidade", headerName: "Quantidade", flex: 1 },
-    {
-      field: "actions",
-      headerName: "Ações",
-      flex: 1.8,
-      renderCell: (params) => (
-        <Button
-          color="error"
-          onClick={() => handleCancelarProduto(params.row.id_produto)}
-        >
-          Cancelar
-        </Button>
-      ),
-    },
-  ];
+  // const columns = [
+  //   { field: "nome_produto", headerName: "Descrição", flex: 8 },
+  //   {
+  //     field: "status",
+  //     headerName: "Status",
+  //     flex: 1,
+  //     renderCell: (params) =>
+  //       params.value === "OK" ? (
+  //         <CheckCircleIcon color="success" />
+  //       ) : (
+  //         <CancelIcon color="error" />
+  //       ),
+  //   },
+  //   { field: "codigo_interno", headerName: "Código", flex: 1.5 },
+  //   { field: "unidade_medida", headerName: "Unidade", flex: 1.5 },
+  //   { field: "preco_venda", headerName: "Preço", flex: 1 },
+  //   { field: "quantidade", headerName: "Quantidade", flex: 1 },
+  //   {
+  //     field: "actions",
+  //     headerName: "Ações",
+  //     flex: 1.8,
+  //     renderCell: (params) => (
+  //       <Button
+  //         color="error"
+  //         onClick={() => handleCancelarProduto(params.row.id_produto)}
+  //       >
+  //         Cancelar
+  //       </Button>
+  //     ),
+  //   },
+  // ];
 
   return (
     <>
@@ -399,36 +455,66 @@ const VendasPDV = () => {
         style={{
           display: "flex",
           justifyContent: "center",
-          height: "calc(100vh - 65px)",
+          minHeight: "calc(100vh - 65px)",
         }}
       >
         <Box
           sx={{
+            p: 3,
             display: "flex",
             gap: 2,
-            flexWrap: "wrap",
             justifyContent: "center",
             alignItems: "center",
             width: "100vw",
+            "@media (max-width: 700px)": {
+              flexWrap: "wrap",
+            },
           }}
         >
           <Paper
             elevation={1}
             sx={{
               p: 1,
-              width: "100%",
-              height: "700px",
-              minWidth: 350, // Define largura mínima para evitar problemas em telas menores
-              maxWidth: 1200,
+              width: "70%",
+              maxHeight: "75vh",
+              minHeight: 720,
+              minWidth: 350,
               borderRadius: "12px",
+              "@media (max-width: 700px)": {
+                maxHeight: "90vh",
+                maxHeight: "100%",
+              },
             }}
           >
+            <Typography
+              variant="h4"
+              sx={{
+                marginBottom: "0",
+                fontSize: 40,
+                color: "#213635",
+                fontWeight: "bold",
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: "3px",
+                height: "100%",
+                "@media (min-width: 700px)": {
+                  display: "none",
+                },
+              }}
+            >
+              PDV 1
+            </Typography>
             <Container
               maxWidth="lg"
               sx={{
+                display: "flex",
+                flexDirection: "column",
                 padding: 2,
                 justifyContent: "space-around",
                 height: "100%",
+                gap: 1,
               }}
             >
               <Box sx={{ display: "flex", gap: 2 }}>
@@ -454,7 +540,13 @@ const VendasPDV = () => {
                       handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
                     }
                   }}
-                  sx={{ flex: 5, mb: 2 }}
+                  sx={{
+                    flex: 5,
+                    mb: 2,
+                    "@media (max-width: 700px)": {
+                      flex: 3,
+                    },
+                  }}
                   renderInput={(params) => (
                     <TextField {...params} label="Pesquisar" />
                   )}
@@ -478,14 +570,50 @@ const VendasPDV = () => {
               <Box
                 sx={{
                   width: "100%",
-                  height: "80%",
                   backgroundColor: "#F2F2F2",
                   borderRadius: "12px",
+                  "& .MuiDataGrid-cell:hover": {
+                    color: "primary.main",
+                  },
                 }}
               >
                 <DataGrid
                   rows={produtosVenda}
-                  columns={columns}
+                  columns={[
+                    { field: "nome_produto", headerName: "Descrição", flex: 6 },
+                    { field: "status", headerName: "Status", flex: 2.5 },
+                    {
+                      field: "codigo_interno",
+                      headerName: "Código",
+                      flex: 2,
+                    },
+                    {
+                      field: "unidade_medida",
+                      headerName: "Unidade",
+                      flex: 2,
+                    },
+                    { field: "preco_venda", headerName: "Preço", flex: 1.5 },
+                    {
+                      field: "quantidade",
+                      headerName: "Quantidade",
+                      flex: 2.3,
+                    },
+                    {
+                      field: "actions",
+                      headerName: "Ações",
+                      flex: 2.7,
+                      renderCell: (params) => (
+                        <Button
+                          color="error"
+                          onClick={() =>
+                            handleCancelarProduto(params.row.id_produto)
+                          }
+                        >
+                          Cancelar
+                        </Button>
+                      ),
+                    },
+                  ]}
                   disableSelectionOnClick
                   getRowId={(row) => row.id_produto}
                   pageSize={5}
@@ -493,11 +621,41 @@ const VendasPDV = () => {
                   sx={{
                     boxShadow: 0,
                     width: "100%",
-                    height: "100%",
+                    height: 540,
                     border: 0,
-                    borderColor: "primary.light",
                     "& .MuiDataGrid-cell:hover": {
                       color: "primary.main",
+                    },
+                    "@media (max-width: 700px)": {
+                      height: 400,
+                      // Ajustes para telas pequenas
+                      "& .MuiDataGrid-columnHeader": {
+                        fontSize: "13px", // Ajusta o tamanho da fonte do cabeçalho
+                      },
+                      "& .MuiDataGrid-cell": {
+                        fontSize: "13px", // Ajusta o tamanho da fonte das células
+                      },
+                      // Ajuste de tamanho de coluna para o cabeçalho e as células
+                      "& .MuiDataGrid-columnHeader:nth-child(2), & .MuiDataGrid-cell:nth-child(2)":
+                        {
+                          flex: 1, // Descrição
+                          minWidth: 150,
+                        },
+                      "& .MuiDataGrid-columnHeader:nth-child(7), & .MuiDataGrid-cell:nth-child(7)":
+                        {
+                          flex: 3, // Quantidade
+                          minWidth: 85,
+                        },
+                      "& .MuiDataGrid-columnHeader:nth-child(8), & .MuiDataGrid-cell:nth-child(8)":
+                        {
+                          flex: 1, // Ações
+                          minWidth: 118,
+                        },
+                      // Oculta as colunas 3-6 tanto no cabeçalho quanto nas células
+                      "& .MuiDataGrid-columnHeader:nth-child(n+3):not(:nth-child(7)):not(:nth-child(8)), & .MuiDataGrid-cell:nth-child(n+3):not(:nth-child(7)):not(:nth-child(8))":
+                        {
+                          display: "none", // Oculta cabeçalhos e células a partir da 3ª coluna (exceto as 7ª e 8ª)
+                        },
                     },
                   }}
                 />
@@ -505,18 +663,47 @@ const VendasPDV = () => {
               <Box
                 sx={{
                   display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "end",
+                  flexDirection: "column",
                   height: "10%",
+                  width: "100%",
                 }}
               >
-                <div className="fistButtom">
+                <Typography
+                  variant="h4"
+                  align="center"
+                  sx={{
+                    backgroundColor: "#f1f1f1",
+                    p: 2,
+                    borderRadius: 2,
+                    "@media (min-width: 700px)": {
+                      display: "none",
+                    },
+                  }}
+                >
+                  R$ {valorTotal.toFixed(2)}
+                </Typography>
+                <Box
+                  sx={{
+                    display: "flex",
+                    gap: 1,
+                    p: 0.5,
+                    "@media (max-width: 700px)": {
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                    },
+                  }}
+                >
                   <Button
                     variant="contained"
                     color="primary"
-                    sx={{ mr: 1 }}
                     startIcon={<DiscountIcon />}
                     onClick={handleAplicarDesconto}
+                    sx={{
+                      "@media (max-width: 700px)": {
+                        width: "100%",
+                      },
+                    }}
                   >
                     Desconto
                   </Button>
@@ -525,18 +712,29 @@ const VendasPDV = () => {
                     color="error"
                     startIcon={<CancelIcon />}
                     onClick={() => setOpenDialogCancelamento(true)}
+                    sx={{
+                      "@media (max-width: 700px)": {
+                        width: "100%",
+                      },
+                    }}
                   >
                     Cancelar Venda
                   </Button>
-                </div>
-                <Button
-                  variant="contained"
-                  color="success"
-                  startIcon={<ShoppingCartCheckoutIcon />}
-                  onClick={handleFinalizarVenda}
-                >
-                  Finalizar Venda
-                </Button>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<ShoppingCartCheckoutIcon />}
+                    onClick={handleFinalizarVenda}
+                    sx={{
+                      marginLeft: "auto",
+                      "@media (max-width: 700px)": {
+                        width: "100%",
+                      },
+                    }}
+                  >
+                    Finalizar Venda
+                  </Button>
+                </Box>
               </Box>
             </Container>
           </Paper>
@@ -544,14 +742,18 @@ const VendasPDV = () => {
           <Paper
             elevation={1}
             sx={{
-              p: 2,
+              p: 2.5,
               borderRadius: "12px",
-              height: "700px",
-              width: "400px",
+              height: "75vh",
+              minHeight: 720,
+              width: "35%",
               display: "flex",
               flexDirection: "column",
               justifyContent: "end",
               gap: 1.5,
+              "@media (max-width: 700px)": {
+                display: "none",
+              },
             }}
           >
             {/* <Typography variant="h6"></Typography> */}
