@@ -8,13 +8,12 @@ import {
   Menu,
   MenuItem,
   Container,
-  Avatar,
   Button,
   Tooltip,
   Alert,
   Snackbar,
 } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Menu as MenuIcon,
   Notifications as NotificationsIcon,
@@ -24,46 +23,31 @@ import {
   Person as UserIcon,
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { logout } from "../../hooks/authSlice";
-
-// Importa o logo diretamente
 import logoExample from "/src/assets/icons/logoExample.png";
-
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
+
   const openSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
+  
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
-  };
   const handleLogout = () => {
-    if (localStorage.produtosVenda.length > 2) {
-      openSnackbar("Finalize ou cancele a venda antes de sair!.", "error")
+    if (localStorage.produtosVenda && localStorage.produtosVenda.length > 2) {
+      openSnackbar("Finalize ou cancele a venda antes de sair!", "error");
     } else {
       localStorage.clear();
       dispatch(logout()); // Reseta o estado de autenticação
@@ -71,17 +55,27 @@ const ResponsiveAppBar = () => {
     }
   };
 
+  const handleNavClick = (to) => {
+    // Verifica se há uma venda em andamento antes de permitir navegação
+    if (localStorage.produtosVenda && localStorage.produtosVenda.length > 2) {
+      openSnackbar("Finalize ou cancele a venda antes de sair!", "error");
+    } else {
+      navigate(to);
+    }
+  };
+
   return (
-    <AppBar position="static" sx={{ backgroundColor: "#213635"}}>
-      <Container maxWidth="xl" >
+    <AppBar position="static" sx={{ backgroundColor: "#213635" }}>
+      <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <Link to="/dashboard" style={{ textDecoration: "none", color: "inherit" }}>
+          <Box style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }} onClick={() => handleNavClick("/dashboard")}>
             <img
               src={logoExample}
               alt="logo"
               style={{ height: 40, marginRight: "1rem" }}
+              
             />
-          </Link>
+          </Box>
 
           {/* Menu para navegação */}
           <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -90,7 +84,7 @@ const ResponsiveAppBar = () => {
               aria-label="account of current user"
               aria-controls="menu-appbar"
               aria-haspopup="true"
-              onClick={handleOpenNavMenu}
+              onClick={() => setAnchorElNav(event.currentTarget)}
               color="inherit"
             >
               <MenuIcon />
@@ -108,24 +102,21 @@ const ResponsiveAppBar = () => {
                 horizontal: "left",
               }}
               open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: "block", md: "none" },
-              }}
+              onClose={() => setAnchorElNav(null)}
             >
-              <MenuItem onClick={() => { navigate("/clientes");}}>
+              <MenuItem onClick={() => handleNavClick("/clientes")}>
                 <Typography textAlign="center">Clientes</Typography>
               </MenuItem>
-              <MenuItem onClick={() => { navigate("/produtos");}}>
+              <MenuItem onClick={() => handleNavClick("/produtos")}>
                 <Typography textAlign="center">Produtos</Typography>
               </MenuItem>
-              <MenuItem onClick={() => { navigate("/estoques");}}>
+              <MenuItem onClick={() => handleNavClick("/estoques")}>
                 <Typography textAlign="center">Estoques</Typography>
               </MenuItem>
-              <MenuItem onClick={() => { navigate("/vendas");}}>
+              <MenuItem onClick={() => handleNavClick("/vendas")}>
                 <Typography textAlign="center">Vendas</Typography>
               </MenuItem>
-              <MenuItem onClick={() => { navigate("/relatorios");}}>
+              <MenuItem onClick={() => handleNavClick("/relatorios")}>
                 <Typography textAlign="center">Relatórios</Typography>
               </MenuItem>
             </Menu>
@@ -133,39 +124,19 @@ const ResponsiveAppBar = () => {
 
           {/* Links de navegação na tela grande */}
           <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/clientes"
-            >
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/clientes")}>
               Clientes
             </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/produtos"
-            >
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/produtos")}>
               Produtos
             </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/estoques"
-            >
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/estoques")}>
               Estoques
             </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/vendas"
-            >
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/vendas")}>
               Vendas
             </Button>
-            <Button
-              sx={{ my: 2, color: "white", display: "block" }}
-              component={Link}
-              to="/relatorios"
-            >
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/relatorios")}>
               Relatórios
             </Button>
           </Box>
@@ -179,7 +150,7 @@ const ResponsiveAppBar = () => {
               <UserIcon />
             </IconButton>
             <Tooltip title="Configurações">
-              <IconButton onClick={handleOpenUserMenu} color="inherit">
+              <IconButton onClick={() => setAnchorElUser(event.currentTarget)} color="inherit">
                 <SettingsIcon />
               </IconButton>
             </Tooltip>
@@ -193,45 +164,18 @@ const ResponsiveAppBar = () => {
                 <LogoutIcon />
               </IconButton>
             </Tooltip>
-
-            {/* Menu de Configurações */}
-            <Menu
-              sx={{ mt: "45px" }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography textAlign="center">Perfil</Typography>
-              </MenuItem>
-              <MenuItem onClick={handleCloseUserMenu}>
-                <Typography textAlign="center">Configurações</Typography>
-              </MenuItem>
-            </Menu>
           </Box>
         </Toolbar>
       </Container>
+
+      {/* Snackbar para mostrar mensagens de erro */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
         onClose={closeSnackbar}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
-        <Alert
-          onClose={closeSnackbar}
-          severity={snackbar.severity}
-          sx={{ width: "100%" }}
-        >
+        <Alert onClose={closeSnackbar} severity={snackbar.severity} sx={{ width: "100%" }}>
           {snackbar.message}
         </Alert>
       </Snackbar>
