@@ -16,6 +16,7 @@ import VendasPDV from "./pages/Vendas/VendasPDV.jsx";
 import RelatoriosPage from "./pages/Relatorios/RelatoriosPage.jsx";
 import DashboardPage from "./pages/Dashboard/DashboardPage.jsx";
 import ResponsiveAppBar from "./components/Navbar/ResponsiveAppBar.jsx";
+import Teste from "./pages/Teste/Teste.jsx";
 
 // Componente para rotas protegidas
 const PrivateRoute = ({ children }) => {
@@ -29,6 +30,7 @@ const RoutesPage = () => {
       <ResponsiveAppBar /> {/* Navbar exibida em todas as rotas */}
       <Routes>
         {/* Rotas públicas */}
+        <Route path="/teste" element={<Teste />} />
         <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/cadastro" element={<RegistrationForm />} />
