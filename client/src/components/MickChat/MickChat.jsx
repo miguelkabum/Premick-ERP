@@ -59,11 +59,12 @@ const MickChat = () => {
             <Dialog
                 open={open}
                 onClose={handleClose}
-                scroll="paper"
-                aria-labelledby="scroll-dialog-title"
-                aria-describedby="scroll-dialog-description"
+                // scroll="paper"
+                // aria-labelledby="scroll-dialog-title"
+                // aria-describedby="scroll-dialog-description"
                 sx={{
                     '& .MuiDialog-paper': {
+                        height: "80%",
                         width: "600px",
                         minWidth: '300px', // Ajuste aqui o valor desejado
                         maxWidth: '90%'
@@ -71,7 +72,6 @@ const MickChat = () => {
                 }}
             >
                 <DialogTitle id="scroll-dialog-title" style={{ display: "flex", alignItems: "center" }}>
-                    {/* Imagem Perfil, Mick.ai */}
                     <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "40px", width: "40px", borderRadius: "20px", marginRight: "10px" }} />
                     Mick
                     <IconButton
@@ -87,8 +87,9 @@ const MickChat = () => {
                         <CloseIcon />
                     </IconButton>
                 </DialogTitle>
-                <DialogContent dividers>
-                    {/* <DialogContentText
+                <PersistentDrawerLeft />
+                {/* <DialogContent dividers>
+                    <DialogContentText
                         id="scroll-dialog-description"
                         ref={descriptionElementRef}
                         tabIndex={-1}
@@ -121,7 +122,7 @@ const MickChat = () => {
                         <div style={{ display: "flex", justifyContent: "flex-start"}}>
                             <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
                         </div>
-                    </DialogContentText> */}
+                    </DialogContentText>
                     <Box sx={{
                             display: 'flex',
                             flexDirection: 'column',
@@ -129,9 +130,8 @@ const MickChat = () => {
                             overflow: 'hidden', // Impede o overflow do conteúdo
                         }}
                     >
-                        <PersistentDrawerLeft />
                     </Box>
-                </DialogContent>
+                </DialogContent> */}
                 <DialogActions>
                     <TextField id="outlined-basic" label="Mensagem" variant="outlined" sx={{ width: "100%" }} />
                     <Button onClick={handleClose} sx={{ width: "56px", height: "56px" }}> <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} /> </Button>

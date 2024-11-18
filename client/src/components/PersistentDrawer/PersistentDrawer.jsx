@@ -57,23 +57,23 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 
 export default function PersistentDrawerLeft() {
     const theme = useTheme();
-    const [open, setOpen] = React.useState(false);
+    const [openDrawer, setOpenDrawer] = React.useState(false);
 
-    const handleDrawerOpen = () => setOpen(true);
-    const handleDrawerClose = () => setOpen(false);
+    const handleDrawerOpen = () => setOpenDrawer(true);
+    const handleDrawerClose = () => setOpenDrawer(false);
 
     return (
         <Box sx={{ display: 'flex', height: '100%' }}>
-            <AppBar position="static" open={open}>
+            <AppBar position="static" open={openDrawer}>
                 <Toolbar>
                     <IconButton
                         color="inherit"
                         aria-label="open drawer"
                         onClick={handleDrawerOpen}
                         edge="start"
-                        sx={{ ...(open && { display: 'none' }) }}
+                        sx={{ ...(openDrawer && { display: 'none' }) }}
                     >
-                        <MenuIcon />
+                        {/* <MenuIcon /> */}
                     </IconButton>
                     <Typography variant="h6" noWrap>
                         Drawer in Dialog
@@ -95,7 +95,7 @@ export default function PersistentDrawerLeft() {
             <Drawer
                 variant="persistent"
                 anchor="left"
-                open={open} // Controlado pelo estado
+                open={openDrawer} // Controlado pelo estado
                 sx={{
                     '& .MuiDrawer-paper': {
                         width: 200, // Ajuste do tamanho do Drawer
@@ -120,12 +120,6 @@ export default function PersistentDrawerLeft() {
                     ))}
                 </List>
             </Drawer>
-            <Main open={open}>
-                <DrawerHeader />
-                <Typography paragraph>
-                    Content inside Dialog
-                </Typography>
-            </Main>
         </Box>
     );
 }
