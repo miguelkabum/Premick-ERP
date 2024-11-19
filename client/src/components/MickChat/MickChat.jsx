@@ -52,7 +52,7 @@ const MickChat = () => {
     const [conversas, setConversas] = useState([]);
     const [mensagens, setMensagens] = useState([]);
 
-    const [openDrawer, setOpenDrawer] = useState(false);
+    const [openDrawer, setOpenDrawer] = useState(true);
     const theme = useTheme();
     const handleDrawerOpen = () => setOpenDrawer(true);
     const handleDrawerClose = () => setOpenDrawer(false);
@@ -87,9 +87,9 @@ const MickChat = () => {
         }
     };
 
-    useEffect(() => {
-        fetchConversas();
-    }, []);
+    // useEffect(() => {
+    //     fetchConversas();
+    // }, []);
 
     const fetchMensagens = async (id_conversa) => {
         try {
@@ -105,7 +105,10 @@ const MickChat = () => {
     return (
         <Fragment>
             <Box sx={{ '& > :not(style)': { m: 1 } }}>
-                <Fab onClick={handleClickOpen} /*size="small" || "medium"*/ color="secondary" aria-label="add">
+                <Fab onClick={() => {
+                    handleClickOpen();
+                    fetchConversas();
+                }} size="large" color="secondary" aria-label="add">
                     <AddIcon />
                 </Fab>
             </Box>
