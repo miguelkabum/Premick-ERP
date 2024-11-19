@@ -19,6 +19,9 @@ const estoqueSaidaRouter = require('./src/routes/estoqueSaida');
 const vendasCanceladasRouter = require('./src/routes/vendasCanceladas');
 const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
 
+const conversasRouter = require('./src/routes/conversas');
+const mensagensRouter = require('./src/routes/mensagens');
+
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
@@ -45,6 +48,9 @@ app.use('/estoqueSaida', estoqueSaidaRouter);
 
 app.use('/vendasCanceladas', vendasCanceladasRouter);
 app.use('/produtosCancelados', produtosCanceladosRouter);
+
+app.use('/conversas', conversasRouter);
+app.use('/mensagens', mensagensRouter);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {

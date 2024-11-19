@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useRef, useEffect, Fragment } from 'react';
 
 // import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -22,10 +22,42 @@ import LogoPremick from './LogoPremick.webp';
 import MessageLeft from './MessageLeft';
 import MessageRight from './MessageRight';
 
-import PersistentDrawerLeft from '../PersistentDrawer/PersistentDrawer';
+import { styled, useTheme } from '@mui/material/styles';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+
+const drawerWidth = 200;
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-end',
+}));
+
+const urlChats = "http://localhost:5000/conversas";
+const urlMessages = "http://localhost:5000/mensagens";
 
 const MickChat = () => {
-    const [open, setOpen] = React.useState(false);
+    const [conversas, setConversas] = useState([]);
+    const [mensagens, setMensagens] = useState([]);
+
+    const [openDrawer, setOpenDrawer] = useState(false);
+    const theme = useTheme();
+    const handleDrawerOpen = () => setOpenDrawer(true);
+    const handleDrawerClose = () => setOpenDrawer(false);
+
+    const [open, setOpen] = useState(false);
 
     const handleClickOpen = () => {
         setOpen(true);
@@ -35,8 +67,8 @@ const MickChat = () => {
         setOpen(false);
     };
 
-    const descriptionElementRef = React.useRef(null);
-    React.useEffect(() => {
+    const descriptionElementRef = useRef(null);
+    useEffect(() => {
         if (open) {
             const { current: descriptionElement } = descriptionElementRef;
             if (descriptionElement !== null) {
@@ -45,99 +77,154 @@ const MickChat = () => {
         }
     }, [open]);
 
+    const fetchConversas = async () => {
+        try {
+            const res = await fetch(urlChats);
+            const data = await res.json();
+            setConversas(data);
+        } catch (error) {
+            console.error("Erro ao buscar conversas:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchConversas();
+    }, []);
+
+    const fetchMensagens = async (id_conversa) => {
+        try {
+            const res = await fetch(`${urlMessages}?id=${id_conversa}`);
+            const data = await res.json();
+            // console.log(data)
+            setMensagens(data);
+        } catch (error) {
+            console.error("Erro ao buscar mensagens:", error);
+        }
+    };
 
     return (
-        <React.Fragment>
+        <Fragment>
             <Box sx={{ '& > :not(style)': { m: 1 } }}>
                 <Fab onClick={handleClickOpen} /*size="small" || "medium"*/ color="secondary" aria-label="add">
                     <AddIcon />
                 </Fab>
             </Box>
 
-            {/* <Button onClick={handleClickOpen}>Open Dialog</Button> */}
 
             <Dialog
                 open={open}
                 onClose={handleClose}
-                // scroll="paper"
+                scroll="paper"
                 // aria-labelledby="scroll-dialog-title"
                 // aria-describedby="scroll-dialog-description"
                 sx={{
                     '& .MuiDialog-paper': {
                         height: "80%",
                         width: "600px",
-                        minWidth: '300px', // Ajuste aqui o valor desejado
-                        maxWidth: '90%'
+                        minWidth: '300px',
+                        maxWidth: '90%',
+                        position: 'relative',
                     },
                 }}
             >
-                <DialogTitle id="scroll-dialog-title" style={{ display: "flex", alignItems: "center" }}>
-                    <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "40px", width: "40px", borderRadius: "20px", marginRight: "10px" }} />
-                    Mick
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleClose}
-                        sx={(theme) => ({
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: theme.palette.grey[500],
-                        })}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <PersistentDrawerLeft />
-                {/* <DialogContent dividers>
-                    <DialogContentText
-                        id="scroll-dialog-description"
-                        ref={descriptionElementRef}
-                        tabIndex={-1}
-                        style={{display: "flex", flexDirection: "column"}}
-                    >   
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testandoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo pra ver se vai" time="16:33"/>
-                        </div>
+                <Drawer
+                    variant="persistent"
+                    anchor="left"
+                    open={openDrawer} // Controlado pelo estado
+                    sx={{
+                        '& .MuiDrawer-paper': {
+                            width: drawerWidth, // Ajuste do tamanho do Drawer
+                            position: 'absolute', // Relativo ao Dialog
+                        },
+                    }}
+                >
+                    <DrawerHeader>
+                        <IconButton onClick={handleDrawerClose}>
+                            <ChevronLeftIcon />
+                            {/* {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />} */}
+                        </IconButton>
+                    </DrawerHeader>
+                    <Divider />
+                    <List>
+                        {conversas.map((conversa) => (
+                            <ListItem key={conversa.id_conversa} disablePadding>
+                                <ListItemButton onClick={() => { fetchMensagens(conversa.id_conversa) }}>
+                                    {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}
+                                    <ListItemText primary={conversa.titulo} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Drawer>
 
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100%', // Ajusta para ocupar todo o espaço disponível verticalmente
+                        overflow: 'hidden', // Impede que o conteúdo extrapole
+                        transition: theme.transitions.create('transform', {
+                            duration: theme.transitions.duration.short,
+                            easing: theme.transitions.easing.easeInOut,
+                        }),
+                        transform: openDrawer ? `translateX(${drawerWidth}px)` : 'translateX(0)', // , width: "600px", minWidth: "300px", maxWidth: "90%"
+                        width: openDrawer ? `calc(100% - ${drawerWidth}px)` : '100%', // Diminui a largura da Box com o Drawer aberto
+                    }}
+                >
+                    <DialogTitle id="scroll-dialog-title" style={{ display: "flex", alignItems: "center", height: "64px" }}>
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={handleDrawerOpen}
+                            edge="start"
+                            sx={{ ...(openDrawer && { display: 'none' }) }}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "40px", width: "40px", borderRadius: "20px", marginRight: "10px" }} />
+                        Mick
+                        <IconButton
+                            aria-label="close"
+                            onClick={handleClose}
+                            sx={(theme) => ({
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                color: theme.palette.grey[500],
+                            })}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </DialogTitle>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testando pra ver se vai" time="16:33"/>
-                        </div>
+                    <DialogContent dividers>
+                        <DialogContentText
+                            id="scroll-dialog-description"
+                            ref={descriptionElementRef}
+                            tabIndex={-1}
+                            style={{ display: "flex", flexDirection: "column" }}
+                        >
+                            {mensagens.map((mensagem) => (
+                                <div key={mensagem.id_mensagem} style={{ display: "flex", justifyContent: mensagem.tipo_mensagem === "USER" ? "flex-end" : "flex-start", marginBottom: "5px", marginTop: "5px"}}>
+                                    {mensagem.tipo_mensagem === "USER" ? (
+                                        <MessageRight text={mensagem.conteudo} time={mensagem.data_envio} />
+                                    ) : (
+                                        <MessageLeft text={mensagem.conteudo} time={mensagem.data_envio} />
+                                    )}
+                                </div>
+                            ))}
+                        </DialogContentText>
+                    </DialogContent>
 
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
+                    <DialogActions>
+                        <TextField id="outlined-basic" label="Mensagem" variant="outlined" sx={{ width: "100%" }} />
+                        <Button onClick={handleClose} sx={{ width: "56px", height: "56px" }}> <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} /> </Button>
+                    </DialogActions>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testando pra ver se vai" time="16:33"/>
-                        </div>
-
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
-                    </DialogContentText>
-                    <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '400px', // Defina uma altura adequada
-                            overflow: 'hidden', // Impede o overflow do conteúdo
-                        }}
-                    >
-                    </Box>
-                </DialogContent> */}
-                <DialogActions>
-                    <TextField id="outlined-basic" label="Mensagem" variant="outlined" sx={{ width: "100%" }} />
-                    <Button onClick={handleClose} sx={{ width: "56px", height: "56px" }}> <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} /> </Button>
-                </DialogActions>
+                </Box>
             </Dialog>
-        </React.Fragment>
+        </Fragment>
     );
 }
 
