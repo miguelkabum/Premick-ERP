@@ -52,20 +52,15 @@ const MickChat = () => {
     const [conversas, setConversas] = useState([]);
     const [mensagens, setMensagens] = useState([]);
 
-    const [openDrawer, setOpenDrawer] = useState(true);
     const theme = useTheme();
+
+    const [openDrawer, setOpenDrawer] = useState(true);
     const handleDrawerOpen = () => setOpenDrawer(true);
     const handleDrawerClose = () => setOpenDrawer(false);
-
+    
     const [open, setOpen] = useState(false);
-
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const handleClickOpen = () => { setOpen(true); };
+    const handleClose = () => { setOpen(false); };
 
     const descriptionElementRef = useRef(null);
     useEffect(() => {
@@ -79,17 +74,13 @@ const MickChat = () => {
 
     const fetchConversas = async () => {
         try {
-            const res = await fetch(urlChats);
+            const res = await fetch(urlChats); // FALTA Puxar por Usuário
             const data = await res.json();
             setConversas(data);
         } catch (error) {
             console.error("Erro ao buscar conversas:", error);
         }
     };
-
-    // useEffect(() => {
-    //     fetchConversas();
-    // }, []);
 
     const fetchMensagens = async (id_conversa) => {
         try {
@@ -106,10 +97,10 @@ const MickChat = () => {
         <Fragment>
             <Box sx={{ '& > :not(style)': { m: 1 } }}>
                 <Fab onClick={() => {
-                    handleClickOpen();
                     fetchConversas();
+                    handleClickOpen();
                 }} size="large" color="secondary" aria-label="add">
-                    <AddIcon />
+                    <AddIcon />                   {/* Usar AddIcon na criação dos novos Chats */}
                 </Fab>
             </Box>
 
