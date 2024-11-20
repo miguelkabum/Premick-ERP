@@ -15,10 +15,10 @@ import {
   DialogContentText,
   DialogTitle,
   InputAdornment,
-  IconButton,
+  IconButton
 } from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-
 import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 const url = 'http://localhost:5000/usuarios';
@@ -60,7 +60,7 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     const { nome_usuario, email_usuario, senha_usuario, confirmSenha, termsAccepted } = formData;
 
     // Validação dos campos
@@ -88,12 +88,12 @@ const RegistrationForm = () => {
     setAlertaClass(false);
 
     // Enviar dados do usuário
-    const user = { 
-      nome_usuario, 
-      email_usuario, 
-      senha_usuario, 
-      status: 1, 
-      perfil_acesso: 'GERENTE' 
+    const user = {
+      nome_usuario,
+      email_usuario,
+      senha_usuario,
+      status: 1,
+      perfil_acesso: 'GERENTE'
     };
     try {
       const response = await fetch(url, {
@@ -134,16 +134,16 @@ const RegistrationForm = () => {
 
   return (
     <Container
-    maxWidth="sm"
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      flexDirection: "column",
-      alignItems: "center",
-      minHeight: "100vh",
-    }}
+      maxWidth="sm"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
     >
-        <Typography variant="h4" gutterBottom textAlign="center"
+      <Typography variant="h4" gutterBottom textAlign="center"
         sx={{
           marginBottom: "0",
           fontSize: 60,
@@ -151,8 +151,8 @@ const RegistrationForm = () => {
           fontWeight: "bold",
           mb: 5
         }}>
-          Cadastro
-        </Typography>
+        Cadastro
+      </Typography>
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -165,9 +165,9 @@ const RegistrationForm = () => {
         }}
       >
 
-        
+
         {alertaClass && <Alert severity="error" sx={{ mb: 2 }}>{alertaMensagem}</Alert>}
-        
+
         <TextField
           label="Nome completo"
           name="nome_usuario"
@@ -332,7 +332,7 @@ const RegistrationForm = () => {
           type="submit"
           variant="contained"
           fullWidth
-          sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2}}
+          sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2 }}
         >
           Avançar
         </Button>
@@ -351,7 +351,21 @@ const RegistrationForm = () => {
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
       >
-        <DialogTitle id="scroll-dialog-title">Subscribe</DialogTitle>
+        <DialogTitle id="scroll-dialog-title">
+          Termos de Serviço
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={(theme) => ({
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: theme.palette.grey[500],
+            })}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
         <DialogContent dividers={scroll === 'paper'}>
           <DialogContentText
             id="scroll-dialog-description"
@@ -372,10 +386,6 @@ const RegistrationForm = () => {
             Data da última atualização: 04/11/2024
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Subscribe</Button>
-        </DialogActions>
       </Dialog>
     </Container>
   );
