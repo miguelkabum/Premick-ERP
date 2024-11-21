@@ -24,7 +24,8 @@ import {
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { logout } from "../../hooks/authSlice";
-import logoExample from "/src/assets/icons/logoExample.png";
+// import logoExample from "/src/assets/icons/logoExample.png";
+import logoPremick from "/src/assets/icons/logoPremick.png";
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -70,9 +71,9 @@ const ResponsiveAppBar = () => {
         <Toolbar disableGutters>
           <Box style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }} onClick={() => handleNavClick("/dashboard")}>
             <img
-              src={logoExample}
+              src={logoPremick}
               alt="logo"
-              style={{ height: 40, marginRight: "1rem" }}
+              style={{ height: 40, marginRight: "1rem", borderRadius: "5px" }}
               
             />
           </Box>
