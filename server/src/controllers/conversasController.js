@@ -5,7 +5,7 @@ exports.getConversas = (req, res) => {
 
   let query = 'SELECT * FROM conversas'; // É seguro deixar a opção de ver todos os chats?
   if (id) {
-    query += ' WHERE id_usuario = ?'; // Histórico de Chats por Usuário
+    query += ' WHERE id_usuario = ? ORDER BY ultimo_acesso DESC'; // Histórico de Chats por Usuário
   }
 
   db.query(query, [id], (err, results) => {
@@ -25,10 +25,10 @@ exports.createConversa = (req, res) => {
   });
 };
 
-exports.updateConversa = (req, res) => { // FALTA OLHAR OS UPDATES
-  const  id_produto  = req.params.id;
-  const produto = req.body;
-  db.query('UPDATE produtos SET ? WHERE id_produto = ?', [produto, id_produto], (err) => {
+exports.updateConversa = (req, res) => {
+  const id_conversa = req.params.id;
+
+  db.query('UPDATE conversas SET ultimo_acesso = NOW() WHERE id_conversa = ?', [id_conversa], (err) => {
     if (err) return res.status(500).send(err);
     res.sendStatus(204);
   });

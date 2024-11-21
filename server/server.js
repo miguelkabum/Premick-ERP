@@ -22,6 +22,8 @@ const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
 const conversasRouter = require('./src/routes/conversas');
 const mensagensRouter = require('./src/routes/mensagens');
 
+const mickRouter = require('./src/routes/mickAPI');
+
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
@@ -51,6 +53,8 @@ app.use('/produtosCancelados', produtosCanceladosRouter);
 
 app.use('/conversas', conversasRouter);
 app.use('/mensagens', mensagensRouter);
+
+app.use('/api/mick', mickRouter);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {

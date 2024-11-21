@@ -28,10 +28,8 @@ import List from '@mui/material/List';
 import Divider from '@mui/material/Divider';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
-import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 
 const drawerWidth = 200;
@@ -49,6 +47,9 @@ const urlChats = "http://localhost:5000/conversas";
 const urlMessages = "http://localhost:5000/mensagens";
 
 const MickChat = () => {
+    const [idConversa, setIdConversa] = useState(0);
+    const [pergunta, setPergunta] = useState('');
+
     const [conversas, setConversas] = useState([]);
     const [mensagens, setMensagens] = useState([]);
 
@@ -57,7 +58,7 @@ const MickChat = () => {
     const [openDrawer, setOpenDrawer] = useState(true);
     const handleDrawerOpen = () => setOpenDrawer(true);
     const handleDrawerClose = () => setOpenDrawer(false);
-    
+
     const [open, setOpen] = useState(false);
     const handleClickOpen = () => { setOpen(true); };
     const handleClose = () => { setOpen(false); };
@@ -73,8 +74,10 @@ const MickChat = () => {
     }, [open]);
 
     const fetchConversas = async () => {
+        const id_usuario = 2;              // FALTA Puxar por Usuário
+
         try {
-            const res = await fetch(urlChats); // FALTA Puxar por Usuário
+            const res = await fetch(`${urlChats}?id=${id_usuario}`);      // FALTA Puxar por Usuário
             const data = await res.json();
             setConversas(data);
         } catch (error) {
@@ -86,12 +89,97 @@ const MickChat = () => {
         try {
             const res = await fetch(`${urlMessages}?id=${id_conversa}`);
             const data = await res.json();
-            // console.log(data)
             setMensagens(data);
         } catch (error) {
             console.error("Erro ao buscar mensagens:", error);
         }
     };
+
+    const handleUpdateLastAccess = async (id_conversa) => {
+        try {
+            const res = await fetch(`${urlChats}/${id_conversa}`, { method: 'PUT' });
+
+            if (res.ok) {
+                console.log('Último acesso atualizado com sucesso');
+                fetchConversas();
+            } else {
+                console.log('Erro ao Atualizar o último acesso da Conversa');
+            }
+
+        } catch (error) {
+            console.error("Erro ao buscar mensagens:", error);
+        }
+    };
+
+    const handleCreateChat = async () => {
+        const conversa = {
+            id_usuario: 2,                            // Pegar id_usuario do Navegador ####### 
+            titulo: "Quinto Chat do Usuário 2"        // Adicionar título do chat onde? kkkkkkkk
+        };
+
+        try {
+            const res = await fetch(urlChats, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(conversa),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                let newIdConversa = data.id_conversa; // Valor padrão como estado atual
+                setIdConversa(newIdConversa);
+
+                // Atualiza as mensagens com o novo ID de conversa
+                await fetchMensagens(newIdConversa);
+    
+                // Atualiza a lista de conversas
+                await fetchConversas();
+            } else {
+                console.error("Erro ao cadastrar a Conversa");
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    const handleSubmitMessage = async () => {
+        const mensagem = {
+            id_conversa: idConversa,
+            tipo_mensagem: 'USER',
+            conteudo: pergunta,
+            id_usuario: 2, // ID fixo para teste; substitua pelo ID do usuário autenticado
+        };
+    
+        try {
+            const res = await fetch(urlMessages, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mensagem),
+            });
+    
+            if (res.ok) {
+                const data = await res.json();
+                let newIdConversa = idConversa; // Valor padrão como estado atual
+                if (data.id_conversa) {
+                    newIdConversa = data.id_conversa; // Atualiza com o ID retornado
+                    setIdConversa(newIdConversa);
+                }
+    
+                // Atualiza as mensagens com o novo ID de conversa
+                await fetchMensagens(newIdConversa);
+    
+                // Atualiza a lista de conversas
+                await fetchConversas();
+            } else {
+                console.error("Erro ao enviar a mensagem ou criar a conversa");
+            }
+        } catch (error) {
+            console.error("Erro na requisição:", error.message);
+        } finally {
+            setPergunta(''); // Limpa o campo de entrada
+        }
+    };
+    
 
     return (
         <Fragment>
@@ -133,18 +221,26 @@ const MickChat = () => {
                         },
                     }}
                 >
-                    <DrawerHeader>
+                    <DrawerHeader sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <IconButton onClick={() => {
+                            handleCreateChat();
+                            setMensagens([]);
+                        }}>
+                            <AddIcon />
+                        </IconButton>
                         <IconButton onClick={handleDrawerClose}>
                             <ChevronLeftIcon />
-                            {/* {theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />} */}
                         </IconButton>
                     </DrawerHeader>
                     <Divider />
                     <List>
                         {conversas.map((conversa) => (
                             <ListItem key={conversa.id_conversa} disablePadding>
-                                <ListItemButton onClick={() => { fetchMensagens(conversa.id_conversa) }}>
-                                    {/* <ListItemIcon>{index % 2 === 0 ? <InboxIcon /> : <MailIcon />}</ListItemIcon> */}
+                                <ListItemButton onClick={async () => {
+                                    setIdConversa(conversa.id_conversa);
+                                    await handleUpdateLastAccess(conversa.id_conversa);
+                                    await fetchMensagens(conversa.id_conversa);
+                                }}>
                                     <ListItemText primary={conversa.titulo} />
                                 </ListItemButton>
                             </ListItem>
@@ -200,7 +296,7 @@ const MickChat = () => {
                             style={{ display: "flex", flexDirection: "column" }}
                         >
                             {mensagens.map((mensagem) => (
-                                <div key={mensagem.id_mensagem} style={{ display: "flex", justifyContent: mensagem.tipo_mensagem === "USER" ? "flex-end" : "flex-start", marginBottom: "5px", marginTop: "5px"}}>
+                                <div key={mensagem.id_mensagem} style={{ display: "flex", justifyContent: mensagem.tipo_mensagem === "USER" ? "flex-end" : "flex-start", marginBottom: "5px", marginTop: "5px" }}>
                                     {mensagem.tipo_mensagem === "USER" ? (
                                         <MessageRight text={mensagem.conteudo} time={mensagem.data_envio} />
                                     ) : (
@@ -212,8 +308,19 @@ const MickChat = () => {
                     </DialogContent>
 
                     <DialogActions>
-                        <TextField id="outlined-basic" label="Mensagem" variant="outlined" sx={{ width: "100%" }} />
-                        <Button onClick={handleClose} sx={{ width: "56px", height: "56px" }}> <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} /> </Button>
+                        <TextField id="outlined-basic" label="Mensagem" variant="outlined" value={pergunta} onChange={(e) => { setPergunta(e.target.value) }} sx={{ width: "100%" }} />
+                        <Button
+                            sx={{ width: "56px", height: "56px" }}
+                            onClick={async () => {
+                                if (!pergunta) {
+                                    alert("Campo Pergunta não pode ser vazio!")
+                                } else {
+                                    await handleSubmitMessage();
+                                }
+                            }}
+                        >
+                            <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} />
+                        </Button>
                     </DialogActions>
 
                 </Box>
