@@ -461,6 +461,7 @@ const VendasPDV = () => {
           display: "flex",
           justifyContent: "center",
           minHeight: "calc(100vh - 65px)",
+          backgroundColor: "RGB(220, 230, 224)",
         }}
       >
         <Box

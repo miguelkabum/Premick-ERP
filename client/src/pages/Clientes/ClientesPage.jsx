@@ -10,6 +10,7 @@ import {
   Typography,
   Paper,
 } from "@mui/material";
+
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Search,
@@ -24,6 +25,8 @@ import { useNavigate } from "react-router-dom";
 const url = "http://localhost:5000/clientes";
 
 const ClientesPage = () => {
+  
+
   const [clientes, setClientes] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuRowId, setMenuRowId] = useState(null);
@@ -113,12 +116,13 @@ const ClientesPage = () => {
   return (
     <div
       style={{
-        backgroundColor: "#F1F1F1",
+        backgroundColor: "#E9EFEC",
         height: "auto",
         display: "flex",
         justifyContent: "center",
       }}
     >
+      
       <Container sx={{ p: 1 }}>
         <Container sx={{ p: 2 }}>
           <div
@@ -134,13 +138,18 @@ const ClientesPage = () => {
             <Typography
               variant="h4"
               gutterBottom
-              sx={{ marginBottom: "0", fontSize: 60, color:"#213635", fontWeight:"bold" }}
+              sx={{
+                marginBottom: "0",
+                fontSize: 60,
+                color: "#213635",
+                fontWeight: "bold",
+              }}
             >
               Clientes
             </Typography>
           </div>
         </Container>
-        
+
         <Paper elevation={1} sx={{ p: 2, borderRadius: "12px" }}>
           <Container maxWidth="lg" sx={{ padding: 2 }}>
             <Box
@@ -159,14 +168,20 @@ const ClientesPage = () => {
                 sx={{ width: "100%", maxWidth: "400px", height: "auto" }}
               />
 
-              <Box display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={2}>
+              <Box
+                display="flex"
+                justifyContent="space-between"
+                alignItems="center"
+                mb={2}
+              >
                 <Button
                   variant="contained"
                   color="primary"
-                  sx={{ height: "56px", width: "100%", backgroundColor: "black"}}
+                  sx={{
+                    height: "56px",
+                    width: "100%",
+                    backgroundColor: "black",
+                  }}
                   startIcon={<Add />}
                   onClick={() => navigate("/clientes/cadastro")}
                 >

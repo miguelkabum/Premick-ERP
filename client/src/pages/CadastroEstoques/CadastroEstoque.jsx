@@ -73,7 +73,7 @@ function CadastroEstoque() {
 
   return (
     <Container maxWidth="sm">
-      <Paper elevation={3} sx={{ padding: 4, mt: 8 }}>
+      <Paper elevation={3} sx={{ padding: 4, mt: 8, borderRadius: "12px" }}>
         <Typography variant="h5" component="h1" align="center" gutterBottom>
           Nova Movimentação de Estoque
         </Typography>

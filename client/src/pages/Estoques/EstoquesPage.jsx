@@ -127,7 +127,7 @@ const formatDate = (date) => {
   return (
     <div
       style={{
-        backgroundColor: "#F1F1F1",
+        backgroundColor: "#E9EFEC",
         height: "auto",
         display: "flex",
         flexDirection: "column",
