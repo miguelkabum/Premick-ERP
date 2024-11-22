@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -39,6 +40,8 @@ const RelatorioVendas = () => {
   const [dataFinalCanceladas, setDataFinalCanceladas] = useState(null);
   const [loadingCanceladas, setLoadingCanceladas] = useState(false);
 
+  dayjs.extend(utc);
+  
   const handleDataInicialCanceladasChange = (newDate) => {
     setDataInicialCanceladas(newDate);
   };
@@ -79,7 +82,7 @@ const RelatorioVendas = () => {
 
   const columnsCanceladas = [
     { field: "id_venda_cancelada", headerName: "ID", width: 90 },
-    { field: "data_venda_cancelada", headerName: "Data", width: 150 },
+    { field: "data_venda_cancelada", headerName: "Data", width: 180 },
     { field: "valor_total", headerName: "Total", width: 150 },
     { field: "metodo_pagamento", headerName: "Tipo de Pagamento", width: 150 },
     { field: "obs_vendas_canceladas", headerName: "Observação", width: 200 },
@@ -194,7 +197,7 @@ const RelatorioVendas = () => {
     try {
       const res = await fetch(`${urlRelatorioVendas}`);
       const relData = await res.json();
-
+      console.log(relData)
       const combinedData = relData.map((item) => ({
         ...item,
         id: item.id_venda,
@@ -205,6 +208,7 @@ const RelatorioVendas = () => {
 
       const filteredData = combinedData.filter((item) => {
         const itemDate = new Date(item.dataGrafico);
+        console.log(itemDate)
         return (
           (!dataInicial || itemDate >= new Date(dataInicial)) &&
           (!dataFinal || itemDate <= new Date(dataFinal))
@@ -229,7 +233,7 @@ const RelatorioVendas = () => {
 
   const columns = [
     { field: "id", headerName: "ID", width: 90 },
-    { field: "data", headerName: "Data", width: 150 },
+    { field: "data", headerName: "Data", width: 180 },
     { field: "valor_total", headerName: "Total", width: 150 },
     { field: "metodo_pagamento", headerName: "Tipo de Pagamento", width: 150 },
     { field: "obs_vendas", headerName: "Observação", width: 200 },
@@ -309,7 +313,14 @@ const RelatorioVendas = () => {
               {
                 scaleType: "band",
                 data: graficoLinhaBarrasData.map((item) => item.date),
-                valueFormatter: (value) => value,
+                valueFormatter: (value) => dayjs(value).toDate().toLocaleString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                  hour12: false,
+                }),
                 title: "Data",
               },
             ]}
@@ -330,10 +341,25 @@ const RelatorioVendas = () => {
             xAxis={[
               {
                 scaleType: "time",
-                data: graficoData.map((item) => new Date(item.date)),
-                valueFormatter: (value) => value.toLocaleDateString("pt-BR"),
+                data: graficoData.map((item) => dayjs(item.date).toDate()), // Converte para objeto Date após usar o Day.js
+                // valueFormatter: (value) => dayjs(value).toDate().toLocaleString("pt-BR", {
+                //   day: "2-digit",
+                //   month: "2-digit",
+                //   year: "numeric",
+                //   hour: "2-digit",
+                //   minute: "2-digit",
+                //   hour12: false,
+                // }),
+                valueFormatter: (value) => dayjs(value).format("DD-MM-YYYY HH:mm:ss"),
                 title: "Data",
               },
+              // {
+              //   scaleType: "time",
+              //   data: graficoData.map((item) => dayjs.utc(item.date).local().toDate()), // Interpreta como UTC e converte para local
+              //   valueFormatter: (value) =>
+              //     dayjs.utc(value).local().format("DD-MM-YYYY HH:mm:ss"), // Converte para o horário local e formata
+              //   title: "Data",
+              // },
             ]}
             yAxis={[{ title: "Total de Vendas" }]}
             series={[

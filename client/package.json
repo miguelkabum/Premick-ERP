@@ -21,6 +21,7 @@
     "@mui/x-date-pickers": "^7.22.3",
     "@reduxjs/toolkit": "^2.3.0",
     "dayjs": "^1.11.13",
+    "dayjs-plugin-utc": "^0.1.2",
     "erp-tcc": "file:",
     "json-server": "^1.0.0-beta.3",
     "react": "^18.3.1",
