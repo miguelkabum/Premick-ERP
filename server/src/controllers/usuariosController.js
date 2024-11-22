@@ -2,7 +2,9 @@ const db = require('../models/db');
 
 exports.login = (req, res) => {
   const { email, senha } = req.body;
-  console.log("oi")
+  
+  console.log("oi");
+
   if (!email || !senha) {
     return res.status(400).json({ error: 'Email e senha são obrigatórios' });
   }
@@ -18,6 +20,11 @@ exports.login = (req, res) => {
     }
 
     const user = results[0];
+
+    // Verificando a senha (sem usar bcrypt, comparando diretamente)
+    if (user.senha_usuario !== senha) {  // Supondo que a senha esteja armazenada diretamente no banco
+      return res.status(401).json({ error: 'Senha incorreta' });
+    }
 
     res.json({
       message: 'Login bem-sucedido',

@@ -56,18 +56,25 @@ exports.registrarVendaCancelada = async (req, res) => {
     // Inicia a transação
     await connection.beginTransaction();
 
+<<<<<<< HEAD
     // Obter as colunas da tabela vendas_canceladas
     const vendaCanceladaFields = await getTableColumns(connection, 'vendas_canceladas');
 
     // Filtra os dados da requisição para só incluir campos válidos
     const vendaCanceladaData = getValuesFromRequest(vendaCanceladaFields, req.body.venda_cancelada);
 
+=======
+>>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     // Insere a venda na tabela `vendas_canceladas`
     const [result] = await connection.execute(
       `INSERT INTO vendas_canceladas (${Object.keys(vendaCanceladaData).join(', ')}) VALUES (${Object.keys(vendaCanceladaData).map(() => '?').join(', ')})`,
       Object.values(vendaCanceladaData)
     );
 
+<<<<<<< HEAD
+=======
+    // Pega o ID da venda cancelada recém-criada
+>>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     const idVendaCancelada = result.insertId;
 
     // Inserção dos produtos cancelados
@@ -80,12 +87,20 @@ exports.registrarVendaCancelada = async (req, res) => {
       );
     });
 
+<<<<<<< HEAD
+=======
+    // Executa todas as queries dos produtos cancelados
+>>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     await Promise.all(produtosCanceladosQueries);
 
     // Confirma a transação
     await connection.commit();
     console.log('Venda cancelada e produtos cancelados com sucesso!');
     
+<<<<<<< HEAD
+=======
+    // Resposta de sucesso com o ID da venda cancelada criada
+>>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     res.status(200).json({ message: 'Venda Cancelada com sucesso!', id_venda_cancelada: idVendaCancelada });
   } catch (error) {
     await connection.rollback();

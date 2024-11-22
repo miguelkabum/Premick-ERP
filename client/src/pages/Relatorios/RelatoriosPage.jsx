@@ -122,7 +122,7 @@ const RelatorioVendas = () => {
         <Typography variant="h6" sx={{ mb: 2 }}>Gráfico de Vendas</Typography>
         <LineChart
           data={graficoData} // Dados do gráfico
-          width={500}
+          // width={500}
           height={300}
           xAxis={[
             {

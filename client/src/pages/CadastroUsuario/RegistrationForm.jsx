@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Button,
@@ -7,13 +7,37 @@ import {
   TextField,
   Typography,
   Alert,
-  Container
+  Link,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  InputAdornment,
+  IconButton
 } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import CloseIcon from '@mui/icons-material/Close';
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useNavigate, Link as RouterLink } from "react-router-dom";
 
 const url = 'http://localhost:5000/usuarios';
 
 const RegistrationForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword(!showPassword);
+  const handleMouseDownPassword = (event) => event.preventDefault();
+
+  const handleClickShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+  const handleMouseDownConfirmPassword = (event) => event.preventDefault();
+
+  const [open, setOpen] = useState(false);
+  const handleClickOpen = () => { setOpen(true); };
+  const handleClose = () => { setOpen(false); };
+
+
   const [formData, setFormData] = useState({
     nome_usuario: '',
     email_usuario: '',
@@ -36,7 +60,7 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     const { nome_usuario, email_usuario, senha_usuario, confirmSenha, termsAccepted } = formData;
 
     // Validação dos campos
@@ -64,12 +88,12 @@ const RegistrationForm = () => {
     setAlertaClass(false);
 
     // Enviar dados do usuário
-    const user = { 
-      nome_usuario, 
-      email_usuario, 
-      senha_usuario, 
-      status: 1, 
-      perfil_acesso: 'GERENTE' 
+    const user = {
+      nome_usuario,
+      email_usuario,
+      senha_usuario,
+      status: 1,
+      perfil_acesso: 'GERENTE'
     };
     try {
       const response = await fetch(url, {
@@ -98,18 +122,28 @@ const RegistrationForm = () => {
     }
   };
 
+  const descriptionElementRef = React.useRef(null);
+  useEffect(() => {
+    if (open) {
+      const { current: descriptionElement } = descriptionElementRef;
+      if (descriptionElement !== null) {
+        descriptionElement.focus();
+      }
+    }
+  }, [open]);
+
   return (
     <Container
-    maxWidth="sm"
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      flexDirection: "column",
-      alignItems: "center",
-      minHeight: "100vh",
-    }}
+      maxWidth="sm"
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        alignItems: "center",
+        minHeight: "100vh",
+      }}
     >
-        <Typography variant="h4" gutterBottom textAlign="center"
+      <Typography variant="h4" gutterBottom textAlign="center"
         sx={{
           marginBottom: "0",
           fontSize: 60,
@@ -117,8 +151,8 @@ const RegistrationForm = () => {
           fontWeight: "bold",
           mb: 5
         }}>
-          Cadastro
-        </Typography>
+        Cadastro
+      </Typography>
       <Box
         component="form"
         onSubmit={handleSubmit}
@@ -131,9 +165,9 @@ const RegistrationForm = () => {
         }}
       >
 
-        
+
         {alertaClass && <Alert severity="error" sx={{ mb: 2 }}>{alertaMensagem}</Alert>}
-        
+
         <TextField
           label="Nome completo"
           name="nome_usuario"
@@ -192,7 +226,7 @@ const RegistrationForm = () => {
         <TextField
           label="Senha"
           name="senha_usuario"
-          type="password"
+          type={showPassword ? "text" : "password"}
           fullWidth
           margin="normal"
           variant="outlined"
@@ -216,11 +250,23 @@ const RegistrationForm = () => {
               },
             },
           }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <TextField
           label="Confirme a senha"
           name="confirmSenha"
-          type="password"
+          type={showConfirmPassword ? "text" : "password"}
           fullWidth
           margin="normal"
           variant="outlined"
@@ -244,6 +290,18 @@ const RegistrationForm = () => {
               },
             },
           }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={handleClickShowConfirmPassword}
+                  onMouseDown={handleMouseDownConfirmPassword}
+                >
+                  {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
         <FormControlLabel
           control={
@@ -257,13 +315,16 @@ const RegistrationForm = () => {
           label={
             <>
               Declaro ter lido e aceito os{' '}
-              <a href="#terms" style={{ color: '#1976d2' }}>
+              <a onClick={(e) => {
+                e.preventDefault(); // Impede o checkbox de ser marcado
+                handleClickOpen(); // Abre o modal
+              }} style={{ color: '#1976d2' }}>
                 termos de serviço
               </a>{' '}
-              e as{' '}
+              {/* e as{' '}
               <a href="#policies" style={{ color: '#1976d2' }}>
                 políticas
-              </a>
+              </a> */}
             </>
           }
         />
@@ -271,11 +332,61 @@ const RegistrationForm = () => {
           type="submit"
           variant="contained"
           fullWidth
-          sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2}}
+          sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2 }}
         >
           Avançar
         </Button>
+        <Typography variant="body2" align="center">
+          Já possui uma conta?{" "}
+          <Link component={RouterLink} to="/login">
+            Entrar
+          </Link>
+        </Typography>
       </Box>
+
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        scroll='paper'
+        aria-labelledby="scroll-dialog-title"
+        aria-describedby="scroll-dialog-description"
+      >
+        <DialogTitle id="scroll-dialog-title">
+          Termos de Serviço
+          <IconButton
+            aria-label="close"
+            onClick={handleClose}
+            sx={(theme) => ({
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: theme.palette.grey[500],
+            })}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers={scroll === 'paper'}>
+          <DialogContentText
+            id="scroll-dialog-description"
+            ref={descriptionElementRef}
+            tabIndex={-1}
+          >
+            <b>CONTRATO DE LICENÇA DE USUÁRIO FINAL (EULA)</b>
+            Este Contrato de Licença de Usuário Final (“Contrato”) é celebrado entre o Usuário Final (“Usuário”) e PREMICK (“Fornecedor”).
+            <br /><b>1. ACEITAÇÃO DOS TERMOS</b> O Usuário declara que leu, compreendeu e concorda com os termos desta licença. O uso do software "PREMICK ERP" está condicionado à aceitação destes termos.
+            <br /><b>2. USO PERMITIDO DO SOFTWARE</b> O Usuário tem o direito de usar o software para as seguintes finalidades: cadastrar clientes, produtos, gerir estoques, emitir relatórios e realizar vendas. O uso do software é limitado a atividades comerciais legítimas e conforme as regras estabelecidas pelo Fornecedor.
+            <br /><b>3. DIREITOS DE PROPRIEDADE INTELECTUAL</b> O Usuário reconhece que todos os direitos de propriedade intelectual relacionados ao software "PREMICK ERP", incluindo, mas não se limitando a, direitos autorais e marcas registradas, pertencem exclusivamente ao Fornecedor. O Usuário não pode copiar, modificar, distribuir ou criar obras derivadas do software.
+            <br /><b>4. DIREITOS DE ACESSO E USO</b> O Usuário terá acesso ao software durante a vigência deste contrato, desde que cumpra todas as condições aqui estabelecidas. O acesso é pessoal e intransferível.
+            <br /><b>5. LIMITAÇÃO DE RESPONSABILIDADE</b> O Fornecedor não será responsável por quaisquer danos diretos, indiretos, acidentais, especiais ou consequenciais resultantes do uso ou da incapacidade de uso do software. O Usuário concorda que sua única e exclusiva reparação será a interrupção do uso do software.
+            <br /><b>6. ACESSO ÀS INFORMAÇÕES DO USUÁRIO</b> O Usuário concorda que o Fornecedor pode acessar e processar as informações do Usuário para fins de manutenção, suporte e atualização do software, respeitando a legislação aplicável à proteção de dados.
+            <br /><b>7. ARBITRAGEM</b> Qualquer disputa relacionada a este contrato, incluindo questões sobre fraudes, será resolvida por arbitragem de acordo com as regras do Centro Brasileiro de Mediação e Arbitragem, cuja decisão será final e vinculativa para ambas as partes.
+            <br /><b>8. CUMPRIMENTO DAS LEIS APLICÁVEIS</b> O Usuário concorda em cumprir todas as leis e regulamentos aplicáveis ao uso do software, incluindo, mas não se limitando, a leis de proteção de dados e privacidade.
+            <br /><b>9. DISPOSIÇÕES FINAIS</b> Este contrato constitui o entendimento completo entre as partes e substitui quaisquer acordos anteriores. Qualquer modificação deve ser feita por escrito e assinada por ambas as partes.
+            <br /><b>Data da última atualização: 04/11/2024</b>
+          </DialogContentText>
+        </DialogContent>
+      </Dialog>
     </Container>
   );
 };

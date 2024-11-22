@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { useState, useRef, useEffect, Fragment } from 'react';
 
 // import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -22,21 +22,49 @@ import LogoPremick from './LogoPremick.webp';
 import MessageLeft from './MessageLeft';
 import MessageRight from './MessageRight';
 
-import PersistentDrawerLeft from '../PersistentDrawer/PersistentDrawer';
+import { styled, useTheme } from '@mui/material/styles';
+import Drawer from '@mui/material/Drawer';
+import List from '@mui/material/List';
+import Divider from '@mui/material/Divider';
+import MenuIcon from '@mui/icons-material/Menu';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ListItem from '@mui/material/ListItem';
+import ListItemButton from '@mui/material/ListItemButton';
+import ListItemText from '@mui/material/ListItemText';
+
+const drawerWidth = 200;
+
+const DrawerHeader = styled('div')(({ theme }) => ({
+    display: 'flex',
+    alignItems: 'center',
+    padding: theme.spacing(0, 1),
+    // necessary for content to be below app bar
+    ...theme.mixins.toolbar,
+    justifyContent: 'flex-end',
+}));
+
+const urlChats = "http://localhost:5000/conversas";
+const urlMessages = "http://localhost:5000/mensagens";
 
 const MickChat = () => {
-    const [open, setOpen] = React.useState(false);
+    const [idConversa, setIdConversa] = useState(0);
+    const [pergunta, setPergunta] = useState('');
 
-    const handleClickOpen = () => {
-        setOpen(true);
-    };
+    const [conversas, setConversas] = useState([]);
+    const [mensagens, setMensagens] = useState([]);
 
-    const handleClose = () => {
-        setOpen(false);
-    };
+    const theme = useTheme();
 
-    const descriptionElementRef = React.useRef(null);
-    React.useEffect(() => {
+    const [openDrawer, setOpenDrawer] = useState(true);
+    const handleDrawerOpen = () => setOpenDrawer(true);
+    const handleDrawerClose = () => setOpenDrawer(false);
+
+    const [open, setOpen] = useState(false);
+    const handleClickOpen = () => { setOpen(true); };
+    const handleClose = () => { setOpen(false); };
+
+    const descriptionElementRef = useRef(null);
+    useEffect(() => {
         if (open) {
             const { current: descriptionElement } = descriptionElementRef;
             if (descriptionElement !== null) {
@@ -45,99 +73,259 @@ const MickChat = () => {
         }
     }, [open]);
 
+    const fetchConversas = async () => {
+        const id_usuario = 2;              // FALTA Puxar por Usuário
+
+        try {
+            const res = await fetch(`${urlChats}?id=${id_usuario}`);      // FALTA Puxar por Usuário
+            const data = await res.json();
+            setConversas(data);
+        } catch (error) {
+            console.error("Erro ao buscar conversas:", error);
+        }
+    };
+
+    const fetchMensagens = async (id_conversa) => {
+        try {
+            const res = await fetch(`${urlMessages}?id=${id_conversa}`);
+            const data = await res.json();
+            setMensagens(data);
+        } catch (error) {
+            console.error("Erro ao buscar mensagens:", error);
+        }
+    };
+
+    const handleUpdateLastAccess = async (id_conversa) => {
+        try {
+            const res = await fetch(`${urlChats}/${id_conversa}`, { method: 'PUT' });
+
+            if (res.ok) {
+                console.log('Último acesso atualizado com sucesso');
+                fetchConversas();
+            } else {
+                console.log('Erro ao Atualizar o último acesso da Conversa');
+            }
+
+        } catch (error) {
+            console.error("Erro ao buscar mensagens:", error);
+        }
+    };
+
+    const handleCreateChat = async () => {
+        const conversa = {
+            id_usuario: 2,                            // Pegar id_usuario do Navegador ####### 
+            titulo: "Quinto Chat do Usuário 2"        // Adicionar título do chat onde? kkkkkkkk
+        };
+
+        try {
+            const res = await fetch(urlChats, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(conversa),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                let newIdConversa = data.id_conversa; // Valor padrão como estado atual
+                setIdConversa(newIdConversa);
+
+                // Atualiza as mensagens com o novo ID de conversa
+                await fetchMensagens(newIdConversa);
+    
+                // Atualiza a lista de conversas
+                await fetchConversas();
+            } else {
+                console.error("Erro ao cadastrar a Conversa");
+            }
+        } catch (error) {
+            console.log(error.message);
+        }
+    };
+
+    const handleSubmitMessage = async () => {
+        const mensagem = {
+            id_conversa: idConversa,
+            tipo_mensagem: 'USER',
+            conteudo: pergunta,
+            id_usuario: 2, // ID fixo para teste; substitua pelo ID do usuário autenticado
+        };
+    
+        try {
+            const res = await fetch(urlMessages, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(mensagem),
+            });
+    
+            if (res.ok) {
+                const data = await res.json();
+                let newIdConversa = idConversa; // Valor padrão como estado atual
+                if (data.id_conversa) {
+                    newIdConversa = data.id_conversa; // Atualiza com o ID retornado
+                    setIdConversa(newIdConversa);
+                }
+    
+                // Atualiza as mensagens com o novo ID de conversa
+                await fetchMensagens(newIdConversa);
+    
+                // Atualiza a lista de conversas
+                await fetchConversas();
+            } else {
+                console.error("Erro ao enviar a mensagem ou criar a conversa");
+            }
+        } catch (error) {
+            console.error("Erro na requisição:", error.message);
+        } finally {
+            setPergunta(''); // Limpa o campo de entrada
+        }
+    };
+    
 
     return (
-        <React.Fragment>
+        <Fragment>
             <Box sx={{ '& > :not(style)': { m: 1 } }}>
-                <Fab onClick={handleClickOpen} /*size="small" || "medium"*/ color="secondary" aria-label="add">
-                    <AddIcon />
+                <Fab onClick={() => {
+                    fetchConversas();
+                    handleClickOpen();
+                }} size="large" color="secondary" aria-label="add">
+                    <AddIcon />                   {/* Usar AddIcon na criação dos novos Chats */}
                 </Fab>
             </Box>
 
-            {/* <Button onClick={handleClickOpen}>Open Dialog</Button> */}
 
             <Dialog
                 open={open}
                 onClose={handleClose}
                 scroll="paper"
-                aria-labelledby="scroll-dialog-title"
-                aria-describedby="scroll-dialog-description"
+                // aria-labelledby="scroll-dialog-title"
+                // aria-describedby="scroll-dialog-description"
                 sx={{
                     '& .MuiDialog-paper': {
+                        height: "80%",
                         width: "600px",
-                        minWidth: '300px', // Ajuste aqui o valor desejado
-                        maxWidth: '90%'
+                        minWidth: '300px',
+                        maxWidth: '90%',
+                        position: 'relative',
                     },
                 }}
             >
-                <DialogTitle id="scroll-dialog-title" style={{ display: "flex", alignItems: "center" }}>
-                    {/* Imagem Perfil, Mick.ai */}
-                    <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "40px", width: "40px", borderRadius: "20px", marginRight: "10px" }} />
-                    Mick
-                    <IconButton
-                        aria-label="close"
-                        onClick={handleClose}
-                        sx={(theme) => ({
-                            position: 'absolute',
-                            right: 8,
-                            top: 8,
-                            color: theme.palette.grey[500],
-                        })}
-                    >
-                        <CloseIcon />
-                    </IconButton>
-                </DialogTitle>
-                <DialogContent dividers>
-                    {/* <DialogContentText
-                        id="scroll-dialog-description"
-                        ref={descriptionElementRef}
-                        tabIndex={-1}
-                        style={{display: "flex", flexDirection: "column"}}
-                    >   
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testandoooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo pra ver se vai" time="16:33"/>
-                        </div>
+                <Drawer
+                    variant="persistent"
+                    anchor="left"
+                    open={openDrawer} // Controlado pelo estado
+                    sx={{
+                        '& .MuiDrawer-paper': {
+                            width: drawerWidth, // Ajuste do tamanho do Drawer
+                            position: 'absolute', // Relativo ao Dialog
+                        },
+                    }}
+                >
+                    <DrawerHeader sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <IconButton onClick={() => {
+                            handleCreateChat();
+                            setMensagens([]);
+                        }}>
+                            <AddIcon />
+                        </IconButton>
+                        <IconButton onClick={handleDrawerClose}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                    </DrawerHeader>
+                    <Divider />
+                    <List>
+                        {conversas.map((conversa) => (
+                            <ListItem key={conversa.id_conversa} disablePadding>
+                                <ListItemButton onClick={async () => {
+                                    setIdConversa(conversa.id_conversa);
+                                    await handleUpdateLastAccess(conversa.id_conversa);
+                                    await fetchMensagens(conversa.id_conversa);
+                                }}>
+                                    <ListItemText primary={conversa.titulo} />
+                                </ListItemButton>
+                            </ListItem>
+                        ))}
+                    </List>
+                </Drawer>
 
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
+                <Box
+                    sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        height: '100%', // Ajusta para ocupar todo o espaço disponível verticalmente
+                        overflow: 'hidden', // Impede que o conteúdo extrapole
+                        transition: theme.transitions.create('transform', {
+                            duration: theme.transitions.duration.short,
+                            easing: theme.transitions.easing.easeInOut,
+                        }),
+                        transform: openDrawer ? `translateX(${drawerWidth}px)` : 'translateX(0)', // , width: "600px", minWidth: "300px", maxWidth: "90%"
+                        width: openDrawer ? `calc(100% - ${drawerWidth}px)` : '100%', // Diminui a largura da Box com o Drawer aberto
+                    }}
+                >
+                    <DialogTitle id="scroll-dialog-title" style={{ display: "flex", alignItems: "center", height: "64px" }}>
+                        <IconButton
+                            color="inherit"
+                            aria-label="open drawer"
+                            onClick={handleDrawerOpen}
+                            edge="start"
+                            sx={{ ...(openDrawer && { display: 'none' }) }}
+                        >
+                            <MenuIcon />
+                        </IconButton>
+                        <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "40px", width: "40px", borderRadius: "20px", marginRight: "10px" }} />
+                        Mick
+                        <IconButton
+                            aria-label="close"
+                            onClick={handleClose}
+                            sx={(theme) => ({
+                                position: 'absolute',
+                                right: 8,
+                                top: 8,
+                                color: theme.palette.grey[500],
+                            })}
+                        >
+                            <CloseIcon />
+                        </IconButton>
+                    </DialogTitle>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testando pra ver se vai" time="16:33"/>
-                        </div>
+                    <DialogContent dividers>
+                        <DialogContentText
+                            id="scroll-dialog-description"
+                            ref={descriptionElementRef}
+                            tabIndex={-1}
+                            style={{ display: "flex", flexDirection: "column" }}
+                        >
+                            {mensagens.map((mensagem) => (
+                                <div key={mensagem.id_mensagem} style={{ display: "flex", justifyContent: mensagem.tipo_mensagem === "USER" ? "flex-end" : "flex-start", marginBottom: "5px", marginTop: "5px" }}>
+                                    {mensagem.tipo_mensagem === "USER" ? (
+                                        <MessageRight text={mensagem.conteudo} time={mensagem.data_envio} />
+                                    ) : (
+                                        <MessageLeft text={mensagem.conteudo} time={mensagem.data_envio} />
+                                    )}
+                                </div>
+                            ))}
+                        </DialogContentText>
+                    </DialogContent>
 
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
+                    <DialogActions>
+                        <TextField id="outlined-basic" label="Mensagem" variant="outlined" value={pergunta} onChange={(e) => { setPergunta(e.target.value) }} sx={{ width: "100%" }} />
+                        <Button
+                            sx={{ width: "56px", height: "56px" }}
+                            onClick={async () => {
+                                if (!pergunta) {
+                                    alert("Campo Pergunta não pode ser vazio!")
+                                } else {
+                                    await handleSubmitMessage();
+                                }
+                            }}
+                        >
+                            <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} />
+                        </Button>
+                    </DialogActions>
 
-                        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom:"10px", marginTop:"10px"}}>
-                            <MessageRight text="Testando pra ver se vai" time="16:33"/>
-                        </div>
-
-                        <div style={{ display: "flex", justifyContent: "flex-start"}}>
-                            <MessageLeft text="todo bonitinho assim no fundo" time="17:13"/>
-                        </div>
-                    </DialogContentText> */}
-                    <Box sx={{
-                            display: 'flex',
-                            flexDirection: 'column',
-                            height: '400px', // Defina uma altura adequada
-                            overflow: 'hidden', // Impede o overflow do conteúdo
-                        }}
-                    >
-                        <PersistentDrawerLeft />
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <TextField id="outlined-basic" label="Mensagem" variant="outlined" sx={{ width: "100%" }} />
-                    <Button onClick={handleClose} sx={{ width: "56px", height: "56px" }}> <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} /> </Button>
-                </DialogActions>
+                </Box>
             </Dialog>
-        </React.Fragment>
+        </Fragment>
     );
 }
 

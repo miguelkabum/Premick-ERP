@@ -5,9 +5,9 @@ const MessageLeft = ({ text, time }) => {
     <div style={styles.container}>
       <div style={styles.bubble}>
         <div style={styles.textContainer}>
-            <p style={styles.text}>
+            <div style={styles.text}>
                 {text}
-            </p>
+            </div>
         </div>
         <div style={styles.footer}>
           <span style={styles.time}>{time}</span>
