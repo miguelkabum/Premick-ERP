@@ -1,24 +1,21 @@
 const express = require('express');
-const usuariosRouter = require('./src/routes/usuarios'); // Importando o router de usuários (login, etc)
+const usuariosRouter = require('./src/routes/usuarios');
 const clientesRouter = require('./src/routes/clientes');
 const categoriasRouter = require('./src/routes/categorias');
 const produtosRouter = require('./src/routes/produtos');
-const mysql = require('mysql2/promise'); // `mysql2` para suporte async/await
+const mysql = require('mysql2/promise'); 
 const vendasRouter = require('./src/routes/vendas');
 const produtosVendidosRouter = require('./src/routes/produtosVendidos');
 const entradaProdutoRouter = require('./src/routes/entradaProduto');
 const saidaProdutoRouter = require('./src/routes/saidaProduto');
 const estoqueRouter = require('./src/routes/estoque');
 const alertasEstoqueRouter = require('./src/routes/alertasEstoque');
-
+const fechamentoCaixaRoutes = require('./src/routes/fechamentoCaixaRoutes'); // Importação correta
 const produtosEstoqueRouter = require('./src/routes/produtosEstoque');
-
 const estoqueEntradaRouter = require('./src/routes/estoqueEntrada');
 const estoqueSaidaRouter = require('./src/routes/estoqueSaida');
-
 const vendasCanceladasRouter = require('./src/routes/vendasCanceladas');
 const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
-
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
@@ -29,7 +26,7 @@ app.use(cors()); // Habilitar CORS
 app.use(express.json()); // Usar o middleware express.json() para tratar requisições JSON
 
 // Definir rotas para os diversos recursos
-app.use('/usuarios', usuariosRouter); // Rota para login e autenticação
+app.use('/usuarios', usuariosRouter);
 app.use('/clientes', clientesRouter);
 app.use('/categorias', categoriasRouter);
 app.use('/produtos', produtosRouter);
@@ -42,9 +39,10 @@ app.use('/alertasEstoque', alertasEstoqueRouter);
 app.use('/produtosEstoque', produtosEstoqueRouter);
 app.use('/estoqueEntrada', estoqueEntradaRouter);
 app.use('/estoqueSaida', estoqueSaidaRouter);
-
+app.use('/fechamentoCaixa', fechamentoCaixaRoutes); // Corrigido aqui
 app.use('/vendasCanceladas', vendasCanceladasRouter);
 app.use('/produtosCancelados', produtosCanceladosRouter);
+app.use('/api/fechamento-caixa', fechamentoCaixaRoutes);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {

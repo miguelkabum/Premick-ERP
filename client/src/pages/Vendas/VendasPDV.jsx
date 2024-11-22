@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Box,
   Button,
@@ -27,9 +27,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import DiscountIcon from "@mui/icons-material/Discount";
 import { useBlocker } from "../../hooks/useBlocker"; // Assumindo que o hook está nesse caminho
-import {
-  useNavigate,
-} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import FechamentoCaixa from "../FechamentoCaixa/FechamentoCaixa ";
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas
@@ -54,49 +53,54 @@ const VendasPDV = () => {
   const [openDialogCancelamento, setOpenDialogCancelamento] = useState(false);
   const [observacaoCancelamento, setObservacaoCancelamento] = useState("");
   const [produtoSelecionado, setProdutoSelecionado] = useState("");
+  const inputRef = useRef(null)
   const [produtosVenda, setProdutosVenda] = useState(() => {
     // Carrega os produtos da venda do localStorage, se existir
     const savedProdutos = localStorage.getItem("produtosVenda");
     return savedProdutos ? JSON.parse(savedProdutos) : [];
   });
 
-const temVendaEmAndamento = () => produtosVenda.length > 0;
-useBlocker(
-  ({ retry }) => {
-    if (window.confirm("Há uma venda em andamento. Deseja sair e cancelar esta venda?")) {
-      localStorage.removeItem("produtosVeda"); // Limpa a venda se o usuário confirmar
-      retry(); // Permite a navegação
-    }
-  },
-  temVendaEmAndamento() // Bloqueia se há produtos na venda
-);
+  const temVendaEmAndamento = () => produtosVenda.length > 0;
+  useBlocker(
+    ({ retry }) => {
+      if (
+        window.confirm(
+          "Há uma venda em andamento. Deseja sair e cancelar esta venda?"
+        )
+      ) {
+        localStorage.removeItem("produtosVeda"); // Limpa a venda se o usuário confirmar
+        retry(); // Permite a navegação
+      }
+    },
+    temVendaEmAndamento() // Bloqueia se há produtos na venda
+  );
 
-useEffect(() => {
-  const handleBeforeUnload = (e) => {
-    if (temVendaEmAndamento()) {
-      e.preventDefault();
-      e.returnValue = ""; // Necessário para mostrar o alerta no navegador
-    }
-  };
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (temVendaEmAndamento()) {
+        e.preventDefault();
+        e.returnValue = ""; // Necessário para mostrar o alerta no navegador
+      }
+    };
 
-  window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-  return () => {
-    window.removeEventListener("beforeunload", handleBeforeUnload);
-  };
-}, [produtosVenda]);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [produtosVenda]);
 
-const [snackbar, setSnackbar] = useState({
-  open: false,
-  message: "",
-  severity: "success",
-});
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
-useEffect(() => {
-  const produtosVenda =
-    JSON.parse(localStorage.getItem("produtosVenda")) || [];
-  setVendaEmAberto(produtosVenda.length > 0);
-}, []);
+  useEffect(() => {
+    const produtosVenda =
+      JSON.parse(localStorage.getItem("produtosVenda")) || [];
+    setVendaEmAberto(produtosVenda.length > 0);
+  }, []);
 
   const openSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
@@ -268,26 +272,28 @@ useEffect(() => {
     console.log("Produto Detalhado:", produto);
     console.log("Quantidade:", quantidade);
     console.log("Produtos na Venda (antes):", produtosVenda);
-
+  
     if (!produto) {
       openSnackbar("Nenhum produto selecionado.", "error");
       return; // Se não houver produto detalhado, encerra a função
     }
-
+  
     if (quantidade <= 0) {
       openSnackbar("A quantidade deve ser maior que zero.", "error");
       return; // Validação para impedir quantidade inválida
     }
-
+  
     // Verifica se o produto já existe na lista
     const produtoExistente = produtosVenda.find(
       (prod) => prod.id_produto === produto.id_produto
     );
-
-    if (produtoExistente) {
-      // Se já existe, incrementa a quantidade e redefine o status para "OK"
-      setProdutosVenda((prev) =>
-        prev.map((prod) =>
+  
+    setProdutosVenda((prev) => {
+      let updatedProdutosVenda;
+  
+      if (produtoExistente) {
+        // Se já existe, incrementa a quantidade e redefine o status para "OK"
+        updatedProdutosVenda = prev.map((prod) =>
           prod.id_produto === produto.id_produto
             ? {
                 ...prod,
@@ -295,21 +301,21 @@ useEffect(() => {
                 status: "OK", // Atualiza o status para "OK"
               }
             : prod
-        )
-      );
-    } else {
-      // Adiciona o produto como novo item
-      setProdutosVenda((prev) => [
-        ...prev,
-        { ...produto, quantidade, status: "OK" },
-      ]);
-    }
-
-    // Reseta quantidade e detalhes do produto
-    setQuantidade(1);
-    setPrecoUnidade(0);
-    openSnackbar("Produto adicionado com sucesso!", "success");
+        );
+        
+      } else {
+        // Adiciona o produto como novo item
+        updatedProdutosVenda = [
+          { ...produto, quantidade, status: "OK" },
+          ...prev, // Coloca o novo produto no começo da lista
+        ];
+        setPesquisa("");
+      }
+      setPesquisa("");
+      return updatedProdutosVenda;
+    });
   };
+  
 
   const handleFinalizarVenda = async () => {
     if (valorTotal <= 0) {
@@ -481,15 +487,16 @@ useEffect(() => {
               minWidth: 350,
               borderRadius: "12px",
               "@media (max-width: 700px)": {
-                maxHeight: "90vh",
+                height: "auto",
+                width: "100%",
                 maxHeight: "100%",
+                minHeight: "100%",
               },
             }}
           >
             <Typography
               variant="h4"
               sx={{
-                marginBottom: "0",
                 fontSize: 40,
                 color: "#213635",
                 fontWeight: "bold",
@@ -518,44 +525,45 @@ useEffect(() => {
               }}
             >
               <Box sx={{ display: "flex", gap: 2 }}>
-                <Autocomplete
-                  // onKeyPress={(e) => e.key === "Enter" && produtoSelecionado}
-                  disablePortal
-                  value={produtoSelecionado} // Usa o produto selecionado
-                  onInputChange={(event, newInputValue) => {
-                    setPesquisa(newInputValue); // Atualiza o valor da pesquisa
-                    handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
-                  }}
-                  options={produtos} // Exibe os produtos filtrados
-                  getOptionLabel={(option) =>
-                    `${option.nome_produto || "Pesquisar"}  ${
-                      option.codigo_interno || ""
-                    }`
-                  }
-                  onChange={(event, newValue) => {
-                    if (newValue) {
-                      setProdutoSelecionado(newValue);
-                      setProdutoDetalhado(newValue);
-                      setPrecoUnidade(newValue.preco_venda);
-                      handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
-                    }
-                  }}
-                  sx={{
-                    flex: 5,
-                    mb: 2,
-                    "@media (max-width: 700px)": {
-                      flex: 3,
-                    },
-                  }}
-                  renderInput={(params) => (
-                    <TextField {...params} label="Pesquisar" />
-                  )}
-                  renderOption={(props, option) => (
-                    <li {...props} key={option.id_produto}>
-                      {option.nome_produto} - {option.codigo_interno}
-                    </li>
-                  )}
-                />
+              <Autocomplete
+      disablePortal
+      value={produtoSelecionado} // Usa o produto selecionado
+      onInputChange={(event, newInputValue) => {
+        handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
+      }}
+      options={produtos} // Exibe os produtos filtrados, altere conforme necessário
+      getOptionLabel={(option) => option.nome_produto || 'Pesquise'}
+      onChange={(event, newValue) => {
+        if (newValue) {
+          setProdutoSelecionado(newValue);
+          handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
+
+          // Seleciona o texto do input após selecionar um produto
+          if (inputRef.current) {
+            inputRef.current.select();
+          }
+        }
+      }}
+      sx={{
+        flex: 5,
+        mb: 2,
+        "@media (max-width: 700px)": {
+          flex: 3,
+        },
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Pesquisar"
+          inputRef={inputRef} // Ref para o campo de entrada
+        />
+      )}
+      renderOption={(props, option) => (
+        <li {...props} key={option.id_produto}>
+          {option.nome_produto} - {option.codigo_interno}
+        </li>
+      )}
+    />
                 <TextField
                   fullWidth
                   label="Quantidade"
