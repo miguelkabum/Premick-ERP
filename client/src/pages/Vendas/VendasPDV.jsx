@@ -28,7 +28,6 @@ import ShoppingCartCheckoutIcon from "@mui/icons-material/ShoppingCartCheckout";
 import DiscountIcon from "@mui/icons-material/Discount";
 import { useBlocker } from "../../hooks/useBlocker"; // Assumindo que o hook está nesse caminho
 import { useNavigate } from "react-router-dom";
-import FechamentoCaixa from "../FechamentoCaixa/FechamentoCaixa ";
 
 const urlProdutos = "http://localhost:5000/produtos"; // API de produtos
 const urlVendas = "http://localhost:5000/vendas"; // API de vendas

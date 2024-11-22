@@ -10,18 +10,11 @@ const entradaProdutoRouter = require('./src/routes/entradaProduto');
 const saidaProdutoRouter = require('./src/routes/saidaProduto');
 const estoqueRouter = require('./src/routes/estoque');
 const alertasEstoqueRouter = require('./src/routes/alertasEstoque');
-const fechamentoCaixaRoutes = require('./src/routes/fechamentoCaixaRoutes'); // Importação correta
 const produtosEstoqueRouter = require('./src/routes/produtosEstoque');
 const estoqueEntradaRouter = require('./src/routes/estoqueEntrada');
 const estoqueSaidaRouter = require('./src/routes/estoqueSaida');
 const vendasCanceladasRouter = require('./src/routes/vendasCanceladas');
 const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
-
-const conversasRouter = require('./src/routes/conversas');
-const mensagensRouter = require('./src/routes/mensagens');
-
-const mickRouter = require('./src/routes/mickAPI');
-
 const dotenv = require('dotenv');
 const cors = require('cors');
 const app = express();
@@ -45,15 +38,8 @@ app.use('/alertasEstoque', alertasEstoqueRouter);
 app.use('/produtosEstoque', produtosEstoqueRouter);
 app.use('/estoqueEntrada', estoqueEntradaRouter);
 app.use('/estoqueSaida', estoqueSaidaRouter);
-app.use('/fechamentoCaixa', fechamentoCaixaRoutes); // Corrigido aqui
 app.use('/vendasCanceladas', vendasCanceladasRouter);
 app.use('/produtosCancelados', produtosCanceladosRouter);
-app.use('/api/fechamento-caixa', fechamentoCaixaRoutes);
-
-app.use('/conversas', conversasRouter);
-app.use('/mensagens', mensagensRouter);
-
-app.use('/api/mick', mickRouter);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {

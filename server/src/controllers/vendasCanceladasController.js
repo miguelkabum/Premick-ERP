@@ -1,23 +1,8 @@
 require('dotenv').config();
-const mysql = require('mysql2/promise');
+const db = require('../models/db');
+const mysql = require('mysql2/promise')
 
-const getTableColumns = async (connection, tableName) => {
-  // Consulta para pegar as colunas de uma tabela
-  const [columns] = await connection.execute(`SHOW COLUMNS FROM ${tableName}`);
-  return columns.map(column => column.Field);
-};
-
-const getValuesFromRequest = (fields, data) => {
-  // Filtra os campos da requisição que são válidos para o banco
-  return fields.reduce((acc, field) => {
-    if (data[field] !== undefined) {
-      acc[field] = data[field];
-    }
-    return acc;
-  }, {});
-};
-
-exports.getVendasCanceladas = async (req, res) => {
+exports.getVendasCanceladas = (req, res) => {
   const id = req.query.id;
 
   let query = 'SELECT * FROM vendas_canceladas';
@@ -25,21 +10,12 @@ exports.getVendasCanceladas = async (req, res) => {
     query += ' WHERE id_venda_cancelada = ?';
   }
 
-  try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      timezone: process.env.DB_TIMEZONE
-    });
-
-    const [results] = await connection.execute(query, [id]);
+  db.query(query, [id], (err, results) => {
+    if (err) return res.status(500).send(err);
     res.json(results);
-  } catch (err) {
-    res.status(500).send(err);
-  }
+  });
 };
+
 
 exports.registrarVendaCancelada = async (req, res) => {
   const connection = await mysql.createConnection({
@@ -52,111 +28,65 @@ exports.registrarVendaCancelada = async (req, res) => {
 
   try {
     console.log("Vendas Canceladas:", req.body);
-    
     // Inicia a transação
     await connection.beginTransaction();
 
-<<<<<<< HEAD
-    // Obter as colunas da tabela vendas_canceladas
-    const vendaCanceladaFields = await getTableColumns(connection, 'vendas_canceladas');
-
-    // Filtra os dados da requisição para só incluir campos válidos
-    const vendaCanceladaData = getValuesFromRequest(vendaCanceladaFields, req.body.venda_cancelada);
-
-=======
->>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     // Insere a venda na tabela `vendas_canceladas`
     const [result] = await connection.execute(
-      `INSERT INTO vendas_canceladas (${Object.keys(vendaCanceladaData).join(', ')}) VALUES (${Object.keys(vendaCanceladaData).map(() => '?').join(', ')})`,
-      Object.values(vendaCanceladaData)
+      `INSERT INTO vendas_canceladas (data_venda_cancelada, valor_total, metodo_pagamento, desconto, obs_vendas_canceladas, id_cliente, id_usuario) VALUES (NOW(), ?, ?, ?, ?, ?, ?)`,
+      [req.body.venda_cancelada.valor_total, req.body.venda_cancelada.metodo_pagamento, req.body.venda_cancelada.desconto, req.body.venda_cancelada.obs_vendas_canceladas, req.body.venda_cancelada.id_cliente, req.body.venda_cancelada.id_usuario]
     );
 
-<<<<<<< HEAD
-=======
     // Pega o ID da venda cancelada recém-criada
->>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     const idVendaCancelada = result.insertId;
 
-    // Inserção dos produtos cancelados
-    const produtosCanceladosFields = await getTableColumns(connection, 'produtos_cancelados');
+    // Prepara as queries para inserir os produtos cancelados
     const produtosCanceladosQueries = req.body.produtos.map((produto) => {
-      const produtoData = getValuesFromRequest(produtosCanceladosFields, produto);
-      return connection.execute(
-        `INSERT INTO produtos_cancelados (${Object.keys(produtoData).join(', ')}) VALUES (${Object.keys(produtoData).map(() => '?').join(', ')})`,
-        Object.values(produtoData)
-      );
+        return connection.execute(
+            `INSERT INTO produtos_cancelados (id_venda_cancelada, id_produto, qtde_cancelada, preco_unitario) VALUES (?, ?, ?, ?)`,
+            [idVendaCancelada, produto.id_produto, produto.quantidade, produto.preco_venda]
+        );
     });
 
-<<<<<<< HEAD
-=======
     // Executa todas as queries dos produtos cancelados
->>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     await Promise.all(produtosCanceladosQueries);
 
     // Confirma a transação
     await connection.commit();
     console.log('Venda cancelada e produtos cancelados com sucesso!');
     
-<<<<<<< HEAD
-=======
     // Resposta de sucesso com o ID da venda cancelada criada
->>>>>>> 751310b18e1f748ac9e0b4f7548effbd030860ce
     res.status(200).json({ message: 'Venda Cancelada com sucesso!', id_venda_cancelada: idVendaCancelada });
   } catch (error) {
+    // Reverte a transação em caso de erro
     await connection.rollback();
     console.error('Erro ao registrar venda cancelada:', error);
     res.status(500).json({ message: 'Erro ao registrar venda cancelada', error: error.message });
   } finally {
+    // Fecha a conexão
     await connection.end();
   }
 };
 
-exports.updateVendaCancelada = async (req, res) => {
+
+exports.updateVendaCancelada = (req, res) => {
   const id_venda_cancelada = req.params.id;
   const venda_cancelada = req.body;
-
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    timezone: process.env.DB_TIMEZONE
+  
+  // Atualização na tabela vendas
+  db.query('UPDATE vendas_canceladas SET ? WHERE id_venda_cancelada = ?', [venda_cancelada, id_venda_cancelada], (err) => {
+    if (err) return res.status(500).send(err);
+    res.sendStatus(204);  // OK sem conteúdo
   });
-
-  try {
-    const vendaCanceladaFields = await getTableColumns(connection, 'vendas_canceladas');
-    const vendaCanceladaData = getValuesFromRequest(vendaCanceladaFields, venda_cancelada);
-
-    const updateQuery = `UPDATE vendas_canceladas SET ${Object.keys(vendaCanceladaData)
-      .map((key) => `${key} = ?`)
-      .join(', ')} WHERE id_venda_cancelada = ?`;
-
-    await connection.execute(updateQuery, [...Object.values(vendaCanceladaData), id_venda_cancelada]);
-    res.sendStatus(204);
-  } catch (err) {
-    res.status(500).send(err);
-  } finally {
-    await connection.end();
-  }
 };
 
-exports.deleteVendaCancelada = async (req, res) => {
+
+exports.deleteVendaCancelada = (req, res) => {
   const id_venda_cancelada = req.params.id;
 
-  const connection = await mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    timezone: process.env.DB_TIMEZONE
+  // Exclusão na tabela vendas
+  db.query('DELETE FROM vendas_canceladas WHERE id_venda_cancelada = ?', [id_venda_cancelada], (err) => {
+    if (err) return res.status(500).send(err);
+    res.sendStatus(204);  // OK sem conteúdo
   });
-
-  try {
-    await connection.execute('DELETE FROM vendas_canceladas WHERE id_venda_cancelada = ?', [id_venda_cancelada]);
-    res.sendStatus(204);
-  } catch (err) {
-    res.status(500).send(err);
-  } finally {
-    await connection.end();
-  }
 };
