@@ -156,11 +156,11 @@ const MickChat = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(mensagem),
             });
-    
+
             if (res.ok) {
                 const data = await res.json();
                 let newIdConversa = idConversa; // Valor padrão como estado atual
-                if (data.id_conversa) {
+                if (idConversa == 0) {
                     newIdConversa = data.id_conversa; // Atualiza com o ID retornado
                     setIdConversa(newIdConversa);
                 }

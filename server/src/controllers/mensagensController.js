@@ -2,6 +2,7 @@ require('dotenv').config();
 const db = require('../models/db');
 const mysql = require('mysql2/promise')
 
+
 exports.getMensagens = (req, res) => {
   const id = req.query.id;
 
@@ -15,6 +16,7 @@ exports.getMensagens = (req, res) => {
     res.json(results);
   });
 };
+
 
 exports.createMensagem = async (req, res) => {
   const connection = await mysql.createConnection({
@@ -51,7 +53,29 @@ exports.createMensagem = async (req, res) => {
         [id_conversa, tipo_mensagem, conteudo]
       );
 
-      const id_mensagem = message.insertId;
+      // const id_mensagem = message.insertId;
+
+      try {
+        const response = await fetch('http://localhost:5000/api/mick', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ conteudo, id_conversa }),
+        });
+
+        const data = await response.json();
+        console.log("resposta mickController status:", response.ok)
+        console.log("Resposta mickController:", data.resposta)
+
+        if (response.ok) {
+          console.log("Resposta:", data.resposta)
+        } else {
+          console.log('Erro ao receber a resposta.');
+        }
+      } catch (error) {
+        console.log('Erro na comunicação com o servidor.\nErro: ', error);
+      }
 
       // Confirma a transação
       await connection.commit();
@@ -59,8 +83,7 @@ exports.createMensagem = async (req, res) => {
       // Resposta de sucesso com o ID da conversa e mensagem criadas
       res.status(200).json({
         message: 'Conversa e mensagem registradas com sucesso!',
-        id_conversa,
-        id_mensagem
+        id_conversa
       });
 
     } catch (error) {
@@ -73,23 +96,46 @@ exports.createMensagem = async (req, res) => {
       await connection.end();
     }
   } else {
-    // Insere a mensagem vinculada a uma conversa existente
-    const mensagem = { id_conversa, tipo_mensagem, conteudo };
 
+    // Insere a mensagem vinculada a uma conversa existente
     db.query(
       'INSERT INTO mensagens (id_conversa, tipo_mensagem, conteudo, data_envio) VALUES (?, ?, ?, NOW())',
       [id_conversa, tipo_mensagem, conteudo],
       (err, results) => {
         if (err) return res.status(500).send(err);
-        res.status(201).json({ id_mensagem: results.insertId, ...mensagem });
+        // res.status(200).json({ id_mensagem: results.insertId });
       }
     );
+
+    try {
+      const response = await fetch('http://localhost:5000/api/mick', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ conteudo, id_conversa }),
+      });
+
+      const data = await response.json();
+      console.log("resposta mickController status:", response.ok)
+      console.log("Resposta mickController:", data.resposta)
+
+      if (response.ok) {
+        console.log("Resposta:", data.resposta)
+      } else {
+        console.log('Erro ao receber a resposta.');
+      }
+    } catch (error) {
+      console.log('Erro na comunicação com o servidor.\nErro: ', error);
+    }
+
+    res.status(200).json({ id_conversa });
   }
 };
 
 
 exports.updateMensagem = (req, res) => { // FALTA OLHAR OS UPDATES
-  const  id_mensagem  = req.params.id;
+  const id_mensagem = req.params.id;
   const mensagem = req.body;
   db.query('UPDATE mensagens SET ? WHERE id_mensagem = ?', [mensagem, id_mensagem], (err) => {
     if (err) return res.status(500).send(err);
@@ -98,7 +144,7 @@ exports.updateMensagem = (req, res) => { // FALTA OLHAR OS UPDATES
 };
 
 exports.deleteMensagem = (req, res) => {
-  const  id_mensagem  = req.params.id;
+  const id_mensagem = req.params.id;
   db.query('DELETE FROM mensagens WHERE id_mensagem = ?', [id_mensagem], (err) => {
     if (err) return res.status(500).send(err);
     res.sendStatus(204);

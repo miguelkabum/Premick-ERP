@@ -24,8 +24,12 @@ import {
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { logout } from "../../hooks/authSlice";
-// import logoExample from "/src/assets/icons/logoExample.png";
+
 import logoPremick from "/src/assets/icons/logoPremick.png";
+
+
+const urlNotifications = "http://localhost:5000/alertasestoque";
+const ITEM_HEIGHT = 48;
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -41,7 +45,7 @@ const ResponsiveAppBar = () => {
   const openSnackbar = (message, severity = "success") => {
     setSnackbar({ open: true, message, severity });
   };
-  
+
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
@@ -65,6 +69,31 @@ const ResponsiveAppBar = () => {
     }
   };
 
+  // NOTIFICAÇÕES DE ESTOQUE
+  const [notifications, setNotifications] = React.useState([]);
+  const [anchorElNotifyMenu, setAnchorElNotifyMenu] = React.useState(null);
+
+  const open = Boolean(anchorElNotifyMenu);
+
+  const handleClick = (event) => {
+    setAnchorElNotifyMenu(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorElNotifyMenu(null);
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await fetch(`${urlNotifications}`);
+      const data = await res.json();
+      setNotifications(data);
+      console.log(notifications) // Ele não entende ainda que as Notificações foram trocadas, MAS FUNCIONA :)
+    } catch (error) {
+      console.error("Erro ao buscar Notificações:", error);
+    }
+  };
+
   return (
     <AppBar position="static" sx={{ backgroundColor: "#213635" }}>
       <Container maxWidth="xl">
@@ -74,7 +103,7 @@ const ResponsiveAppBar = () => {
               src={logoPremick}
               alt="logo"
               style={{ height: 40, marginRight: "1rem", borderRadius: "5px" }}
-              
+
             />
           </Box>
 
@@ -144,9 +173,44 @@ const ResponsiveAppBar = () => {
 
           {/* Ícones de ações do usuário */}
           <Box sx={{ flexGrow: 0 }}>
-            <IconButton size="large" color="inherit">
+            <IconButton aria-label="more"
+              id="long-button"
+              size="large"
+              color="inherit"
+              aria-controls={open ? 'long-menu' : undefined}
+              aria-expanded={open ? 'true' : undefined}
+              aria-haspopup="true"
+              onClick={(event) => {
+                fetchNotifications();
+                handleClick(event);
+              }}
+            >
               <NotificationsIcon />
             </IconButton>
+            <Menu
+              id="long-menu"
+              MenuListProps={{
+                'aria-labelledby': 'long-button',
+              }}
+              anchorEl={anchorElNotifyMenu}
+              open={open}
+              onClose={handleClose}
+              slotProps={{
+                paper: {
+                  style: {
+                    maxHeight: ITEM_HEIGHT * 4.5,
+                    width: '20ch',
+                  },
+                },
+              }}
+            >
+              {notifications.map((notification) => (
+                <MenuItem key={notification.id_alerta} onClick={handleClose}>
+                  {notification.mensagem}
+                  {/* {notification.data_alerta} */}
+                </MenuItem>
+              ))}
+            </Menu>
             <IconButton size="large" color="inherit">
               <UserIcon />
             </IconButton>
