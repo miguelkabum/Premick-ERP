@@ -49,6 +49,8 @@ const urlChats = "http://localhost:5000/conversas";
 const urlMessages = "http://localhost:5000/mensagens";
 
 const MickChat = () => {
+    const { user } = useSelector((state) => state.auth);
+
     const [idConversa, setIdConversa] = useState(0);
     const [pergunta, setPergunta] = useState('');
     const [loading, setLoading] = useState(false);
@@ -76,7 +78,7 @@ const MickChat = () => {
     }, [open]);
 
     const fetchConversas = async () => {
-        const id_usuario = 2;              // FALTA Puxar por Usuário
+        const id_usuario = user.id_usuario;
         setLoading(true); // Ativa o spinner enquanto envia a mensagem
 
         try {
@@ -122,7 +124,7 @@ const MickChat = () => {
 
     const handleCreateChat = async () => {
         const conversa = {
-            id_usuario: 2,                            // Pegar id_usuario do Navegador ####### 
+            id_usuario: user.id_usuario,
             titulo: "Quinto Chat do Usuário 2"        // Adicionar título do chat onde? kkkkkkkk
         };
 

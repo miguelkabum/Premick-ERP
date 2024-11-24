@@ -9,8 +9,11 @@ import {
   TextField,
   Typography,
   Paper,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
-
 import { DataGrid } from "@mui/x-data-grid";
 import {
   Search,
@@ -25,11 +28,14 @@ import { useNavigate } from "react-router-dom";
 const url = "http://localhost:5000/clientes";
 
 const ClientesPage = () => {
-  
+
 
   const [clientes, setClientes] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [menuRowId, setMenuRowId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [clienteIdToDelete, setClienteIdToDelete] = useState(null);
 
   const navigate = useNavigate();
 
@@ -57,15 +63,27 @@ const ClientesPage = () => {
     setMenuRowId(null);
   };
 
-  const handleDeleteCliente = async (id) => {
+  const handleDeleteCliente = async () => {
     try {
-      await fetch(`${url}/${id}`, { method: "DELETE" });
+      await fetch(`${url}/${clienteIdToDelete}`, { method: "DELETE" });
       setClientes((prev) =>
-        prev.filter((cliente) => cliente.id_cliente !== id)
+        prev.filter((cliente) => cliente.id_cliente !== clienteIdToDelete)
       );
+      setOpenDialog(false);
+      setClienteIdToDelete(null);
     } catch (error) {
       console.error("Erro ao excluir cliente:", error);
     }
+  };
+
+  const handleOpenDialog = (id) => {
+    setClienteIdToDelete(id);
+    setOpenDialog(true);
+  };
+
+  const handleCloseDialog = () => {
+    setOpenDialog(false);
+    setClienteIdToDelete(null);
   };
 
   const columns = [
@@ -101,7 +119,7 @@ const ClientesPage = () => {
             </MenuItem>
             <MenuItem
               onClick={() => {
-                handleDeleteCliente(params.row.id_cliente);
+                handleOpenDialog(params.row.id_cliente);
                 handleCloseMenu();
               }}
             >
@@ -113,6 +131,13 @@ const ClientesPage = () => {
     },
   ];
 
+  const filteredClientes = Array.isArray(clientes)
+    ? clientes.filter((cliente) =>
+      cliente.nome_cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.CPF_cliente.includes(searchTerm)
+    )
+    : [];
+
   return (
     <div
       style={{
@@ -122,7 +147,7 @@ const ClientesPage = () => {
         justifyContent: "center",
       }}
     >
-      
+
       <Container sx={{ p: 1 }}>
         <Container sx={{ p: 2 }}>
           <div
@@ -165,7 +190,8 @@ const ClientesPage = () => {
                 InputProps={{
                   startAdornment: <Search />,
                 }}
-                sx={{ width: "100%", maxWidth: "400px", height: "auto" }}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ width: "100%", maxWidth: "300px", height: "auto" }}
               />
 
               <Box
@@ -190,6 +216,30 @@ const ClientesPage = () => {
               </Box>
             </Box>
           </Container>
+
+          {/* Dialog de confirmação Delete */}
+          <Dialog
+            open={openDialog}
+            onClose={handleCloseDialog}
+            aria-labelledby="alert-dialog-title"
+            aria-describedby="alert-dialog-description"
+          >
+            <DialogTitle id="alert-dialog-title">Excluir Cliente</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1">
+                Tem certeza que deseja excluir este cliente?
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog} color="primary">
+                Cancelar
+              </Button>
+              <Button onClick={handleDeleteCliente} color="error" autoFocus>
+                Excluir
+              </Button>
+            </DialogActions>
+          </Dialog>
+
           <Container maxWidth="lg" sx={{ padding: 2 }}>
             <Box
               sx={{
@@ -200,7 +250,7 @@ const ClientesPage = () => {
               }}
             >
               <DataGrid
-                rows={clientes}
+                rows={filteredClientes}
                 columns={columns}
                 getRowId={(row) => row.id_cliente}
                 pageSize={5}

@@ -15,7 +15,8 @@ import {
   DialogContentText,
   DialogTitle,
   InputAdornment,
-  IconButton
+  IconButton,
+  Snackbar,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -47,7 +48,12 @@ const RegistrationForm = () => {
   });
 
   const [alertaClass, setAlertaClass] = useState(false);
+  const [alertaClassSuccess, setAlertaClassSuccess] = useState(false);
   const [alertaMensagem, setAlertaMensagem] = useState('');
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Estado para o Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(''); // Mensagem do Snackbar
+
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -63,29 +69,44 @@ const RegistrationForm = () => {
 
     const { nome_usuario, email_usuario, senha_usuario, confirmSenha, termsAccepted } = formData;
 
-    // Validação dos campos
-    if (nome_usuario === '') {
+    // Validação do nome: Apenas letras maiúsculas e minúsculas
+    const nomeRegex = /^[A-Za-z\s]+$/;
+    if (!nome_usuario || !nomeRegex.test(nome_usuario)) {
       setAlertaClass(true);
-      setAlertaMensagem('O campo nome não pode ser vazio');
-      return;
-    }
-    if (email_usuario === '') {
-      setAlertaClass(true);
-      setAlertaMensagem('O campo email não pode ser vazio');
-      return;
-    }
-    if (senha_usuario === '' || confirmSenha === '' || senha_usuario !== confirmSenha) {
-      setAlertaClass(true);
-      setAlertaMensagem('As senhas não são iguais ou estão vazias');
-      return;
-    }
-    if (!termsAccepted) {
-      setAlertaClass(true);
-      setAlertaMensagem('Você deve aceitar os termos de serviço');
+      setAlertaMensagem('O nome só pode conter letras (maiúsculas ou minúsculas) e espaços.');
       return;
     }
 
-    setAlertaClass(false);
+    // Validação do email: Algo@dominio.com
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!email_usuario || !emailRegex.test(email_usuario)) {
+      setAlertaClass(true);
+      setAlertaMensagem('Por favor, insira um e-mail válido no formato exemplo@dominio.com');
+      return;
+    }
+
+    // Validação da senha: Mínimo de 8 caracteres
+    if (!senha_usuario || senha_usuario.length < 8) {
+      setAlertaClass(true);
+      setAlertaMensagem('A senha deve ter no mínimo 8 caracteres.');
+      return;
+    }
+
+    // Validação das senhas
+    if (senha_usuario !== confirmSenha) {
+      setAlertaClass(true);
+      setAlertaMensagem('As senhas não coincidem.');
+      return;
+    }
+
+    // Validação dos termos de serviço
+    if (!termsAccepted) {
+      setAlertaClass(true);
+      setAlertaMensagem('Você deve aceitar os termos de serviço para continuar.');
+      return;
+    }
+
+    setAlertaClass(false); // Reseta a classe de alerta em caso de sucesso
 
     // Enviar dados do usuário
     const user = {
@@ -93,8 +114,9 @@ const RegistrationForm = () => {
       email_usuario,
       senha_usuario,
       status: 1,
-      perfil_acesso: 'GERENTE'
+      perfil_acesso: 'GERENTE',
     };
+
     try {
       const response = await fetch(url, {
         method: 'POST',
@@ -103,7 +125,11 @@ const RegistrationForm = () => {
       });
 
       if (response.ok) {
-        alert('Usuário cadastrado com sucesso');
+        setSnackbarMessage('Usuário cadastrado com sucesso');
+        setSnackbarOpen(true);
+        setAlertaClassSuccess(true);
+        setAlertaMensagem('Usuário cadastrado com sucesso');
+
         setFormData({
           nome_usuario: '',
           email_usuario: '',
@@ -111,7 +137,10 @@ const RegistrationForm = () => {
           confirmSenha: '',
           termsAccepted: false,
         });
-        navigate('/login');
+
+        setTimeout(() => {
+          navigate('/login');
+        }, 1500);
       } else {
         setAlertaClass(true);
         setAlertaMensagem('Erro ao cadastrar o usuário');
@@ -120,6 +149,11 @@ const RegistrationForm = () => {
       setAlertaClass(true);
       setAlertaMensagem('Erro de conexão com o servidor');
     }
+  };
+
+
+  const handleCloseSnackbar = () => {
+    setSnackbarOpen(false);
   };
 
   const descriptionElementRef = React.useRef(null);
@@ -167,6 +201,7 @@ const RegistrationForm = () => {
 
 
         {alertaClass && <Alert severity="error" sx={{ mb: 2 }}>{alertaMensagem}</Alert>}
+        {alertaClassSuccess && <Alert severity="success" sx={{ mb: 2 }}>{alertaMensagem}</Alert>}
 
         <TextField
           label="Nome completo"
@@ -176,7 +211,7 @@ const RegistrationForm = () => {
           variant="outlined"
           onChange={handleChange}
           value={formData.nome_usuario}
-          required
+          // required
           placeholder="Digite o nome completo"
           sx={{
             mb: 2,
@@ -204,7 +239,7 @@ const RegistrationForm = () => {
           variant="outlined"
           onChange={handleChange}
           value={formData.email_usuario}
-          required
+          // required
           placeholder="Digite o seu e-mail"
           sx={{
             mb: 2,
@@ -232,7 +267,7 @@ const RegistrationForm = () => {
           variant="outlined"
           onChange={handleChange}
           value={formData.senha_usuario}
-          required
+          // required
           placeholder="8 ou mais caracteres"
           sx={{
             mb: 2,
@@ -272,7 +307,7 @@ const RegistrationForm = () => {
           variant="outlined"
           onChange={handleChange}
           value={formData.confirmSenha}
-          required
+          // required
           placeholder="Repita a senha"
           sx={{
             mb: 2,
@@ -309,7 +344,7 @@ const RegistrationForm = () => {
               name="termsAccepted"
               onChange={handleChange}
               checked={formData.termsAccepted}
-              required
+            // required
             />
           }
           label={
@@ -333,9 +368,11 @@ const RegistrationForm = () => {
           variant="contained"
           fullWidth
           sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2 }}
+          disabled={alertaClassSuccess}
         >
           Avançar
         </Button>
+
         <Typography variant="body2" align="center">
           Já possui uma conta?{" "}
           <Link component={RouterLink} to="/login">
@@ -343,6 +380,18 @@ const RegistrationForm = () => {
           </Link>
         </Typography>
       </Box>
+
+      {/* Snackbar de sucesso */}
+      {/* <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar> */}
 
       <Dialog
         open={open}

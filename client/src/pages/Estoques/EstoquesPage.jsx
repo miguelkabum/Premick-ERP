@@ -41,24 +41,24 @@ const EstoquesPage = () => {
   };
 
   // Função para formatar a data e hora com ajuste de +3 horas
-const formatDate = (date) => {
-  if (!date) return ''; // Verifica se a data existe
+  const formatDate = (date) => {
+    if (!date) return ''; // Verifica se a data existe
 
-  const adjustedDate = new Date(date);
-  adjustedDate.setHours(adjustedDate.getHours() + 3); // Adiciona 3 horas
+    const adjustedDate = new Date(date);
+    adjustedDate.setHours(adjustedDate.getHours() + 3); // Adiciona 3 horas
 
-  const formattedDate = adjustedDate.toLocaleString('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: false // Para usar o formato 24h
-  });
+    const formattedDate = adjustedDate.toLocaleString('pt-BR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false // Para usar o formato 24h
+    });
 
-  return formattedDate.replace(',', ''); // Remove a vírgula entre data e hora
-};
+    return formattedDate.replace(',', ''); // Remove a vírgula entre data e hora
+  };
 
   // Função para buscar estoques de acordo com o produto e tipo
   const fetchEstoques = async () => {
@@ -72,9 +72,21 @@ const formatDate = (date) => {
       const entradaData = await resEntrada.json();
       const saidaData = await resSaida.json();
       const combinedData = [
-        ...entradaData.map(e => ({ ...e, tipo: 'Entrada', data: formatDate(e.data_entrada), observacao: e.obs_entrada_produto })),
-        ...saidaData.map(s => ({ ...s, tipo: 'Saída', data: formatDate(s.data_saida), observacao: s.obs_saida_produto })),
+        ...(Array.isArray(entradaData) ? entradaData.map(e => ({
+          ...e,
+          tipo: 'Entrada',
+          data: formatDate(e.data_entrada),
+          observacao: e.obs_entrada_produto
+        })) : []),
+
+        ...(Array.isArray(saidaData) ? saidaData.map(s => ({
+          ...s,
+          tipo: 'Saída',
+          data: formatDate(s.data_saida),
+          observacao: s.obs_saida_produto
+        })) : [])
       ];
+
 
       // Aplica o filtro de tipo (se houver)
       if (tipoFiltro) {
@@ -158,74 +170,78 @@ const formatDate = (date) => {
               Movimentações de Estoque -{" "}
               {produtoSelecionado
                 ? produtos.find((p) => p.id_produto === produtoSelecionado)
-                    ?.nome_produto
+                  ?.nome_produto
                 : "Selecione um Produto"}
             </Typography>
           </div>
         </Container>
 
         <Paper elevation={1} sx={{ p: 2, borderRadius: "12px" }}>
-        <Container maxWidth="lg" sx={{ padding: 2 }}>
-          <Grid container spacing={2} sx={{ mt: 1, alignItems: "center" }}>
-            <Grid item xs={12} sm={4}>
-              {/* Selecione o Produto */}
-              <TextField
-                select
-                fullWidth
-                label="Selecione um Produto"
-                value={produtoSelecionado}
-                onChange={(e) => setProdutoSelecionado(e.target.value)}
-                sx={{ marginTop: 2, marginBottom: 2 }}
-              >
-                <MenuItem value="">Todos</MenuItem>
-                {produtos.map((produto) => (
-                  <MenuItem key={produto.id_produto} value={produto.id_produto}>
-                    {produto.nome_produto}
-                  </MenuItem>
-                ))}
-              </TextField>
-            </Grid>
+          <Container maxWidth="lg" sx={{ padding: 2 }}>
+            <Grid container spacing={2} sx={{ mt: 1, alignItems: "center" }}>
+              <Grid item xs={12} sm={4}>
+                {/* Selecione o Produto */}
+                <TextField
+                  select
+                  fullWidth
+                  label="Selecione um Produto"
+                  value={produtoSelecionado}
+                  onChange={(e) => setProdutoSelecionado(e.target.value)}
+                  sx={{ marginTop: 2, marginBottom: 2 }}
+                >
+                  <MenuItem value="">Todos</MenuItem>
+                  {Array.isArray(produtos) && produtos.length > 0 ? (
+                    produtos.map((produto) => (
+                      <MenuItem key={produto.id_produto} value={produto.id_produto}>
+                        {produto.nome_produto}
+                      </MenuItem>
+                    ))
+                  ) : (
+                    <MenuItem disabled>Não há produtos cadastrados</MenuItem>
+                  )}
+                </TextField>
+              </Grid>
 
-            <Grid item xs={12} sm={4}>
-              {/* Filtro de Tipo */}
-              <TextField
-                select
-                fullWidth
-                label="Filtrar por Tipo"
-                value={tipoFiltro}
-                onChange={(e) => setTipoFiltro(e.target.value)}
-                sx={{ marginTop: 2, marginBottom: 2 }}
-              >
-                <MenuItem value="">Todos</MenuItem>
-                <MenuItem value="Entrada">Entrada</MenuItem>
-                <MenuItem value="Saída">Saída</MenuItem>
-              </TextField>
-            </Grid>
+              <Grid item xs={12} sm={4}>
+                {/* Filtro de Tipo */}
+                <TextField
+                  select
+                  fullWidth
+                  label="Filtrar por Tipo"
+                  value={tipoFiltro}
+                  onChange={(e) => setTipoFiltro(e.target.value)}
+                  sx={{ marginTop: 2, marginBottom: 2 }}
+                >
+                  <MenuItem value="">Todos</MenuItem>
+                  <MenuItem value="Entrada">Entrada</MenuItem>
+                  <MenuItem value="Saída">Saída</MenuItem>
+                </TextField>
+              </Grid>
 
-            <Grid item xs={12} sm={4}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={<Add />}
-                sx={{ backgroundColor:"black", }}
-                onClick={() =>
-                  navigate(`/estoques/cadastro`, {
-                    state: {
-                      produto: produtos.find(
-                        (p) => p.id_produto === produtoSelecionado
-                      ),
-                    },
-                  })
-                }
-                disabled={!produtoSelecionado} // Desabilita o botão se não houver produto selecionado
-              >
-                Nova Movimentação
-              </Button>
+              <Grid item xs={12} sm={4}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  startIcon={<Add />}
+                  sx={{ backgroundColor: "black", }}
+                  onClick={() =>
+                    navigate(`/estoques/cadastro`, {
+                      state: {
+                        produto: produtos.find(
+                          (p) => p.id_produto === produtoSelecionado
+                        ),
+                      },
+                    })
+                  }
+                  disabled={!produtoSelecionado} // Desabilita o botão se não houver produto selecionado
+                >
+                  Nova Movimentação
+                </Button>
+              </Grid>
             </Grid>
-          </Grid>
           </Container>
           <Container maxWidth="lg" sx={{ padding: 2 }}>
-          <Box
+            <Box
               sx={{
                 height: "auto",
                 width: "100%",
@@ -233,25 +249,24 @@ const formatDate = (date) => {
                 borderRadius: "12px",
               }}
             >
-            <DataGrid
-              rows={estoques}
-              columns={columns}
-              getRowId={(row) =>
-                `${row.id_entrada_produto || row.id_saida_produto}-${
-                  row.tipo
-                }-${row.id_produto}`
-              }
-              pageSize={5}
-              sx={{
-                boxShadow: 0,
-                border: 0,
-                borderColor: "primary.light",
-                "& .MuiDataGrid-cell:hover": {
-                  color: "primary.main",
-                },
-              }}
-            />
-          </Box>
+              <DataGrid
+                rows={estoques}
+                columns={columns}
+                getRowId={(row) =>
+                  `${row.id_entrada_produto || row.id_saida_produto}-${row.tipo
+                  }-${row.id_produto}`
+                }
+                pageSize={5}
+                sx={{
+                  boxShadow: 0,
+                  border: 0,
+                  borderColor: "primary.light",
+                  "& .MuiDataGrid-cell:hover": {
+                    color: "primary.main",
+                  },
+                }}
+              />
+            </Box>
           </Container>
         </Paper>
       </Container>

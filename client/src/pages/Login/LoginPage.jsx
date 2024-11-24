@@ -9,6 +9,7 @@ import {
   IconButton,
   InputAdornment,
   Alert,
+  CircularProgress,
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useNavigate, Link as RouterLink } from "react-router-dom";
@@ -20,6 +21,7 @@ const LoginPage = () => {
   const [senha, setSenha] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [alerta, setAlerta] = useState(null);
+  const [loadingButton, setLoadingButton] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -38,7 +40,7 @@ const LoginPage = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  
+
     if (!email) {
       setAlerta("O campo email não pode ser vazio");
     } else if (!emailRegex.test(email)) {
@@ -46,19 +48,28 @@ const LoginPage = () => {
     } else if (!senha) {
       setAlerta("O campo senha não pode ser vazio");
     } else {
-      // Usar Redux para login
-      dispatch(login({ email, senha }))
-        .unwrap()
-        .then((data) => {
-          // Redirecionar ou fazer algo com a resposta
-          navigate("/dashboard");
-        })
-        .catch((error) => {
-          setAlerta(error.message);  // Exibe o erro na UI
-        });
+
+      setLoadingButton(true); // Ativa o loading do botão
+
+      // Simula um delay com setTimeout
+      setTimeout(() => {
+        // Usar Redux para login
+        dispatch(login({ email, senha }))
+          .unwrap()
+          .then((data) => {
+            // Redirecionar ou fazer algo com a resposta
+            navigate("/dashboard");
+          })
+          .catch((error) => {
+            setAlerta(error.message);  // Exibe o erro na UI
+          })
+          .finally(() => {
+            setLoadingButton(false); // Desativa o loading após a resposta
+          });
+      }, 1300); // Simula 1,3 segundos de espera
     }
   };
-  
+
 
   return (
     <Container
@@ -71,15 +82,15 @@ const LoginPage = () => {
         minHeight: "100vh",
       }}
     >
-        <Typography variant="h4" sx={{
-                marginBottom: "0",
-                fontSize: 60,
-                color: "#213635",
-                fontWeight: "bold",
-                mb: 5
-              }}>
-          Login
-        </Typography>
+      <Typography variant="h4" sx={{
+        marginBottom: "0",
+        fontSize: 60,
+        color: "#213635",
+        fontWeight: "bold",
+        mb: 5
+      }}>
+        Login
+      </Typography>
       <Box
         component="form"
         onSubmit={handleLogin}
@@ -170,10 +181,18 @@ const LoginPage = () => {
           variant="contained"
           color="primary"
           fullWidth
-          disabled={loading} // Desabilita o botão durante o carregamento
+          disabled={loading || loadingButton} // Desabilita o botão durante o carregamento
           sx={{ mb: 2, background: "#213635", height: 45 }}
         >
-          {loading ? "Entrando..." : "Entrar"} {/* Exibe mensagem de carregamento */}
+
+          {loadingButton ? (
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <CircularProgress size={24} sx={{ color: "#fff", mr: 1 }} />
+              Entrando...
+            </div>
+          ) : (
+            "Entrar"
+          )}
         </Button>
 
         <Typography variant="body2" align="center">

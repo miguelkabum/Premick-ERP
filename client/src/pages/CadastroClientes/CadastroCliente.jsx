@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Container, Divider, Grid, MenuItem, Paper, Select, TextField, Typography } from '@mui/material';
+import { Box, Button, Container, Divider, Grid, MenuItem, Paper, Select, TextField, Typography, Snackbar, Alert, FormHelperText, FormControlLabel, Switch, } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const url = "http://localhost:5000/clientes";
@@ -7,6 +7,12 @@ const url = "http://localhost:5000/clientes";
 const CadastroCliente = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Para controlar a exibição do Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(''); // Mensagem do Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Tipo de alerta do Snackbar (error, success, etc.)
+
+  const [errors, setErrors] = useState({});
   
   const [cliente, setCliente] = useState({
     nome_cliente: '',
@@ -18,7 +24,8 @@ const CadastroCliente = () => {
     bairro: '',
     complemento: '',
     telefone_cliente: '',
-    CPF_cliente: ''
+    CPF_cliente: '',
+    status: true,
   });
 
   useEffect(() => {
@@ -30,6 +37,18 @@ const CadastroCliente = () => {
     }
   }, [id]);
 
+  // Função para validar o nome
+  const validarNome = (nome) => {
+    const nomeRegex = /^[A-Za-z\s]+$/;
+    if (!nome || !nomeRegex.test(nome)) {
+      setSnackbarMessage('O nome deve conter apenas letras (maiúsculas ou minúsculas).');
+      setSnackbarSeverity('info');
+      setSnackbarOpen(true);
+      return false;
+    }
+    return true;
+  };
+
   // Função para buscar o endereço com base no CEP
   const buscarEnderecoPorCEP = (cep) => {
     if (cep.length === 8) {
@@ -37,10 +56,11 @@ const CadastroCliente = () => {
         .then((response) => response.json())
         .then((data) => {
           if (data.erro) {
-            alert("CEP não encontrado!");
+            setSnackbarMessage("CEP não encontrado!");
+            setSnackbarSeverity("error");
+            setSnackbarOpen(true);
             return;
           }
-          // Preenchendo os campos com as informações do endereço retornadas
           setCliente((prevCliente) => ({
             ...prevCliente,
             logradouro: data.logradouro,
@@ -52,7 +72,9 @@ const CadastroCliente = () => {
         })
         .catch((error) => {
           console.error("Erro ao buscar CEP:", error);
-          alert("Erro ao buscar informações do CEP.");
+          setSnackbarMessage("Erro ao buscar informações do CEP.");
+          setSnackbarSeverity("error");
+          setSnackbarOpen(true);
         });
     }
   };
@@ -105,7 +127,7 @@ const CadastroCliente = () => {
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name, value, type, checked } = e.target;
 
     let novoValor = value;
 
@@ -120,7 +142,8 @@ const CadastroCliente = () => {
 
     setCliente(prevCliente => ({
       ...prevCliente,
-      [name]: novoValor
+      [name]: novoValor,
+      [name]: type === 'checkbox' ? checked : value
     }));
 
     if (name === "cep") {
@@ -128,16 +151,41 @@ const CadastroCliente = () => {
     }
   };
 
-  // Função de validação do CPF ao sair do campo (onBlur)
-  const handleCPFBlur = () => {
-    const cpfLimpo = cliente.CPF_cliente.replace(/\D/g, ''); // Remove a formatação
+  // // Função de validação do CPF ao sair do campo (onBlur)
+  // const handleCPFBlur = () => {
+  //   const cpfLimpo = cliente.CPF_cliente.replace(/\D/g, ''); // Remove a formatação
 
-    if (cpfLimpo && !validarCPF(cpfLimpo)) {
-      alert('CPF inválido');
+  //   if (cpfLimpo && !validarCPF(cpfLimpo)) {
+  //     // alert('CPF inválido');
+  //     setSnackbarMessage('CPF inválido');
+  //     setSnackbarSeverity('error');
+  //     setSnackbarOpen(true);
+  //   }
+  // };
+
+  const validateForm = () => {
+    let formErrors = {};
+    let formIsValid = true;
+
+    if (!cliente.nome_cliente) {
+      formIsValid = false;
+      formErrors.nome_cliente = 'Nome do cliente é obrigatório';
     }
+
+    if (!cliente.CPF_cliente) {
+      formIsValid = false;
+      formErrors.CPF_cliente = 'CPF é obrigatório';
+    }
+
+    setErrors(formErrors);
+    return formIsValid;
   };
 
   const handleSaveCliente = async () => {
+    if (!validateForm() && !validarNome(cliente.nome_cliente)) {
+      return;
+    }
+
     // Remove pontos e hífens do CPF e do CEP
     const cpfLimpo = cliente.CPF_cliente.replace(/\D/g, ''); // Remove tudo que não for número
     const cepLimpo = cliente.cep.replace(/\D/g, ''); // Remove tudo que não for número
@@ -151,10 +199,12 @@ const CadastroCliente = () => {
 
     // Valida o CPF depois de limpar
     if (!validarCPF(cpfLimpo)) {
-      alert('CPF inválido');
+      setSnackbarMessage('CPF inválido');
+      setSnackbarSeverity('error');
+      setSnackbarOpen(true);
       return; // Impede o envio do formulário se o CPF for inválido
     }
-  
+
     // Salvar ou editar cliente
     const method = id ? "PUT" : "POST";
     const endpoint = id ? `${url}/${id}` : url;
@@ -171,12 +221,20 @@ const CadastroCliente = () => {
       });
   
       if (res.ok) {
+        setSnackbarMessage('Cliente salvo com sucesso!');
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
         navigate('/clientes');
       } else {
-        console.error('Erro ao salvar cliente.');
+        setSnackbarMessage('Erro ao salvar cliente.');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error("Erro ao salvar cliente:", error);
+      setSnackbarMessage("Erro ao salvar cliente.");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
   };
 
@@ -210,6 +268,8 @@ const CadastroCliente = () => {
                 name="nome_cliente"
                 value={cliente.nome_cliente}
                 onChange={handleChange}
+                error={!!errors.nome_cliente}
+                helperText={errors.nome_cliente}
                 sx={{
                   backgroundColor: "#F1F1F1", // Cor de fundo personalizada
                   borderRadius: 3, // Para arredondar os cantos
@@ -462,7 +522,9 @@ const CadastroCliente = () => {
                 name="CPF_cliente"
                 value={cliente.CPF_cliente}
                 onChange={handleChange}
-                onBlur={handleCPFBlur}  // Valida ao perder o foco
+                error={!!errors.CPF_cliente}
+                helperText={errors.CPF_cliente}
+                // onBlur={handleCPFBlur}  // Valida ao perder o foco
                 sx={{
                   backgroundColor: "#F1F1F1", // Cor de fundo personalizada
                   borderRadius: 3, // Para arredondar os cantos
@@ -480,6 +542,28 @@ const CadastroCliente = () => {
                 }}
               />
             </Grid>
+            { id && (
+  <Grid item xs={12}>
+    <FormControlLabel 
+      control={<Switch 
+        checked={cliente.status} 
+        onChange={handleChange} 
+        color='#213635'
+        sx={{
+          '& .MuiSwitch-thumb': {
+            backgroundColor: '#213635', // Cor do "thumb" (bolinha)
+          },
+          '& .MuiSwitch-track': {
+            backgroundColor: '#213635', // Cor do fundo
+          },
+        }}
+        name="status"
+      />} 
+      label="Ativo" 
+    />
+  </Grid>
+)}
+
           </Grid>
 
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -496,6 +580,19 @@ const CadastroCliente = () => {
           </Box>
         </Box>
       </Paper>
+
+      {/* Snackbar */}
+      <Snackbar 
+        open={snackbarOpen} 
+        autoHideDuration={3000} 
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 };

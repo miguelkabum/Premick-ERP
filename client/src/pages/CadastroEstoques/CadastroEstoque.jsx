@@ -8,6 +8,10 @@ import {
   TextField,
   Typography,
   Paper,
+  FormHelperText,
+  FormControl,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 
@@ -18,6 +22,15 @@ function CadastroEstoque() {
   const navigate = useNavigate();
   const location = useLocation();
   const produto = location.state?.produto; // Produto recebido via navegação
+
+  const [errors, setErrors] = useState({
+    quantidade: '',
+    valor_unitario: '',
+  });
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false); // Para controlar a exibição do Snackbar
+  const [snackbarMessage, setSnackbarMessage] = useState(''); // Mensagem do Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Tipo de alerta do Snackbar (error, success, etc.)
 
   const [movimentacao, setMovimentacao] = useState({
     tipo: 'Entrada',
@@ -35,12 +48,42 @@ function CadastroEstoque() {
       ...prev,
       [name]: value,
     }));
+
+    // Reset errors when the user starts typing
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '', // Clear the error for that field
+    }));
+  };
+
+  const validateForm = () => {
+    let isValid = true;
+    let errorMessages = {};
+
+    // Validating quantidade
+    if (movimentacao.quantidade <= 0) {
+      errorMessages.quantidade = 'Quantidade deve ser maior que 0.';
+      isValid = false;
+    }
+
+    // Validating valor_unitario
+    if (movimentacao.valor_unitario <= 0) {
+      errorMessages.valor_unitario = 'Valor unitário deve ser maior que 0.';
+      isValid = false;
+    }
+
+    setErrors(errorMessages);
+    return isValid;
   };
 
   const handleSaveMovimentacao = async () => {
     if (!movimentacao.id_produto) {
       console.error('Erro: Produto não foi identificado.');
       return;
+    }
+
+    if (!validateForm()) {
+      return; // Não salva se a validação falhar
     }
 
     const url = movimentacao.tipo === 'Entrada' ? urlEntrada : urlSaida;
@@ -65,6 +108,10 @@ function CadastroEstoque() {
         navigate(`/estoques`, { state: { produto } });
       } else {
         console.error('Erro ao salvar movimentação de estoque.');
+        // alert('Erro ao salvar movimentação de estoque.')
+        setSnackbarMessage('Quantidade insuficiente no estoque para saída.');
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       }
     } catch (error) {
       console.error('Erro ao salvar movimentação:', error);
@@ -112,56 +159,62 @@ function CadastroEstoque() {
             </TextField>
           </Grid>
           <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="Quantidade"
-              variant="outlined"
-              type="number"
-              name="quantidade"
-              value={movimentacao.quantidade}
-              onChange={handleChange}
-              sx={{
-                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
-                borderRadius: 3, // Para arredondar os cantos
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#ffffff", // Cor da borda padrão
+            <FormControl fullWidth error={!!errors.quantidade}>
+              <TextField
+                fullWidth
+                label="Quantidade"
+                variant="outlined"
+                type="number"
+                name="quantidade"
+                value={movimentacao.quantidade}
+                onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#ffffff", // Cor da borda no hover
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#ffffff", // Cor da borda no foco
-                  },
-                },
-              }}
-            />
+                }}
+              />
+              <FormHelperText>{errors.quantidade}</FormHelperText>
+            </FormControl>
           </Grid>
           <Grid item xs={6}>
-            <TextField
-              fullWidth
-              label="Valor Unitário"
-              variant="outlined"
-              type="number"
-              name="valor_unitario"
-              value={movimentacao.valor_unitario}
-              onChange={handleChange}
-              sx={{
-                backgroundColor: "#F1F1F1", // Cor de fundo personalizada
-                borderRadius: 3, // Para arredondar os cantos
-                "& .MuiOutlinedInput-root": {
-                  "& fieldset": {
-                    borderColor: "#ffffff", // Cor da borda padrão
+            <FormControl fullWidth error={!!errors.valor_unitario}>
+              <TextField
+                fullWidth
+                label="Valor Unitário"
+                variant="outlined"
+                type="number"
+                name="valor_unitario"
+                value={movimentacao.valor_unitario}
+                onChange={handleChange}
+                sx={{
+                  backgroundColor: "#F1F1F1", // Cor de fundo personalizada
+                  borderRadius: 3, // Para arredondar os cantos
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "#ffffff", // Cor da borda padrão
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no hover
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#ffffff", // Cor da borda no foco
+                    },
                   },
-                  "&:hover fieldset": {
-                    borderColor: "#ffffff", // Cor da borda no hover
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#ffffff", // Cor da borda no foco
-                  },
-                },
-              }}
-            />
+                }}
+              />
+              <FormHelperText>{errors.valor_unitario}</FormHelperText>
+            </FormControl>
           </Grid>
           {/* <Grid item xs={12}>
             <TextField
@@ -224,6 +277,19 @@ function CadastroEstoque() {
           </Grid>
         </Grid>
       </Paper>
+
+      {/* Snackbar */}
+      <Snackbar 
+        open={snackbarOpen} 
+        autoHideDuration={5000} 
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 }
