@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Paper,
-  Grid,
-} from "@mui/material";
+import { Box, TextField, Button, Typography, Paper, Grid } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
@@ -17,6 +10,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DataGrid } from "@mui/x-data-grid";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import ProdutosGrafico from "../../components/ProdutosGrafico";
 
 // URLs das APIs
 const urlVendasCanceladas = "http://localhost:5000/vendasCanceladas";
@@ -38,6 +32,11 @@ const RelatorioVendas = () => {
   const [loading, setLoading] = useState(false);
   const [vendasCanceladas, setVendasCanceladas] = useState([]);
   const [loadingCanceladas, setLoadingCanceladas] = useState(false);
+  const [exibirGraficoLinha, setExibirGraficoLinha] = useState(true);
+  const [exibirGraficoBarras, setExibirGraficoBarras] = useState(true);
+  const [exibirGraficoPizza, setExibirGraficoPizza] = useState(true);
+  const [exibirTabelaVendas, setExibirTabelaVendas] = useState(true);
+  const [exibirTabelaCanceladas, setExibirTabelaCanceladas] = useState(true);
 
   // Manipulação da mudança na data inicial
   const handleDataInicialChange = (newDate) => {
@@ -64,12 +63,12 @@ const RelatorioVendas = () => {
       const res = await fetch(urlVendasCanceladas);
       const data = await res.json();
 
-const filteredData = data.filter((item) => {
-  const itemDate = dayjs(item.data_venda_cancelada);
-  return (
-    (!dataInicial || itemDate.isSameOrAfter(dayjs(dataInicial), "day")) &&
-    (!dataFinal || itemDate.isBefore(dayjs(dataFinal).add(1, "day")))
-  );
+      const filteredData = data.filter((item) => {
+        const itemDate = dayjs(item.data_venda_cancelada);
+        return (
+          (!dataInicial || itemDate.isSameOrAfter(dayjs(dataInicial), "day")) &&
+          (!dataFinal || itemDate.isBefore(dayjs(dataFinal).add(1, "day")))
+        );
       });
 
       setVendasCanceladas(filteredData);
@@ -153,7 +152,8 @@ const filteredData = data.filter((item) => {
       const filteredData = combinedData.filter((item) => {
         const itemDate = dayjs(item.dataGrafico);
         return (
-          (!dataInicial || itemDate.isAfter(dayjs(dataInicial).subtract(0, "day"))) &&
+          (!dataInicial ||
+            itemDate.isAfter(dayjs(dataInicial).subtract(0, "day"))) &&
           (!dataFinal || itemDate.isBefore(dayjs(dataFinal).add(1, "day")))
         );
       });
@@ -182,22 +182,21 @@ const filteredData = data.filter((item) => {
   ];
 
   return (
-    <Box
-      sx={{
-        p: 2,
-        display: "flex",
-        flexDirection: "column",
-        gap: 3,
-      }}
-    >
-      <Typography variant="h2">Relatório de Vendas</Typography>
+    <>
+      <Typography variant="h2" sx={{ textAlign: "center", mt: 3, mb: 4 }}>
+        Relatório de Vendas
+      </Typography>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
+          p: 2,
+          display: "grid",
+          gridTemplateColumns: "minmax(400px, 30%) minmax(70%, 70%)",
+          gap: 1,
+          minWidth: "350px",
           "@media (max-width: 900px)": {
-            flexWrap: "wrap",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
           },
         }}
       >
@@ -205,87 +204,134 @@ const filteredData = data.filter((item) => {
           sx={{
             borderRadius: "12px",
             p: 3,
-            width: "50%",
-            "@media (max-width: 900px)": {
-              width: "100%",
-            },
+
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
           }}
         >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Escolha a data inicial e a data final
-          </Typography>
-          <div
-            className="datas"
-            style={{ display: "flex", justifyContent: "space-between" }}
-          >
-            <LocalizationProvider
-              dateAdapter={AdapterDayjs}
-              adapterLocale="pt-br"
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Escolha a data inicial e a data final
+            </Typography>
+            <div
+              className="datas"
+              style={{ display: "flex", justifyContent: "space-between" }}
             >
-              <div>
-                <DesktopDatePicker
-                  label="Data Inicial"
-                  value={dataInicial ? dayjs(dataInicial, "DD/MM/YYYY") : null}
-                  onChange={handleDataInicialChange}
-                  renderInput={(params) => <TextField {...params} />}
-                  inputFormat="DD/MM/YYYY"
-                  maxDate={dataFinal ? dayjs(dataFinal, "DD/MM/YYYY") : null} // Limita a seleção
-                  sx={{ margin: 4 }}
+              <LocalizationProvider
+                dateAdapter={AdapterDayjs}
+                adapterLocale="pt-br"
+              >
+                <Box sx={{ display: "flex", flexDirection: "column" }}>
+                  <div>
+                    <DesktopDatePicker
+                      label="Data Inicial"
+                      value={
+                        dataInicial ? dayjs(dataInicial, "DD/MM/YYYY") : null
+                      }
+                      onChange={handleDataInicialChange}
+                      renderInput={(params) => <TextField {...params} />}
+                      inputFormat="DD/MM/YYYY"
+                      maxDate={
+                        dataFinal ? dayjs(dataFinal, "DD/MM/YYYY") : null
+                      } // Limita a seleção
+                      sx={{ margin: 4 }}
+                    />
+                  </div>
+                  <div>
+                    <DesktopDatePicker
+                      label="Data Final"
+                      value={dataFinal ? dayjs(dataFinal, "DD/MM/YYYY") : null}
+                      onChange={handleDataFinalChange}
+                      renderInput={(params) => <TextField {...params} />}
+                      inputFormat="DD/MM/YYYY"
+                      minDate={
+                        dataInicial ? dayjs(dataInicial, "DD/MM/YYYY") : null
+                      } // Limita a seleção
+                      sx={{ margin: 4 }}
+                    />
+                  </div>
+                </Box>
+              </LocalizationProvider>
+            </div>
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Configurações de Exibição
+            </Typography>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={exibirGraficoLinha}
+                  onChange={(e) => setExibirGraficoLinha(e.target.checked)}
                 />
-              </div>
-              <div>
-                <DesktopDatePicker
-                  label="Data Final"
-                  value={dataFinal ? dayjs(dataFinal, "DD/MM/YYYY") : null}
-                  onChange={handleDataFinalChange}
-                  renderInput={(params) => <TextField {...params} />}
-                  inputFormat="DD/MM/YYYY"
-                  minDate={
-                    dataInicial ? dayjs(dataInicial, "DD/MM/YYYY") : null
-                  } // Limita a seleção
-                  sx={{ margin: 4 }}
+                Exibir Gráfico de Linha
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={exibirGraficoBarras}
+                  onChange={(e) => setExibirGraficoBarras(e.target.checked)}
                 />
-              </div>
-            </LocalizationProvider>
-          </div>
+                Exibir Gráfico de Barras
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={exibirGraficoPizza}
+                  onChange={(e) => setExibirGraficoPizza(e.target.checked)}
+                />
+                Exibir Gráfico de Pizza
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={exibirTabelaVendas}
+                  onChange={(e) => setExibirTabelaVendas(e.target.checked)}
+                />
+                Exibir Tabela de Vendas
+              </label>
+            </div>
+            <div>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={exibirTabelaCanceladas}
+                  onChange={(e) => setExibirTabelaCanceladas(e.target.checked)}
+                />
+                Exibir Tabela de Canceladas
+              </label>
+            </div>
+          </Box>
         </Paper>
-        <Paper
-          sx={{
-            borderRadius: "12px",
-            p: 3,
-            width: "50%",
-            "@media (max-width: 900px)": {
-              width: "100%",
-            },
-          }}
-        >
-          {graficoData.length > 0 ? (
+
+        {exibirGraficoLinha && graficoData.length > 0 ? (
+          <Paper
+            sx={{
+              borderRadius: "12px",
+              p: 3,
+              "@media (max-width: 900px)": {
+                width: "100%",
+              },
+            }}
+          >
             <LineChart
               data={graficoData}
-              height={300}
+              height={400}
               xAxis={[
                 {
                   scaleType: "time",
-                  data: graficoData.map((item) => dayjs(item.date).toDate()), // Converte para objeto Date após usar o Day.js
-                  // valueFormatter: (value) => dayjs(value).toDate().toLocaleString("pt-BR", {
-                  //   day: "2-digit",
-                  //   month: "2-digit",
-                  //   year: "numeric",
-                  //   hour: "2-digit",
-                  //   minute: "2-digit",
-                  //   hour12: false,
-                  // }),
-                  valueFormatter: (value) =>
-                    dayjs(value).format("DD-MM-YYYY HH:mm:ss"),
+                  data: graficoData.map((item) => dayjs(item.date).toDate()),
+                  valueFormatter: (value) => dayjs(value).format("DD-MM-YYYY"),
                   title: "Data",
                 },
-                // {
-                //   scaleType: "time",
-                //   data: graficoData.map((item) => dayjs.utc(item.date).local().toDate()), // Interpreta como UTC e converte para local
-                //   valueFormatter: (value) =>
-                //     dayjs.utc(value).local().format("DD-MM-YYYY HH:mm:ss"), // Converte para o horário local e formata
-                //   title: "Data",
-                // },
               ]}
               yAxis={[{ title: "Total de Vendas" }]}
               series={[
@@ -295,38 +341,49 @@ const filteredData = data.filter((item) => {
                 },
               ]}
             />
-          ) : (
+          </Paper>
+        ) : (
+          exibirGraficoLinha && (
             <Typography variant="body2">
               Nenhum dado para exibir no gráfico de linha.
             </Typography>
-          )}
-        </Paper>
-      </Box>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          "@media (max-width: 900px)": {
-            flexWrap: "wrap",
-          },
-        }}
-      >
-        <Paper
-          sx={{
-            borderRadius: "12px",
-            p: 3,
-            width: "65%",
-            minWidth: 425,
-            "@media (max-width: 900px)": {
-              width: "100%",
-            },
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Vendas concluídas
-          </Typography>
-          {graficoLinhaBarrasData.length > 0 ? (
+          )
+        )}
+        {exibirGraficoPizza && graficoPizzaData.length > 0 ? (
+          <Paper
+            sx={{
+              borderRadius: "12px",
+              p: 3,
+              "@media (max-width: 900px)": {},
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+              Gráfico de porcentagem por forma de pagamento
+            </Typography>
+
+            <PieChart
+              series={[{ data: graficoPizzaData }]}
+              height={400}
+              width={350}
+              sx={{
+                "@media (max-width: 900px)": {
+                  marginLeft: -15,
+                },
+              }}
+            />
+          </Paper>
+        ) : (
+          exibirGraficoPizza && (
+            <Typography variant="body2">
+              Nenhum dado para exibir no gráfico de linha.
+            </Typography>
+          )
+        )}
+        {exibirGraficoBarras && (
+          <Paper>
+            <Typography variant="h6" sx={{ mb: 2, textAlign: "center" }}>
+              Vendas concluídas
+            </Typography>
             <BarChart
               series={[
                 {
@@ -334,132 +391,79 @@ const filteredData = data.filter((item) => {
                   title: "Vendas",
                 },
               ]}
-              height={200}
+              height={400}
               xAxis={[
                 {
                   scaleType: "band",
                   data: graficoLinhaBarrasData.map((item) => item.date),
-                  valueFormatter: (value) =>
-                    dayjs(value).toDate().toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      year: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    }),
+                  valueFormatter: (value) => dayjs(value).format("DD/MM/YYYY"),
                   title: "Data",
                 },
               ]}
               yAxis={[{ title: "Total de Vendas" }]}
             />
-          ) : (
-            <Typography variant="body2">
-              Nenhum dado para exibir no gráfico de barras.
+          </Paper>
+        )}
+
+        {exibirTabelaVendas && (
+          <Paper
+            sx={{
+              borderRadius: "12px",
+              p: 3,
+              gridColumn: "span 2",
+              "@media (max-width: 900px)": {
+                width: "100%",
+              },
+            }}
+          >
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Vendas concluídas
             </Typography>
-          )}
-        </Paper>
-
-        <Paper
-          sx={{
-            borderRadius: "12px",
-            p: 3,
-            width: "35%",
-            minWidth: 425,
-            "@media (max-width: 900px)": {
-              width: "100%",
-              minWidth: "auto",
-            },
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Gráfico de porcentagem por forma de pagamento
-          </Typography>
-
-          {graficoPizzaData.length > 0 ? (
-            <PieChart
-              series={[{ data: graficoPizzaData }]}
-              height={200}
-              width={450}
+            <DataGrid
+              rows={vendas}
+              columns={columns}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              loading={loading}
               sx={{
-                marginLeft: -9,
-                overflowX: "auto",
-                "@media (max-width: 900px)": {
-                  marginLeft: -15,
-                },
+                height: 400,
+                borderRadius: "12px",
               }}
             />
-          ) : (
-            <Typography variant="body2">
-              Nenhum dado para exibir no gráfico de pizza.
-            </Typography>
-          )}
-        </Paper>
-      </Box>
+          </Paper>
+        )}
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "row",
-          gap: 2,
-          "@media (max-width: 900px)": {
-            flexWrap: "wrap",
-          },
-        }}
-      >
-        <Paper
-          sx={{
-            borderRadius: "12px",
-            p: 3,
-            width: "50%",
-            "@media (max-width: 900px)": {
-              width: "100%",
-            },
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Vendas concluídas
-          </Typography>
-          <DataGrid
-            rows={vendas}
-            columns={columns}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            loading={loading}
+        {exibirTabelaCanceladas && (
+          <Paper
             sx={{
-              height: 400,
               borderRadius: "12px",
+              p: 3,
+              gridColumn: "span 2",
+              "@media (max-width: 900px)": {
+                width: "100%",
+              },
             }}
-          />
-        </Paper>
-        <Paper
-          sx={{
-            borderRadius: "12px",
-            p: 3,
-            width: "50%",
-            "@media (max-width: 900px)": {
-              width: "100%",
-            },
-          }}
-        >
-          <Typography variant="h6" sx={{ mb: 2 }}>
-            Vendas Canceladas
-          </Typography>
-          <DataGrid
-            rows={vendasCanceladas}
-            columns={columnsCanceladas}
-            pageSize={5}
-            rowsPerPageOptions={[5]}
-            loading={loadingCanceladas}
-            getRowId={(row) => row.id_venda_cancelada} // Define um identificador personalizado
-            sx={{
-              height: 400,
-              borderRadius: "12px",
-            }}
-          />
-        </Paper>
+          >
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              Vendas Canceladas
+            </Typography>
+            <DataGrid
+              rows={vendasCanceladas}
+              columns={columnsCanceladas}
+              pageSize={5}
+              rowsPerPageOptions={[5]}
+              loading={loadingCanceladas}
+              getRowId={(row) => row.id_venda_cancelada} // Define um identificador personalizado
+              sx={{
+                height: 400,
+                borderRadius: "12px",
+              }}
+            />
+          </Paper>
+        )}
       </Box>
-    </Box>
+      
+    </>
   );
 };
 
