@@ -2,14 +2,14 @@ const db = require('../models/db');
 
 // 1. Obter alertas de estoque
 exports.getAlertasEstoque = (req, res) => {
-  const id_produto = req.query.id_produto;
+  const id_alerta = req.query.id_alerta;
 
-  let query = 'SELECT * FROM alertas_estoque';
-  if (id_produto) {
-    query += ' WHERE id_produto = ?';
+  let query = 'SELECT ae.id_alerta, ae.id_produto, p.nome_produto, ae.mensagem, ae.data_alerta, ae.visualizado FROM alertas_estoque ae JOIN produtos p ON ae.id_produto = p.id_produto';
+  if (id_alerta) {
+    query += ' WHERE id_alerta = ?';
   }
 
-  db.query(query, [id_produto], (err, results) => {
+  db.query(query, [id_alerta], (err, results) => {
     if (err) return res.status(500).send(err);
     res.json(results);
   });
@@ -34,16 +34,9 @@ exports.createAlertaEstoque = (req, res) => {
 
 // 3. Atualizar alerta de estoque
 exports.updateAlertaEstoque = (req, res) => {
-  const id_alerta = req.params.id_alerta;
-  const { mensagem, data_alerta } = req.body;
+  const id_alerta = req.params.id;
 
-  if (!mensagem || !data_alerta) {
-    return res.status(400).json({ error: 'Faltando dados obrigatórios para atualização' });
-  }
-
-  const alertaEstoque = { mensagem, data_alerta };
-
-  db.query('UPDATE alertas_estoque SET ? WHERE id_alerta = ?', [alertaEstoque, id_alerta], (err) => {
+  db.query('UPDATE alertas_estoque SET visualizado = 1 WHERE id_alerta = ?', [id_alerta], (err) => {
     if (err) return res.status(500).send(err);
     res.sendStatus(204); // No content
   });

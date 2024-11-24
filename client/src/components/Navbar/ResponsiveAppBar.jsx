@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   AppBar,
   Box,
@@ -12,6 +12,7 @@ import {
   Tooltip,
   Alert,
   Snackbar,
+  Badge,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -70,6 +71,7 @@ const ResponsiveAppBar = () => {
   };
 
   // NOTIFICAÇÕES DE ESTOQUE
+  const [unseenNotifications, setUnseenNotifications] = React.useState(0);
   const [notifications, setNotifications] = React.useState([]);
   const [anchorElNotifyMenu, setAnchorElNotifyMenu] = React.useState(null);
 
@@ -88,11 +90,60 @@ const ResponsiveAppBar = () => {
       const res = await fetch(`${urlNotifications}`);
       const data = await res.json();
       setNotifications(data);
-      console.log(notifications) // Ele não entende ainda que as Notificações foram trocadas, MAS FUNCIONA :)
+
+      let qtde_unseenNotifications = 0;
+      data.map((notification) => {
+        if (notification.visualizado == 0) {
+          qtde_unseenNotifications += 1;
+        }
+      })
+
+      if (qtde_unseenNotifications > 0) {
+        setUnseenNotifications(qtde_unseenNotifications)
+      }
+
+      // console.log(notifications) // Ele não entende ainda que as Notificações foram trocadas, MAS FUNCIONA :)
     } catch (error) {
       console.error("Erro ao buscar Notificações:", error);
     }
   };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const fetchUpdateUnseenNotifications = async (id_alerta) => {
+    try {
+      const res = await fetch(`${urlNotifications}/${id_alerta}`, { method: "PUT" });
+
+      if (res.ok) {
+        console.log("Visualização atualizada com sucesso");
+
+        // Atualize o estado local após marcar a notificação como visualizada
+        setNotifications((prev) => {
+          const updatedNotifications = prev.map((notification) =>
+            notification.id_alerta === id_alerta
+              ? { ...notification, visualizado: 1 }
+              : notification
+          );
+
+          // Recalcular as notificações não visualizadas
+          const updatedUnseenCount = updatedNotifications.filter(
+            (notification) => notification.visualizado === 0
+          ).length;
+
+          setUnseenNotifications(updatedUnseenCount);
+
+          return updatedNotifications;
+        });
+      } else {
+        console.log("Erro ao Atualizar a visualização da Notificação");
+      }
+    } catch (error) {
+      console.error("Erro ao Atualizar Visualização das Notificações:", error);
+    }
+  };
+
 
   return (
     <AppBar position="static" sx={{ backgroundColor: "#213635" }}>
@@ -185,7 +236,16 @@ const ResponsiveAppBar = () => {
                 handleClick(event);
               }}
             >
-              <NotificationsIcon />
+              {unseenNotifications == 0 ? (
+                <NotificationsIcon />
+              ) : (
+                <Badge badgeContent={unseenNotifications} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              )}
+              {/* <Badge badgeContent={unseenNotifications} color="error">
+                <NotificationsIcon />
+              </Badge> */}
             </IconButton>
             <Menu
               id="long-menu"
@@ -198,6 +258,7 @@ const ResponsiveAppBar = () => {
               slotProps={{
                 paper: {
                   style: {
+                    minHeight: ITEM_HEIGHT * 4.5,
                     maxHeight: ITEM_HEIGHT * 4.5,
                     width: '20ch',
                   },
@@ -205,7 +266,7 @@ const ResponsiveAppBar = () => {
               }}
             >
               {notifications.map((notification) => (
-                <MenuItem key={notification.id_alerta} onClick={handleClose}>
+                <MenuItem key={notification.id_alerta} onClick={() => { fetchUpdateUnseenNotifications(notification.id_alerta) }}>
                   {notification.mensagem}
                   {/* {notification.data_alerta} */}
                 </MenuItem>
