@@ -32,6 +32,8 @@ import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 
+import CircularProgress from '@mui/material/CircularProgress';
+
 const drawerWidth = 200;
 
 const DrawerHeader = styled('div')(({ theme }) => ({
@@ -49,7 +51,7 @@ const urlMessages = "http://localhost:5000/mensagens";
 const MickChat = () => {
     const [idConversa, setIdConversa] = useState(0);
     const [pergunta, setPergunta] = useState('');
-
+    const [loading, setLoading] = useState(false);
     const [conversas, setConversas] = useState([]);
     const [mensagens, setMensagens] = useState([]);
 
@@ -75,6 +77,7 @@ const MickChat = () => {
 
     const fetchConversas = async () => {
         const id_usuario = 2;              // FALTA Puxar por Usuário
+        setLoading(true); // Ativa o spinner enquanto envia a mensagem
 
         try {
             const res = await fetch(`${urlChats}?id=${id_usuario}`);      // FALTA Puxar por Usuário
@@ -82,16 +85,22 @@ const MickChat = () => {
             setConversas(data);
         } catch (error) {
             console.error("Erro ao buscar conversas:", error);
+        } finally {
+            setLoading(false); // Desativa o spinner após a operação
         }
     };
 
     const fetchMensagens = async (id_conversa) => {
+        setLoading(true); // Ativa o spinner enquanto envia a mensagem
+
         try {
             const res = await fetch(`${urlMessages}?id=${id_conversa}`);
             const data = await res.json();
             setMensagens(data);
         } catch (error) {
             console.error("Erro ao buscar mensagens:", error);
+        } finally {
+            setLoading(false); // Desativa o spinner após a operação
         }
     };
 
@@ -131,7 +140,7 @@ const MickChat = () => {
 
                 // Atualiza as mensagens com o novo ID de conversa
                 await fetchMensagens(newIdConversa);
-    
+
                 // Atualiza a lista de conversas
                 await fetchConversas();
             } else {
@@ -149,7 +158,9 @@ const MickChat = () => {
             conteudo: pergunta,
             id_usuario: 2, // ID fixo para teste; substitua pelo ID do usuário autenticado
         };
-    
+
+        setLoading(true); // Ativa o spinner enquanto envia a mensagem
+
         try {
             const res = await fetch(urlMessages, {
                 method: 'POST',
@@ -164,10 +175,10 @@ const MickChat = () => {
                     newIdConversa = data.id_conversa; // Atualiza com o ID retornado
                     setIdConversa(newIdConversa);
                 }
-    
+
                 // Atualiza as mensagens com o novo ID de conversa
                 await fetchMensagens(newIdConversa);
-    
+
                 // Atualiza a lista de conversas
                 await fetchConversas();
             } else {
@@ -177,9 +188,10 @@ const MickChat = () => {
             console.error("Erro na requisição:", error.message);
         } finally {
             setPergunta(''); // Limpa o campo de entrada
+            setLoading(false); // Desativa o spinner após a operação
         }
     };
-    
+
 
     return (
         <Fragment>
@@ -311,6 +323,7 @@ const MickChat = () => {
                         <TextField id="outlined-basic" label="Mensagem" variant="outlined" value={pergunta} onChange={(e) => { setPergunta(e.target.value) }} sx={{ width: "100%" }} />
                         <Button
                             sx={{ width: "56px", height: "56px" }}
+                            disabled={loading}
                             onClick={async () => {
                                 if (!pergunta) {
                                     alert("Campo Pergunta não pode ser vazio!")
@@ -319,7 +332,11 @@ const MickChat = () => {
                                 }
                             }}
                         >
-                            <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} />
+                            {loading ? (
+                                <CircularProgress size={24} color="inherit" />
+                            ) : (
+                                <SendIcon sx={{ color: "black", width: "40px", height: "40px" }} />
+                            )}
                         </Button>
                     </DialogActions>
 

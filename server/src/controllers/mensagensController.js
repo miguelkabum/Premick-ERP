@@ -55,26 +55,75 @@ exports.createMensagem = async (req, res) => {
 
       // const id_mensagem = message.insertId;
 
+      // try {
+      //   const response = await fetch('http://localhost:5000/api/mick', {
+      //     method: 'POST',
+      //     headers: {
+      //       'Content-Type': 'application/json',
+      //     },
+      //     body: JSON.stringify({ conteudo, id_conversa }),
+      //   });
+
+      //   const data = await response.json();
+      //   console.log("resposta mickController status:", response.ok)
+      //   console.log("Resposta mickController:", data.resposta)
+
+      //   if (response.ok) {
+      //     console.log("Resposta:", data.resposta)
+      //   } else {
+      //     console.log('Erro ao receber a resposta.');
+      //   }
+      // } catch (error) {
+      //   console.log('Erro na comunicação com o servidor.\nErro: ', error);
+      // }
+
       try {
-        const response = await fetch('http://localhost:5000/api/mick', {
+        console.log(conteudo)
+        let pergunta = conteudo;
+        console.log(pergunta)
+        // Faz requisição para a API em Python (Flask) com o Vanna
+        const respostaPython = await fetch('http://localhost:8000/api/mick', {
           method: 'POST',
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ conteudo, id_conversa }),
+          body: JSON.stringify({ pergunta })
         });
 
-        const data = await response.json();
-        console.log("resposta mickController status:", response.ok)
-        console.log("Resposta mickController:", data.resposta)
+        const dadosPython = await respostaPython.json();
+        console.log("respostaPython status:", respostaPython.ok)
+        console.log("DadosPython:", dadosPython)
 
-        if (response.ok) {
-          console.log("Resposta:", data.resposta)
+        if (!dadosPython || !dadosPython.resposta) {
+          // Insere a resposta de Erro na tabela `mensagens`
+          db.query(
+            'INSERT INTO mensagens (id_conversa, tipo_mensagem, conteudo, data_envio) VALUES (?, "BOT", ?, NOW())',
+            [id_conversa, 'Desculpe, houve um erro ao processar sua solicitação, tente novamente mais tarde.'],
+          );
+
+          res.status(500).json({ error: 'Resposta inválida da API Flask' });
         } else {
-          console.log('Erro ao receber a resposta.');
+          // Insere a resposta na tabela `mensagens`
+          db.query(
+            'INSERT INTO mensagens (id_conversa, tipo_mensagem, conteudo, data_envio) VALUES (?, "BOT", ?, NOW())',
+            [id_conversa, dadosPython.resposta],
+            // (err, results) => {
+            //   if (err) return res.status(500).send(err);
+            //   console.log("Resposta da API:", dadosPython.resposta)
+            //   res.status(200).json({ /*id_mensagem: results.insertId,*/ resposta: dadosPython.resposta });
+            // }
+          );
         }
+
+        // if (respostaPython.ok) {
+        // } else {
+        //     console.log('respostaPython.ok == false, não é "OK"');
+        //     console.log('Resposta do BOT:', dadosPython.resposta);
+        //     res.status(500).json({ resposta: 'Erro ao receber a resposta da API Vanna' });
+        // }
       } catch (error) {
-        console.log('Erro na comunicação com o servidor.\nErro: ', error);
+        console.error('Erro ao consultar a API Vanna:', error);
+        res.status(500).json({ erro: 'Erro ao consultar a API Vanna' });
       }
 
       // Confirma a transação
