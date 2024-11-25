@@ -69,7 +69,7 @@ const LoginPage = () => {
       }, 1300); // Simula 1,3 segundos de espera
     }
   };
-
+  localStorage.clear();
 
   return (
     <Container

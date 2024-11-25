@@ -10,7 +10,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DataGrid } from "@mui/x-data-grid";
 import { LineChart } from "@mui/x-charts/LineChart";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
-import ProdutosGrafico from "../../components/ProdutosGrafico";
+import ProdutosGrafico from "../../components/ProdutosGrafico/ProdutosGrafico";
 
 // URLs das APIs
 const urlVendasCanceladas = "http://localhost:5000/vendasCanceladas";
@@ -190,7 +190,7 @@ const RelatorioVendas = () => {
         sx={{
           p: 2,
           display: "grid",
-          gridTemplateColumns: "minmax(400px, 30%) minmax(70%, 70%)",
+          gridTemplateColumns: "minmax(400px, 30%) minmax(40%, 70%)",
           gap: 1,
           minWidth: "350px",
           "@media (max-width: 900px)": {
@@ -461,8 +461,19 @@ const RelatorioVendas = () => {
             />
           </Paper>
         )}
+        <Paper
+            sx={{
+              borderRadius: "12px",
+              p: 3,
+              gridColumn: "span 2",
+              "@media (max-width: 900px)": {
+                width: "100%",
+              },
+            }}
+          >
+        <ProdutosGrafico />
+        </Paper>
       </Box>
-      
     </>
   );
 };
