@@ -49,6 +49,26 @@ const BootstrapDialog = styled(Dialog)(({ theme }) => ({
 
 
 const ResponsiveAppBar = () => {
+  // Função para formatar a data e hora com ajuste de +3 horas
+  const formatDate = (date) => {
+    if (!date) return ''; // Verifica se a data existe
+
+    const adjustedDate = new Date(date);
+    adjustedDate.setHours(adjustedDate.getHours() + 3); // Adiciona 3 horas
+
+    const formattedDate = adjustedDate.toLocaleString('pt-BR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false // Para usar o formato 24h
+    });
+
+    return formattedDate.replace(',', ''); // Remove a vírgula entre data e hora
+  };
+
   const [selectedNotification, setSelectedNotification] = React.useState(null);
   const [openNotificationInfo, setOpenNotificationInfo] = React.useState(false);
 
@@ -129,15 +149,13 @@ const ResponsiveAppBar = () => {
         setUnseenNotifications(qtde_unseenNotifications)
       }
 
-      // console.log(notifications) // Ele não entende ainda que as Notificações foram trocadas, MAS FUNCIONA :)
+      // Agendar a próxima verificação
+      setTimeout(fetchNotifications, 5000); // Repetir a cada 5 segundos
     } catch (error) {
       console.error("Erro ao buscar Notificações:", error);
+      setTimeout(fetchNotifications, 5000); // Repetir a cada 5 segundos
     }
   };
-
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
 
   const fetchUpdateUnseenNotifications = async (id_alerta) => {
     try {
@@ -170,6 +188,10 @@ const ResponsiveAppBar = () => {
       console.error("Erro ao Atualizar Visualização das Notificações:", error);
     }
   };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
 
 
   return (
@@ -287,7 +309,7 @@ const ResponsiveAppBar = () => {
                   style: {
                     minHeight: ITEM_HEIGHT * 4.5,
                     maxHeight: ITEM_HEIGHT * 4.5,
-                    width: '20ch',
+                    width: '40ch',
                   },
                 },
               }}
@@ -303,14 +325,17 @@ const ResponsiveAppBar = () => {
                   }}
                   sx={{
                     backgroundColor: notification.visualizado === 0 ? "#f9f9f9" : "white", // Fundo mais claro para não lidas
-                    fontWeight: notification.visualizado === 0 ? "bold" : "normal", // Negrito para não lidas
                     borderBottom: "1px solid #e0e0e0", // Separador entre notificações
                     "&:hover": {
                       backgroundColor: notification.visualizado === 0 ? "#e0e0e0" : "#f5f5f5", // Diferencia o hover
                     },
                   }}
                 >
-                  {notification.mensagem}
+                  <Typography noWrap sx={{
+                    fontWeight: notification.visualizado === 0 ? "bold" : "normal", // Negrito para não lidas
+                  }}>
+                    {notification.id_alerta}. {notification.nome_produto} - {notification.mensagem}
+                  </Typography>
                   {/* {notification.data_alerta} */}
                 </MenuItem>
               ))}
@@ -374,10 +399,10 @@ const ResponsiveAppBar = () => {
           {selectedNotification ? (
             <>
               <Typography gutterBottom>
-                <strong>Data:</strong> {new Date(selectedNotification.data_alerta).toLocaleString()}
+                <strong>Data do Alerta:</strong> {formatDate(selectedNotification.data_alerta)}.
               </Typography>
               <Typography gutterBottom>
-                <strong>Mensagem:</strong> {selectedNotification.mensagem}
+                <strong>Mensagem:</strong> {selectedNotification.mensagem} para o produto: {selectedNotification.nome_produto}.
               </Typography>
               {/* <Typography gutterBottom>
                 <strong>Detalhes:</strong> {selectedNotification.detalhes || "Sem informações adicionais."}

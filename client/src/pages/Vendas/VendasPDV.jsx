@@ -271,37 +271,37 @@ const VendasPDV = () => {
     console.log("Produto Detalhado:", produto);
     console.log("Quantidade:", quantidade);
     console.log("Produtos na Venda (antes):", produtosVenda);
-  
+
     if (!produto) {
       openSnackbar("Nenhum produto selecionado.", "error");
       return; // Se não houver produto detalhado, encerra a função
     }
-  
+
     if (quantidade <= 0) {
       openSnackbar("A quantidade deve ser maior que zero.", "error");
       return; // Validação para impedir quantidade inválida
     }
-  
+
     // Verifica se o produto já existe na lista
     const produtoExistente = produtosVenda.find(
       (prod) => prod.id_produto === produto.id_produto
     );
-  
+
     setProdutosVenda((prev) => {
       let updatedProdutosVenda;
-  
+
       if (produtoExistente) {
         // Se já existe, incrementa a quantidade e redefine o status para "OK"
         updatedProdutosVenda = prev.map((prod) =>
           prod.id_produto === produto.id_produto
             ? {
-                ...prod,
-                quantidade: prod.quantidade + quantidade,
-                status: "OK", // Atualiza o status para "OK"
-              }
+              ...prod,
+              quantidade: prod.quantidade + quantidade,
+              status: "OK", // Atualiza o status para "OK"
+            }
             : prod
         );
-        
+
       } else {
         // Adiciona o produto como novo item
         updatedProdutosVenda = [
@@ -314,7 +314,7 @@ const VendasPDV = () => {
       return updatedProdutosVenda;
     });
   };
-  
+
 
   const handleFinalizarVenda = async () => {
     if (valorTotal <= 0) {
@@ -525,45 +525,45 @@ const VendasPDV = () => {
               }}
             >
               <Box sx={{ display: "flex", gap: 2 }}>
-              <Autocomplete
-      disablePortal
-      value={produtoSelecionado} // Usa o produto selecionado
-      onInputChange={(event, newInputValue) => {
-        handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
-      }}
-      options={produtos} // Exibe os produtos filtrados, altere conforme necessário
-      getOptionLabel={(option) => option.nome_produto || 'Pesquise'}
-      onChange={(event, newValue) => {
-        if (newValue) {
-          setProdutoSelecionado(newValue);
-          handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
+                <Autocomplete
+                  disablePortal
+                  value={produtoSelecionado} // Usa o produto selecionado
+                  onInputChange={(event, newInputValue) => {
+                    handlePesquisaProduto(newInputValue); // Chama a função de pesquisa
+                  }}
+                  options={produtos} // Exibe os produtos filtrados, altere conforme necessário
+                  getOptionLabel={(option) => option.nome_produto || 'Pesquise'}
+                  onChange={(event, newValue) => {
+                    if (newValue) {
+                      setProdutoSelecionado(newValue);
+                      handleAdicionarProduto(newValue, quantidade); // Passa o produto e quantidade diretamente
 
-          // Seleciona o texto do input após selecionar um produto
-          if (inputRef.current) {
-            inputRef.current.select();
-          }
-        }
-      }}
-      sx={{
-        flex: 5,
-        mb: 2,
-        "@media (max-width: 700px)": {
-          flex: 3,
-        },
-      }}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Pesquisar"
-          inputRef={inputRef} // Ref para o campo de entrada
-        />
-      )}
-      renderOption={(props, option) => (
-        <li {...props} key={option.id_produto}>
-          {option.nome_produto} - {option.codigo_interno}
-        </li>
-      )}
-    />
+                      // Seleciona o texto do input após selecionar um produto
+                      if (inputRef.current) {
+                        inputRef.current.select();
+                      }
+                    }
+                  }}
+                  sx={{
+                    flex: 5,
+                    mb: 2,
+                    "@media (max-width: 700px)": {
+                      flex: 3,
+                    },
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Pesquisar"
+                      inputRef={inputRef} // Ref para o campo de entrada
+                    />
+                  )}
+                  renderOption={(props, option) => (
+                    <li {...props} key={option.id_produto}>
+                      {option.nome_produto} - {option.codigo_interno}
+                    </li>
+                  )}
+                />
                 <TextField
                   fullWidth
                   label="Quantidade"
@@ -589,7 +589,18 @@ const VendasPDV = () => {
                   rows={produtosVenda}
                   columns={[
                     { field: "nome_produto", headerName: "Descrição", flex: 6 },
-                    { field: "status", headerName: "Status", flex: 2.5 },
+                    // { field: "status", headerName: "Status", flex: 2.5 },
+                    {
+                      field: "status",
+                      headerName: "Status",
+                      flex: 1.5,
+                      renderCell: (params) =>
+                        params.value === "OK" ? (
+                          <CheckCircleIcon color="success" />
+                        ) : (
+                          <CancelIcon color="error" />
+                        ),
+                    },
                     {
                       field: "codigo_interno",
                       headerName: "Código",
@@ -633,7 +644,10 @@ const VendasPDV = () => {
                     border: 0,
                     "& .MuiDataGrid-cell:hover": {
                       color: "primary.main",
-                    },
+                    },"& .MuiDataGrid-columnHeader:nth-child(3), & .MuiDataGrid-cell:nth-child(3)":
+                      {
+                        textAlign: "center"
+                      },
                     "@media (max-width: 700px)": {
                       height: 400,
                       // Ajustes para telas pequenas
@@ -645,25 +659,25 @@ const VendasPDV = () => {
                       },
                       // Ajuste de tamanho de coluna para o cabeçalho e as células
                       "& .MuiDataGrid-columnHeader:nth-child(2), & .MuiDataGrid-cell:nth-child(2)":
-                        {
-                          flex: 1, // Descrição
-                          minWidth: 150,
-                        },
+                      {
+                        flex: 1, // Descrição
+                        minWidth: 150,
+                      },
                       "& .MuiDataGrid-columnHeader:nth-child(7), & .MuiDataGrid-cell:nth-child(7)":
-                        {
-                          flex: 3, // Quantidade
-                          minWidth: 85,
-                        },
+                      {
+                        flex: 3, // Quantidade
+                        minWidth: 85,
+                      },
                       "& .MuiDataGrid-columnHeader:nth-child(8), & .MuiDataGrid-cell:nth-child(8)":
-                        {
-                          flex: 1, // Ações
-                          minWidth: 118,
-                        },
+                      {
+                        flex: 1, // Ações
+                        minWidth: 118,
+                      },
                       // Oculta as colunas 3-6 tanto no cabeçalho quanto nas células
                       "& .MuiDataGrid-columnHeader:nth-child(n+3):not(:nth-child(7)):not(:nth-child(8)), & .MuiDataGrid-cell:nth-child(n+3):not(:nth-child(7)):not(:nth-child(8))":
-                        {
-                          display: "none", // Oculta cabeçalhos e células a partir da 3ª coluna (exceto as 7ª e 8ª)
-                        },
+                      {
+                        display: "none", // Oculta cabeçalhos e células a partir da 3ª coluna (exceto as 7ª e 8ª)
+                      },
                     },
                   }}
                 />

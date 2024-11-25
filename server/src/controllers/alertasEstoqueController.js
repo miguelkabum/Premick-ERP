@@ -4,7 +4,7 @@ const db = require('../models/db');
 exports.getAlertasEstoque = (req, res) => {
   const id_alerta = req.query.id_alerta;
 
-  let query = 'SELECT ae.id_alerta, ae.id_produto, p.nome_produto, ae.mensagem, ae.data_alerta, ae.visualizado FROM alertas_estoque ae JOIN produtos p ON ae.id_produto = p.id_produto';
+  let query = 'SELECT ae.id_alerta, ae.id_produto, p.nome_produto, ae.mensagem, ae.data_alerta, ae.visualizado FROM alertas_estoque ae JOIN produtos p ON ae.id_produto = p.id_produto ORDER BY ae.data_alerta DESC';
   if (id_alerta) {
     query += ' WHERE id_alerta = ?';
   }
