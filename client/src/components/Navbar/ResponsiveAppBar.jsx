@@ -13,6 +13,10 @@ import {
   Alert,
   Snackbar,
   Badge,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -22,6 +26,7 @@ import {
   Help as HelpIcon,
   Logout as LogoutIcon,
   Person as UserIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
 import { logout } from "../../hooks/authSlice";
@@ -32,7 +37,29 @@ import logoPremick from "/src/assets/icons/logoPremick.png";
 const urlNotifications = "http://localhost:5000/alertasestoque";
 const ITEM_HEIGHT = 48;
 
+import { styled } from '@mui/material/styles';
+const BootstrapDialog = styled(Dialog)(({ theme }) => ({
+  '& .MuiDialogContent-root': {
+    padding: theme.spacing(2),
+  },
+  '& .MuiDialogActions-root': {
+    padding: theme.spacing(1),
+  },
+}));
+
+
 const ResponsiveAppBar = () => {
+  const [selectedNotification, setSelectedNotification] = React.useState(null);
+  const [openNotificationInfo, setOpenNotificationInfo] = React.useState(false);
+
+  const handleClickOpenNotificationInfo = () => {
+    setOpenNotificationInfo(true);
+  };
+  const handleCloseNotificationInfo = () => {
+    setOpenNotificationInfo(false);
+    setSelectedNotification(null); // Limpa a notificação quando fechar o Dialog
+  };
+
   const [anchorElNav, setAnchorElNav] = React.useState(null);
   const [anchorElUser, setAnchorElUser] = React.useState(null);
   const dispatch = useDispatch();
@@ -236,16 +263,16 @@ const ResponsiveAppBar = () => {
                 handleClick(event);
               }}
             >
-              {unseenNotifications == 0 ? (
+              {/* {unseenNotifications == 0 ? (
                 <NotificationsIcon />
               ) : (
                 <Badge badgeContent={unseenNotifications} color="error">
                   <NotificationsIcon />
                 </Badge>
-              )}
-              {/* <Badge badgeContent={unseenNotifications} color="error">
+              )} */}
+              <Badge badgeContent={unseenNotifications} color="error">
                 <NotificationsIcon />
-              </Badge> */}
+              </Badge>
             </IconButton>
             <Menu
               id="long-menu"
@@ -266,7 +293,23 @@ const ResponsiveAppBar = () => {
               }}
             >
               {notifications.map((notification) => (
-                <MenuItem key={notification.id_alerta} onClick={() => { fetchUpdateUnseenNotifications(notification.id_alerta) }}>
+                <MenuItem key={notification.id_alerta}
+                  onClick={() => {
+                    if (notification.visualizado == 0) {
+                      fetchUpdateUnseenNotifications(notification.id_alerta);
+                    }
+                    setSelectedNotification(notification);
+                    handleClickOpenNotificationInfo();
+                  }}
+                  sx={{
+                    backgroundColor: notification.visualizado === 0 ? "#f9f9f9" : "white", // Fundo mais claro para não lidas
+                    fontWeight: notification.visualizado === 0 ? "bold" : "normal", // Negrito para não lidas
+                    borderBottom: "1px solid #e0e0e0", // Separador entre notificações
+                    "&:hover": {
+                      backgroundColor: notification.visualizado === 0 ? "#e0e0e0" : "#f5f5f5", // Diferencia o hover
+                    },
+                  }}
+                >
                   {notification.mensagem}
                   {/* {notification.data_alerta} */}
                 </MenuItem>
@@ -305,6 +348,52 @@ const ResponsiveAppBar = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+
+      {/* Dialog para mostrar informações da Notificação */}
+      <BootstrapDialog
+        onClose={handleCloseNotificationInfo}
+        aria-labelledby="customized-dialog-title"
+        open={openNotificationInfo}
+      >
+        <DialogTitle sx={{ m: 0, p: 2 }} id="customized-dialog-title">
+          Alerta de Estoque
+        </DialogTitle>
+        <IconButton
+          aria-label="close"
+          onClick={handleCloseNotificationInfo}
+          sx={(theme) => ({
+            position: 'absolute',
+            right: 8,
+            top: 8,
+            color: theme.palette.grey[500],
+          })}
+        >
+          <CloseIcon />
+        </IconButton>
+        <DialogContent dividers>
+          {selectedNotification ? (
+            <>
+              <Typography gutterBottom>
+                <strong>Data:</strong> {new Date(selectedNotification.data_alerta).toLocaleString()}
+              </Typography>
+              <Typography gutterBottom>
+                <strong>Mensagem:</strong> {selectedNotification.mensagem}
+              </Typography>
+              {/* <Typography gutterBottom>
+                <strong>Detalhes:</strong> {selectedNotification.detalhes || "Sem informações adicionais."}
+              </Typography> */}
+            </>
+          ) : (
+            <Typography>Carregando...</Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button autoFocus onClick={handleCloseNotificationInfo}>
+            OK
+          </Button>
+        </DialogActions>
+      </BootstrapDialog>
+
     </AppBar>
   );
 };
