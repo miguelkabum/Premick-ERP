@@ -53,6 +53,7 @@ const RegistrationForm = () => {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false); // Estado para o Snackbar
   const [snackbarMessage, setSnackbarMessage] = useState(''); // Mensagem do Snackbar
+  const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Tipo de alerta do Snackbar (error, success, etc.)
 
   const navigate = useNavigate();
 
@@ -83,6 +84,23 @@ const RegistrationForm = () => {
       setAlertaClass(true);
       setAlertaMensagem('Por favor, insira um e-mail válido no formato exemplo@dominio.com');
       return;
+    }
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const emailDuplicado = data.some((c) => c.email_usuario === email_usuario);
+
+      if (emailDuplicado) {
+        setSnackbarMessage("Email já cadastrado.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return; // Interrompe a execução se o Email já existir
+      }
+
+    } catch (error) {
+      console.error("Erro ao buscar Email dos usuários:", error);
     }
 
     // Validação da senha: Mínimo de 8 caracteres
@@ -126,6 +144,7 @@ const RegistrationForm = () => {
 
       if (response.ok) {
         setSnackbarMessage('Usuário cadastrado com sucesso');
+        setSnackbarSeverity("success");
         setSnackbarOpen(true);
         setAlertaClassSuccess(true);
         setAlertaMensagem('Usuário cadastrado com sucesso');
@@ -436,6 +455,19 @@ const RegistrationForm = () => {
           </DialogContentText>
         </DialogContent>
       </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+
     </Container>
   );
 };

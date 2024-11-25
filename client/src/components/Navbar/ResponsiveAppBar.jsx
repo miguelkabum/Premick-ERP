@@ -194,7 +194,7 @@ const ResponsiveAppBar = () => {
               <MenuItem onClick={() => handleNavClick("/estoques")}>
                 <Typography textAlign="center">Estoques</Typography>
               </MenuItem>
-              <MenuItem onClick={() => handleNavClick("/vendas")}>
+              <MenuItem onClick={() => navigate("/vendas")}>
                 <Typography textAlign="center">Vendas</Typography>
               </MenuItem>
               <MenuItem onClick={() => handleNavClick("/relatorios")}>
@@ -214,7 +214,7 @@ const ResponsiveAppBar = () => {
             <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/estoques")}>
               Estoques
             </Button>
-            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/vendas")}>
+            <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => navigate("/vendas")}>
               Vendas
             </Button>
             <Button sx={{ my: 2, color: "white", display: "block" }} onClick={() => handleNavClick("/relatorios")}>

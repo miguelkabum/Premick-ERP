@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, Fragment } from 'react';
+import { useSelector } from 'react-redux';
 
 // import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -49,6 +50,26 @@ const urlChats = "http://localhost:5000/conversas";
 const urlMessages = "http://localhost:5000/mensagens";
 
 const MickChat = () => {
+    // Função para formatar a data e hora com ajuste de +3 horas
+    const formatDate = (date) => {
+        if (!date) return ''; // Verifica se a data existe
+
+        const adjustedDate = new Date(date);
+        adjustedDate.setHours(adjustedDate.getHours() + 3); // Adiciona 3 horas
+
+        const formattedDate = adjustedDate.toLocaleString('pt-BR', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false // Para usar o formato 24h
+        });
+
+        return formattedDate.replace(',', ''); // Remove a vírgula entre data e hora
+    };
+
     const { user } = useSelector((state) => state.auth);
 
     const [idConversa, setIdConversa] = useState(0);
@@ -82,7 +103,7 @@ const MickChat = () => {
         setLoading(true); // Ativa o spinner enquanto envia a mensagem
 
         try {
-            const res = await fetch(`${urlChats}?id=${id_usuario}`);      // FALTA Puxar por Usuário
+            const res = await fetch(`${urlChats}?id=${id_usuario}`);
             const data = await res.json();
             setConversas(data);
         } catch (error) {
@@ -123,34 +144,36 @@ const MickChat = () => {
     };
 
     const handleCreateChat = async () => {
-        const conversa = {
-            id_usuario: user.id_usuario,
-            titulo: "Quinto Chat do Usuário 2"        // Adicionar título do chat onde? kkkkkkkk
-        };
+        setIdConversa(0);
 
-        try {
-            const res = await fetch(urlChats, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(conversa),
-            });
+        // const conversa = {
+        //     id_usuario: user.id_usuario,
+        //     titulo: "Quinto Chat do Usuário 2"        // Adicionar título do chat onde? kkkkkkkk
+        // };
 
-            if (res.ok) {
-                const data = await res.json();
-                let newIdConversa = data.id_conversa; // Valor padrão como estado atual
-                setIdConversa(newIdConversa);
+        // try {
+        //     const res = await fetch(urlChats, {
+        //         method: 'POST',
+        //         headers: { 'Content-Type': 'application/json' },
+        //         body: JSON.stringify(conversa),
+        //     });
 
-                // Atualiza as mensagens com o novo ID de conversa
-                await fetchMensagens(newIdConversa);
+        //     if (res.ok) {
+        //         const data = await res.json();
+        //         let newIdConversa = data.id_conversa; // Valor padrão como estado atual
+        //         setIdConversa(newIdConversa);
 
-                // Atualiza a lista de conversas
-                await fetchConversas();
-            } else {
-                console.error("Erro ao cadastrar a Conversa");
-            }
-        } catch (error) {
-            console.log(error.message);
-        }
+        //         // Atualiza as mensagens com o novo ID de conversa
+        //         await fetchMensagens(newIdConversa);
+
+        //         // Atualiza a lista de conversas
+        //         await fetchConversas();
+        //     } else {
+        //         console.error("Erro ao cadastrar a Conversa");
+        //     }
+        // } catch (error) {
+        //     console.log(error.message);
+        // }
     };
 
     const handleSubmitMessage = async () => {
@@ -158,7 +181,7 @@ const MickChat = () => {
             id_conversa: idConversa,
             tipo_mensagem: 'USER',
             conteudo: pergunta,
-            id_usuario: 2, // ID fixo para teste; substitua pelo ID do usuário autenticado
+            id_usuario: user.id_usuario,
         };
 
         setLoading(true); // Ativa o spinner enquanto envia a mensagem
@@ -202,7 +225,7 @@ const MickChat = () => {
                     fetchConversas();
                     handleClickOpen();
                 }} size="large" color="secondary" aria-label="add">
-                    <AddIcon />                   {/* Usar AddIcon na criação dos novos Chats */}
+                    <AddIcon />                                                          {/* Substituir pela Imagem do MickChat */}
                 </Fab>
             </Box>
 
@@ -235,12 +258,13 @@ const MickChat = () => {
                         },
                     }}
                 >
-                    <DrawerHeader sx={{ display: "flex", justifyContent: "space-between" }}>
+                    <DrawerHeader sx={{ display: "flex", justifyContent: "space-between", alignItems: "center"}}>
                         <IconButton onClick={() => {
                             handleCreateChat();
                             setMensagens([]);
                         }}>
                             <AddIcon />
+                            <p style={{fontSize: "16px"}}>Novo Chat</p>
                         </IconButton>
                         <IconButton onClick={handleDrawerClose}>
                             <ChevronLeftIcon />
@@ -312,9 +336,9 @@ const MickChat = () => {
                             {mensagens.map((mensagem) => (
                                 <div key={mensagem.id_mensagem} style={{ display: "flex", justifyContent: mensagem.tipo_mensagem === "USER" ? "flex-end" : "flex-start", marginBottom: "5px", marginTop: "5px" }}>
                                     {mensagem.tipo_mensagem === "USER" ? (
-                                        <MessageRight text={mensagem.conteudo} time={mensagem.data_envio} />
+                                        <MessageRight text={mensagem.conteudo} time={formatDate(mensagem.data_envio)} />
                                     ) : (
-                                        <MessageLeft text={mensagem.conteudo} time={mensagem.data_envio} />
+                                        <MessageLeft text={mensagem.conteudo} time={formatDate(mensagem.data_envio)} />
                                     )}
                                 </div>
                             ))}

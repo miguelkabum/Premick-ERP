@@ -3,13 +3,17 @@ import { Box, Grid, Paper, Typography, Button, IconButton, Divider, LinearProgre
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { BarChart as BarChartComponent } from '@mui/x-charts/BarChart';
 import { useSelector } from 'react-redux';
+
+import MickChat from "../../components/MickChat/MickChat"; // Importa o chatbot
+// <MickChat />
+
 const Dashboard = () => {
   const { user } = useSelector((state) => state.auth);
 
   return (
-    <Box sx={{ padding: 3, width: "100vw", display: "flex", justifyContent: "center"}}>
+    <Box sx={{ padding: 3, width: "100vw", display: "flex", justifyContent: "center" }}>
       {/* Cabeçalho com boas-vindas e informações */}
-        {/* <Grid item xs={3}>
+      {/* <Grid item xs={3}>
           <Paper sx={{ padding: 2 }}>
             <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
               Restam 30 dias de teste grátis
@@ -36,90 +40,90 @@ const Dashboard = () => {
           </Paper>
         </Grid> */}
 
-        <Grid item xs={9}>
+      <Grid item xs={9}>
         <Box display="flex" alignItems="center" sx={{ paddingBottom: 3, gap: 2 }}>
-              <AccountCircleIcon fontSize="large" />
-              <Typography variant="h6" >
-                Bem-vindo, {user.nome_usuario}!
-              </Typography>
-            </Box>
+          <AccountCircleIcon fontSize="large" />
+          <Typography variant="h6" >
+            Bem-vindo, {user.nome_usuario}!
+          </Typography>
+        </Box>
 
-          <Grid container spacing={2}sx={{ maxWidth: 1200 }} >
-            {/* Caixas de informação */}
-            <Grid item xs={6}>
-              <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-                <Typography variant="h6">Feche com nossos parceiros para aproveitar todos os descontos.</Typography>
-                <Button fullWidth variant="contained" sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2}}>Conheça nossos parceiros</Button>
-              </Paper>
-            </Grid>
-            <Grid item xs={6}>
-              <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center"}}>
-                <Typography variant="h6">Em breve um novo app será lançado.</Typography>
-                <Typography variant="body2">Praticidade na palma da mão.</Typography>
-                <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
-                  <IconButton>
-                    <img src="/android-logo.png" alt="Android" />
-                  </IconButton>
-                  <IconButton>
-                    <img src="/ios-logo.png" alt="iOS" />
-                  </IconButton>
-                </Box>
-              </Paper>
-            </Grid>
+        <Grid container spacing={2} sx={{ maxWidth: 1200 }} >
+          {/* Caixas de informação */}
+          <Grid item xs={6}>
+            <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <Typography variant="h6">Feche com nossos parceiros para aproveitar todos os descontos.</Typography>
+              <Button fullWidth variant="contained" sx={{ mb: 2, background: "#213635", height: 45, marginTop: 2 }}>Conheça nossos parceiros</Button>
+            </Paper>
+          </Grid>
+          <Grid item xs={6}>
+            <Paper sx={{ padding: 2, maxWidth: 650, minHeight: 237, display: 'flex', flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+              <Typography variant="h6">Em breve um novo app será lançado.</Typography>
+              <Typography variant="body2">Praticidade na palma da mão.</Typography>
+              <Box display="flex" justifyContent="center" sx={{ mt: 2 }}>
+                <IconButton>
+                  <img src="/android-logo.png" alt="Android" />
+                </IconButton>
+                <IconButton>
+                  <img src="/ios-logo.png" alt="iOS" />
+                </IconButton>
+              </Box>
+            </Paper>
+          </Grid>
 
-            {/* Resumo */}
-            <Grid item xs={12}>
-              <Paper sx={{ padding: 2 }}>
-                <Box display="flex" justifyContent="space-between">
-                  <Typography variant="h6">Resumo</Typography>
-                  <Box>
-                    <Button>Visão Geral</Button>
-                    <Button>Eventos</Button>
-                  </Box>
+          {/* Resumo */}
+          <Grid item xs={12}>
+            <Paper sx={{ padding: 2 }}>
+              <Box display="flex" justifyContent="space-between">
+                <Typography variant="h6">Resumo</Typography>
+                <Box>
+                  <Button>Visão Geral</Button>
+                  <Button>Eventos</Button>
                 </Box>
-                <Grid container spacing={2} sx={{ mt: 2 }}>
-                  <Grid item xs={4}>
-                    <Paper sx={{ padding: 2 }}>
-                      <Typography variant="h6">Pedidos de Venda</Typography>
-                      <Typography variant="body2">Total de vendas: 7</Typography>
-                      <Typography variant="body2">Novos: 9</Typography>
-                      <Typography variant="body2">Em andamento: 5</Typography>
-                      <Typography variant="body2">Cancelados: 0</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Paper sx={{ padding: 2 }}>
-                      <Typography variant="h6">Contas a Receber</Typography>
-                      <Typography variant="body2">Total: R$ 69</Typography>
-                      <Typography variant="body2">Taxas: R$ 10</Typography>
-                      <Typography variant="body2">Líquido: R$ 59</Typography>
-                    </Paper>
-                  </Grid>
-                  <Grid item xs={4}>
-                    <Paper sx={{ padding: 2 }}>
-                      <Typography variant="h6">Contas a Pagar</Typography>
-                      <Typography variant="body2">Total a pagar: R$ 10</Typography>
-                      <Typography variant="body2">Notas fiscais: 9</Typography>
-                    </Paper>
-                  </Grid>
+              </Box>
+              <Grid container spacing={2} sx={{ mt: 2 }}>
+                <Grid item xs={4}>
+                  <Paper sx={{ padding: 2 }}>
+                    <Typography variant="h6">Pedidos de Venda</Typography>
+                    <Typography variant="body2">Total de vendas: 7</Typography>
+                    <Typography variant="body2">Novos: 9</Typography>
+                    <Typography variant="body2">Em andamento: 5</Typography>
+                    <Typography variant="body2">Cancelados: 0</Typography>
+                  </Paper>
                 </Grid>
+                <Grid item xs={4}>
+                  <Paper sx={{ padding: 2 }}>
+                    <Typography variant="h6">Contas a Receber</Typography>
+                    <Typography variant="body2">Total: R$ 69</Typography>
+                    <Typography variant="body2">Taxas: R$ 10</Typography>
+                    <Typography variant="body2">Líquido: R$ 59</Typography>
+                  </Paper>
+                </Grid>
+                <Grid item xs={4}>
+                  <Paper sx={{ padding: 2 }}>
+                    <Typography variant="h6">Contas a Pagar</Typography>
+                    <Typography variant="body2">Total a pagar: R$ 10</Typography>
+                    <Typography variant="body2">Notas fiscais: 9</Typography>
+                  </Paper>
+                </Grid>
+              </Grid>
 
-                {/* Gráfico */}
-                <Box mt={4}>
-                  <BarChartComponent
-                    series={[
-                      { data: [30, 60, 10], label: 'Fluxo' }
-                    ]}
-                    xAxis={[
-                      { scaleType: 'band', data: ['30', '60', '10'] }
-                    ]}
-                    height={200}
-                  />
-                </Box>
-              </Paper>
-            </Grid>
+              {/* Gráfico */}
+              <Box mt={4}>
+                <BarChartComponent
+                  series={[
+                    { data: [30, 60, 10], label: 'Fluxo' }
+                  ]}
+                  xAxis={[
+                    { scaleType: 'band', data: ['30', '60', '10'] }
+                  ]}
+                  height={200}
+                />
+              </Box>
+            </Paper>
           </Grid>
         </Grid>
+      </Grid>
     </Box>
   );
 };

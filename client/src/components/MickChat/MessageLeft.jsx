@@ -46,7 +46,7 @@ const styles = {
   },
   footer: {
     display: "flex",
-    justifyContent: "flex-start",
+    justifyContent: "flex-end",
     alignItems: "center",
     fontSize: "12px",
     color: "#D1D1D1",

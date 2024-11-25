@@ -13,7 +13,7 @@ const CadastroCliente = () => {
   const [snackbarSeverity, setSnackbarSeverity] = useState('error'); // Tipo de alerta do Snackbar (error, success, etc.)
 
   const [errors, setErrors] = useState({});
-  
+
   const [cliente, setCliente] = useState({
     nome_cliente: '',
     cep: '',
@@ -82,7 +82,7 @@ const CadastroCliente = () => {
   // Função para validar o CPF
   function validarCPF(cpf) {
     cpf = cpf.replace(/[^\d]/g, ''); // Remove todos os caracteres não numéricos
-  
+
     if (cpf.length !== 11) return false; // Verifica se tem 11 dígitos
     if (/^(\d)\1{10}$/.test(cpf)) return false; // Elimina CPFs conhecidos como inválidos
 
@@ -105,7 +105,7 @@ const CadastroCliente = () => {
     let digito2 = 11 - (soma % 11);
     if (digito2 === 10 || digito2 === 11) digito2 = 0;
     if (digito2 !== parseInt(cpf.charAt(10))) return false;
-  
+
     return true; // CPF válido
   }
 
@@ -177,6 +177,11 @@ const CadastroCliente = () => {
       formErrors.CPF_cliente = 'CPF é obrigatório';
     }
 
+    if (!cliente.telefone_cliente) {
+      formIsValid = false;
+      formErrors.telefone_cliente = 'Telefone é obrigatório';
+    }
+
     setErrors(formErrors);
     return formIsValid;
   };
@@ -189,7 +194,7 @@ const CadastroCliente = () => {
     // Remove pontos e hífens do CPF e do CEP
     const cpfLimpo = cliente.CPF_cliente.replace(/\D/g, ''); // Remove tudo que não for número
     const cepLimpo = cliente.cep.replace(/\D/g, ''); // Remove tudo que não for número
-  
+
     // Atualiza os valores no estado com os dados limpos
     setCliente((prevCliente) => ({
       ...prevCliente,
@@ -204,11 +209,27 @@ const CadastroCliente = () => {
       setSnackbarOpen(true);
       return; // Impede o envio do formulário se o CPF for inválido
     }
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const cpfDuplicado = data.some((c) => c.CPF_cliente === cpfLimpo);
+
+      if (cpfDuplicado) {
+        setSnackbarMessage("CPF já cadastrado.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+        return; // Interrompe a execução se o CPF já existir
+      }
+
+    } catch (error) {
+      console.error("Erro ao buscar CPF dos clientes:", error);
+    }
 
     // Salvar ou editar cliente
     const method = id ? "PUT" : "POST";
     const endpoint = id ? `${url}/${id}` : url;
-    
+
     try {
       const res = await fetch(endpoint, {
         method,
@@ -219,7 +240,7 @@ const CadastroCliente = () => {
           cep: cepLimpo           // Garante que o CEP seja enviado sem formatação
         }),
       });
-  
+
       if (res.ok) {
         setSnackbarMessage('Cliente salvo com sucesso!');
         setSnackbarSeverity('success');
@@ -240,31 +261,31 @@ const CadastroCliente = () => {
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
-      
-        <Typography sx={{
-                marginBottom: "0",
-                fontSize: 60,
-                color: "#213635",
-                fontWeight: "bold",
-                paddingBottom: "26px"
-              }} variant="h4" align="center" gutterBottom>
-          {id ? 'Editar Cliente' : 'Cadastro de Clientes'}
-        </Typography>
+
+      <Typography sx={{
+        marginBottom: "0",
+        fontSize: 60,
+        color: "#213635",
+        fontWeight: "bold",
+        paddingBottom: "26px"
+      }} variant="h4" align="center" gutterBottom>
+        {id ? 'Editar Cliente' : 'Cadastro de Clientes'}
+      </Typography>
       <Paper elevation={3} sx={{
-              p: 3,
-              width: "100%",
-              borderRadius: "12px",
-            }}>
-        
+        p: 3,
+        width: "100%",
+        borderRadius: "12px",
+      }}>
+
         <Box component="form">
-          
+
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="Nome" 
+              <TextField
+                fullWidth
+                label="Nome"
                 color='red'
-                variant="outlined" 
+                variant="outlined"
                 name="nome_cliente"
                 value={cliente.nome_cliente}
                 onChange={handleChange}
@@ -288,10 +309,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="CEP" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="CEP"
+                variant="outlined"
                 name="cep"
                 value={cliente.cep}
                 onChange={handleChange}
@@ -313,10 +334,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField 
-                fullWidth 
-                label="Número" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Número"
+                variant="outlined"
                 name="numero"
                 value={cliente.numero}
                 onChange={handleChange}
@@ -338,10 +359,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="Logradouro" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Logradouro"
+                variant="outlined"
                 name="logradouro"
                 value={cliente.logradouro}
                 onChange={handleChange}
@@ -363,9 +384,9 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Select 
-                fullWidth 
-                variant="outlined" 
+              <Select
+                fullWidth
+                variant="outlined"
                 name="uf"
                 value={cliente.uf}
                 onChange={handleChange}
@@ -415,10 +436,10 @@ const CadastroCliente = () => {
               </Select>
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField 
-                fullWidth 
-                label="Cidade" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Cidade"
+                variant="outlined"
                 name="cidade"
                 value={cliente.cidade}
                 onChange={handleChange}
@@ -440,10 +461,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField 
-                fullWidth 
-                label="Bairro" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Bairro"
+                variant="outlined"
                 name="bairro"
                 value={cliente.bairro}
                 onChange={handleChange}
@@ -465,10 +486,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12}>
-              <TextField 
-                fullWidth 
-                label="Complemento" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Complemento"
+                variant="outlined"
                 name="complemento"
                 value={cliente.complemento}
                 onChange={handleChange}
@@ -490,13 +511,15 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="Telefone" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="Telefone"
+                variant="outlined"
                 name="telefone_cliente"
                 value={cliente.telefone_cliente}
                 onChange={handleChange}
+                error={!!errors.telefone_cliente}
+                helperText={errors.telefone_cliente}
                 sx={{
                   backgroundColor: "#F1F1F1", // Cor de fundo personalizada
                   borderRadius: 3, // Para arredondar os cantos
@@ -515,10 +538,10 @@ const CadastroCliente = () => {
               />
             </Grid>
             <Grid item xs={12} sm={6}>
-              <TextField 
-                fullWidth 
-                label="CPF" 
-                variant="outlined" 
+              <TextField
+                fullWidth
+                label="CPF"
+                variant="outlined"
                 name="CPF_cliente"
                 value={cliente.CPF_cliente}
                 onChange={handleChange}
@@ -542,27 +565,27 @@ const CadastroCliente = () => {
                 }}
               />
             </Grid>
-            { id && (
-  <Grid item xs={12}>
-    <FormControlLabel 
-      control={<Switch 
-        checked={cliente.status} 
-        onChange={handleChange} 
-        color='#213635'
-        sx={{
-          '& .MuiSwitch-thumb': {
-            backgroundColor: '#213635', // Cor do "thumb" (bolinha)
-          },
-          '& .MuiSwitch-track': {
-            backgroundColor: '#213635', // Cor do fundo
-          },
-        }}
-        name="status"
-      />} 
-      label="Ativo" 
-    />
-  </Grid>
-)}
+            {id && (
+              <Grid item xs={12}>
+                <FormControlLabel
+                  control={<Switch
+                    checked={cliente.status}
+                    onChange={handleChange}
+                    color='#213635'
+                    sx={{
+                      '& .MuiSwitch-thumb': {
+                        backgroundColor: '#213635', // Cor do "thumb" (bolinha)
+                      },
+                      '& .MuiSwitch-track': {
+                        backgroundColor: '#213635', // Cor do fundo
+                      },
+                    }}
+                    name="status"
+                  />}
+                  label="Ativo"
+                />
+              </Grid>
+            )}
 
           </Grid>
 
@@ -570,8 +593,8 @@ const CadastroCliente = () => {
             <Button variant="contained" color="error" sx={{ mr: 2, backgroundColor: "white", color: "black" }} onClick={() => navigate('/clientes')}>
               Cancelar
             </Button>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={handleSaveCliente}
               sx={{ backgroundColor: "black" }}
             >
@@ -582,12 +605,12 @@ const CadastroCliente = () => {
       </Paper>
 
       {/* Snackbar */}
-      <Snackbar 
-        open={snackbarOpen} 
-        autoHideDuration={3000} 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        >
+      >
         <Alert onClose={() => setSnackbarOpen(false)} severity={snackbarSeverity} sx={{ width: '100%' }}>
           {snackbarMessage}
         </Alert>
