@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, TextField, Button, Typography, Paper, Grid } from "@mui/material";
+import { Box, TextField, Button, Typography, Paper, Grid, Divider } from "@mui/material";
 import { PieChart } from "@mui/x-charts/PieChart";
 import dayjs from "dayjs";
 import "dayjs/locale/pt-br";
@@ -7,6 +7,10 @@ import utc from "dayjs/plugin/utc";
 import { BarChart } from "@mui/x-charts/BarChart";
 import { useSelector } from "react-redux";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import { AttachMoney, CreditCard, AccountBalanceWallet } from '@mui/icons-material';
+
+import MickChat from "../../components/MickChat/MickChat"; // Importa o chatbot
+// <MickChat />
 
 const Dashboard = () => {
   const [totalVendido, setTotalVendido] = useState();
@@ -101,7 +105,12 @@ const Dashboard = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setTotalVendido(data.valor_total_vendido);
+        console.log("Total Vendido:", data);  // Isso vai exibir o array no console
+        if (Array.isArray(data) && data.length > 0) {
+          setTotalVendido(data[0].valor_total_vendido);  // Acessa o valor do primeiro objeto do array
+        } else {
+          console.error("Dados inesperados para totalvendido");
+        }
       } else {
         console.error("Erro ao buscar qtde_total_vendas");
       }
@@ -114,7 +123,12 @@ const Dashboard = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setTotalInvestido(data.valor_total_investido);
+        console.log("Total Investido:", data);
+        if (Array.isArray(data) && data.length > 0) {
+          setTotalInvestido(data[0].valor_total_investido);  // Acessa o valor do primeiro objeto do array
+        } else {
+          console.error("Dados inesperados para totalinvestido");
+        }
       } else {
         console.error("Erro ao buscar totalinvestido");
       }
@@ -127,7 +141,14 @@ const Dashboard = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setTotalVendaDia(data.valor_total_vendido);
+        console.log("Vendas do dia:", data);
+        if (Array.isArray(data) && data.length > 0) {
+          // Verifica se o valor_total_vendido existe e não é null
+          setTotalVendaDia(data[0].valor_total_vendido ?? 0);  // Usa 0 caso valor_total_vendido seja null ou undefined
+        } else {
+          console.error("Dados inesperados para vendadia");
+          setTotalVendaDia(0); // Garante que seja 0 se não houver dados
+        }
       } else {
         console.error("Erro ao buscar vendadia");
       }
@@ -140,7 +161,12 @@ const Dashboard = () => {
 
       if (res.ok) {
         const data = await res.json();
-        setQtdeVendaDia(data.qtde_total_vendas);
+        console.log("Quantidade de vendas do dia:", data);
+        if (Array.isArray(data) && data.length > 0) {
+          setQtdeVendaDia(data[0].qtde_total_vendas);  // Acessa o valor do primeiro objeto do array
+        } else {
+          console.error("Dados inesperados para qtdevendadia");
+        }
       } else {
         console.error("Erro ao buscar qtdevendadia");
       }
@@ -154,95 +180,117 @@ const Dashboard = () => {
       <Typography variant="h2" sx={{ textAlign: "center", mt: 3, mb: 4 }}>
         Dashboard
       </Typography>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 2,
-          p: 2,
-        }}
-      >
-        <Paper sx={{ padding: 2 }}>
-          <Box
-            display="flex"
-            alignItems="center"
-            sx={{ paddingBottom: 3, gap: 2 }}
-          >
-            <AccountCircleIcon fontSize="large" />
-            <Typography variant="h6">
-              Bem-vindo, {user.nome_usuario}!
-            </Typography>
-          </Box>
-          <Box display="flex" justifyContent="space-between">
-            <Typography variant="h6">Resumo</Typography>
-            <Box>
-              <Button>Visão Geral</Button>
-              <Button>Eventos</Button>
+      <Box sx={{ padding: 3, width: "100vw", display: "flexwrap", justifyContent: "center" }}>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 2,
+            p: 2,
+          }}
+        >
+          <Paper sx={{ padding: 2 }}>
+            <Box
+              display="flex"
+              alignItems="center"
+              sx={{ paddingBottom: 3, gap: 2 }}
+            >
+              <AccountCircleIcon fontSize="large" />
+              <Typography variant="h6">
+                Bem-vindo, {user.nome_usuario}!
+              </Typography>
             </Box>
-          </Box>
-          <Grid container spacing={2} sx={{ mt: 2 }}>
-            <Grid item xs={4}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Pedidos de Venda</Typography>
-                <Typography variant="body2">Qtde de vendas: {qtdeVendaDia}</Typography>
-                <Typography variant="body2">Total de vendas: {totalVendaDia}</Typography>
-                <Typography variant="body2">Em andamento: 5</Typography>
-                <Typography variant="body2">Cancelados: 0</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={4}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Contas a Receber</Typography>
-                <Typography variant="body2">Total: R$ {totalVendido}</Typography>
-                <Typography variant="body2">Taxas: R$ 10</Typography>
-                <Typography variant="body2">Líquido: R$ 59</Typography>
-              </Paper>
-            </Grid>
-            <Grid item xs={4}>
-              <Paper sx={{ padding: 2 }}>
-                <Typography variant="h6">Contas a Pagar</Typography>
-                <Typography variant="body2">Total a pagar: R$ {totalInvestido}</Typography>
-                <Typography variant="body2">Notas fiscais: 9</Typography>
-              </Paper>
-            </Grid>
-          </Grid>
-        </Paper>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Gráfico de Pizza
-          </Typography>
-          {graficoPizzaData.length > 0 ? (
-            <PieChart series={[{ data: graficoPizzaData }]} height={300} />
-          ) : (
-            <Typography>Sem dados para exibir.</Typography>
-          )}
-        </Paper>
+            <Box display="flex" justifyContent="space-between">
+              <Typography variant="h6">Resumo</Typography>
+            </Box>
+            <Grid container spacing={2} sx={{ mt: 2 }}>
+              {/* Card - Pedidos de Venda */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper sx={{ padding: 3, backgroundColor: '#f5f5f5' }}>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <AttachMoney sx={{ mr: 1, color: '#3f51b5' }} />
+                    Pedidos de Venda Diária
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Quantidade do dia: {qtdeVendaDia}</Typography>
+                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Total do dia: R$ {totalVendaDia}</Typography>
+                </Paper>
+              </Grid>
 
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Gráfico de Barras
-          </Typography>
-          {graficoLinhaBarrasData.length > 0 ? (
-            <BarChart
-              height={300}
-              xAxis={[
-                {
-                  data: graficoLinhaBarrasData.map((item) => item.date),
-                  scaleType: "band",
-                  title: "Data",
-                },
-              ]}
-              series={[
-                {
-                  data: graficoLinhaBarrasData.map((item) => item.total),
-                  title: "Vendas",
-                },
-              ]}
-            />
-          ) : (
-            <Typography>Sem dados para exibir.</Typography>
-          )}
-        </Paper>
+              {/* Card - Contas a Receber */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper sx={{ padding: 3, backgroundColor: '#f5f5f5' }}>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <CreditCard sx={{ mr: 1, color: '#3f51b5' }} />
+                    Contas a Receber
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Total a receber: R$ {totalVendido}</Typography>
+                </Paper>
+              </Grid>
+
+              {/* Card - Contas a Pagar */}
+              <Grid item xs={12} sm={6} md={4}>
+                <Paper sx={{ padding: 3, backgroundColor: '#f5f5f5' }}>
+                  <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <AccountBalanceWallet sx={{ mr: 1, color: '#3f51b5' }} />
+                    Contas a Pagar
+                  </Typography>
+                  <Divider sx={{ mb: 2 }} />
+                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Total a pagar: R$ {totalInvestido}</Typography>
+                </Paper>
+              </Grid>
+
+              {/* Card - MickChat */}
+              {/* <Grid item xs={12} sm={6} md={4}>
+    <Paper sx={{ padding: 3, backgroundColor: '#f5f5f5' }}>
+      <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        MickChat
+      </Typography>
+      <Divider sx={{ mb: 2 }} />
+      <MickChat />
+    </Paper>
+  </Grid> */}
+            </Grid>
+
+          </Paper>
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Gráfico de Pizza
+            </Typography>
+            {graficoPizzaData.length > 0 ? (
+              <PieChart series={[{ data: graficoPizzaData }]} height={300} />
+            ) : (
+              <Typography>Sem dados para exibir.</Typography>
+            )}
+          </Paper>
+
+          <Paper sx={{ p: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Gráfico de Barras
+            </Typography>
+            {graficoLinhaBarrasData.length > 0 ? (
+              <BarChart
+                height={300}
+                xAxis={[
+                  {
+                    data: graficoLinhaBarrasData.map((item) => item.date),
+                    scaleType: "band",
+                    title: "Data",
+                  },
+                ]}
+                series={[
+                  {
+                    data: graficoLinhaBarrasData.map((item) => item.total),
+                    title: "Vendas",
+                  },
+                ]}
+              />
+            ) : (
+              <Typography>Sem dados para exibir.</Typography>
+            )}
+          </Paper>
+        </Box>
       </Box>
     </>
   );
