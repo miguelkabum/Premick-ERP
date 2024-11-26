@@ -9,6 +9,11 @@ import { useSelector } from "react-redux";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 const Dashboard = () => {
+  const [totalVendido, setTotalVendido] = useState();
+  const [totalInvestido, setTotalInvestido] = useState();
+  const [totalVendaDia, setTotalVendaDia] = useState();
+  const [qtdeVendaDia, setQtdeVendaDia] = useState();
+
   const [vendas, setVendas] = useState([]);
   const [vendasCanceladas, setVendasCanceladas] = useState([]);
   const [graficoPizzaData, setGraficoPizzaData] = useState([]);
@@ -22,6 +27,7 @@ const Dashboard = () => {
 
   const urlVendas = "http://localhost:5000/vendas";
   const urlVendasCanceladas = "http://localhost:5000/vendasCanceladas";
+  const urlDashboard = "http://localhost:5000/dashboard";
 
   const { user } = useSelector((state) => state.auth);
 
@@ -86,7 +92,62 @@ const Dashboard = () => {
 
   useEffect(() => {
     buscarDados();
+    handleGetDataDashboard();
   }, [dataInicial, dataFinal]);
+
+  const handleGetDataDashboard = async () => {
+    try {
+      const res = await fetch(`${urlDashboard}/totalvendido`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setTotalVendido(data.valor_total_vendido);
+      } else {
+        console.error("Erro ao buscar qtde_total_vendas");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    try {
+      const res = await fetch(`${urlDashboard}/totalinvestido`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setTotalInvestido(data.valor_total_investido);
+      } else {
+        console.error("Erro ao buscar totalinvestido");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    try {
+      const res = await fetch(`${urlDashboard}/vendadia`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setTotalVendaDia(data.valor_total_vendido);
+      } else {
+        console.error("Erro ao buscar vendadia");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+
+    try {
+      const res = await fetch(`${urlDashboard}/qtdevendadia`);
+
+      if (res.ok) {
+        const data = await res.json();
+        setQtdeVendaDia(data.qtde_total_vendas);
+      } else {
+        console.error("Erro ao buscar qtdevendadia");
+      }
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
 
   return (
     <>
@@ -123,8 +184,8 @@ const Dashboard = () => {
             <Grid item xs={4}>
               <Paper sx={{ padding: 2 }}>
                 <Typography variant="h6">Pedidos de Venda</Typography>
-                <Typography variant="body2">Total de vendas: 7</Typography>
-                <Typography variant="body2">Novos: 9</Typography>
+                <Typography variant="body2">Qtde de vendas: {qtdeVendaDia}</Typography>
+                <Typography variant="body2">Total de vendas: {totalVendaDia}</Typography>
                 <Typography variant="body2">Em andamento: 5</Typography>
                 <Typography variant="body2">Cancelados: 0</Typography>
               </Paper>
@@ -132,7 +193,7 @@ const Dashboard = () => {
             <Grid item xs={4}>
               <Paper sx={{ padding: 2 }}>
                 <Typography variant="h6">Contas a Receber</Typography>
-                <Typography variant="body2">Total: R$ 69</Typography>
+                <Typography variant="body2">Total: R$ {totalVendido}</Typography>
                 <Typography variant="body2">Taxas: R$ 10</Typography>
                 <Typography variant="body2">Líquido: R$ 59</Typography>
               </Paper>
@@ -140,7 +201,7 @@ const Dashboard = () => {
             <Grid item xs={4}>
               <Paper sx={{ padding: 2 }}>
                 <Typography variant="h6">Contas a Pagar</Typography>
-                <Typography variant="body2">Total a pagar: R$ 10</Typography>
+                <Typography variant="body2">Total a pagar: R$ {totalInvestido}</Typography>
                 <Typography variant="body2">Notas fiscais: 9</Typography>
               </Paper>
             </Grid>

@@ -22,6 +22,7 @@ const produtosCanceladosRouter = require('./src/routes/produtosCancelados');
 const conversasRouter = require('./src/routes/conversas');
 const mensagensRouter = require('./src/routes/mensagens');
 
+const dashboardRouter = require('./src/routes/dashboard');
 
 const dotenv = require('dotenv');
 const cors = require('cors');
@@ -53,6 +54,7 @@ app.use('/produtosCancelados', produtosCanceladosRouter);
 app.use('/conversas', conversasRouter);
 app.use('/mensagens', mensagensRouter);
 
+app.use('/dashboard', dashboardRouter);
 
 // Rota inicial para testar se o servidor está funcionando corretamente
 app.get("/", (req, res) => {
