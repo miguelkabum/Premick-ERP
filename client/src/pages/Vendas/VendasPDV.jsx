@@ -919,10 +919,10 @@ const VendasPDV = () => {
               onChange={(e) => setTipoPagamento(e.target.value)}
               label="Tipo de Pagamento"
             >
-              <MenuItem value="Débito">Débito</MenuItem>
-              <MenuItem value="Crédito">Crédito</MenuItem>
-              {/* <MenuItem value="Dinheiro">PIX</MenuItem> */}
+              <MenuItem value="Cartão de Débito">Cartão de Débito</MenuItem>
+              <MenuItem value="Cartão de Crédito">Cartão de Crédito</MenuItem>
               <MenuItem value="Dinheiro">Dinheiro</MenuItem>
+              <MenuItem value="PIX">PIX</MenuItem>
             </Select>
           </FormControl>
           <TextField

@@ -225,7 +225,7 @@ const MickChat = () => {
                     fetchConversas();
                     handleClickOpen();
                 }} size="large" color="secondary" aria-label="add">
-                    <AddIcon />                                                          {/* Substituir pela Imagem do MickChat */}
+                    <img src={LogoPremick} alt="Imagem de Perfil do Mick" style={{ height: "65px", width: "65px", borderRadius: "20px", marginRight: "10px" }} />                                                          {/* Substituir pela Imagem do MickChat */}
                 </Fab>
             </Box>
 

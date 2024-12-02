@@ -237,26 +237,26 @@ const Dashboard = () => {
                     Contas a Pagar
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
-                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Total a pagar: R$ {totalInvestido}</Typography>
+                  <Typography sx={{ fontWeight: "bold", fontSize: "20px" }} variant="body1">Total a pagar: R$ {totalInvestido ? totalInvestido.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0,00'}</Typography>
                 </Paper>
               </Grid>
 
               {/* Card - MickChat */}
-              {/* <Grid item xs={12} sm={6} md={4}>
+              <Grid item xs={12} sm={6} md={4}>
     <Paper sx={{ padding: 3, backgroundColor: '#f5f5f5' }}>
       <Typography variant="h6" sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-        MickChat
+        MickChat+
       </Typography>
       <Divider sx={{ mb: 2 }} />
       <MickChat />
     </Paper>
-  </Grid> */}
+  </Grid>
             </Grid>
 
           </Paper>
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Gráfico de Pizza
+              Gráfico de Pizza - Métodos de pagamento
             </Typography>
             {graficoPizzaData.length > 0 ? (
               <PieChart series={[{ data: graficoPizzaData }]} height={300} />
@@ -267,7 +267,7 @@ const Dashboard = () => {
 
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Gráfico de Barras
+              Gráfico de Barras - Valor total de vendas
             </Typography>
             {graficoLinhaBarrasData.length > 0 ? (
               <BarChart

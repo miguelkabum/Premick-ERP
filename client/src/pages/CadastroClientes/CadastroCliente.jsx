@@ -283,7 +283,7 @@ const CadastroCliente = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Nome"
+                label="Nome* (Obrigatório)"
                 color='red'
                 variant="outlined"
                 name="nome_cliente"
@@ -513,7 +513,7 @@ const CadastroCliente = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="Telefone"
+                label="Telefone* (Obrigatório)"
                 variant="outlined"
                 name="telefone_cliente"
                 value={cliente.telefone_cliente}
@@ -540,7 +540,7 @@ const CadastroCliente = () => {
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
-                label="CPF"
+                label="CPF* (Obrigatório)"
                 variant="outlined"
                 name="CPF_cliente"
                 value={cliente.CPF_cliente}

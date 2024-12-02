@@ -63,7 +63,12 @@ const RelatorioVendas = () => {
       const res = await fetch(urlVendasCanceladas);
       const data = await res.json();
 
-      const filteredData = data.filter((item) => {
+      const combinedDataCancel = data.map((item) => ({
+        ...item,
+        data_venda_cancelada: dayjs(item.data_venda_cancelada).format("DD/MM/YYYY"),
+      }))
+
+      const filteredData = combinedDataCancel.filter((item) => {
         const itemDate = dayjs(item.data_venda_cancelada);
         return (
           (!dataInicial || itemDate.isSameOrAfter(dayjs(dataInicial), "day")) &&
@@ -367,7 +372,7 @@ const RelatorioVendas = () => {
               width={350}
               sx={{
                 "@media (max-width: 900px)": {
-                  marginLeft: -15,
+                  marginLeft: -1,
                 },
               }}
             />
